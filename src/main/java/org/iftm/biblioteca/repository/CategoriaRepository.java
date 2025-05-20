@@ -12,4 +12,6 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     Optional<Categoria> findByNome(String nomeInexistente);
     // JpaRepository já fornece os métodos básicos de CRUD.
     // Métodos personalizados podem ser adicionados aqui se necessário.
+
+    Optional<Categoria> findByNomeIgnoreCase(String nome);
 }
