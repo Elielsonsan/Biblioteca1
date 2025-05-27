@@ -4,11 +4,9 @@ import org.iftm.biblioteca.entities.Categoria;
 import org.iftm.biblioteca.repository.CategoriaRepository;
 import org.iftm.biblioteca.repository.LivroRepository; // Para verificar livros associados
 import org.iftm.biblioteca.service.CategoriaService;
-import org.iftm.biblioteca.service.exceptions.CategoriaComLivrosException;
-import org.iftm.biblioteca.service.exceptions.NomeDuplicadoException;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
 import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
-
+import org.iftm.biblioteca.service.exceptions.CategoriaComLivrosException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +42,7 @@ public class CategoriaServiceImpl implements CategoriaService {
         Optional<Categoria> categoriaExistente = categoriaRepository.findByNomeIgnoreCase(nome); // Supondo findByNomeIgnoreCase
         if (categoriaExistente.isPresent() &&
             (idAtual == null || !categoriaExistente.get().getId().equals(idAtual))) {
-            throw new NomeDuplicadoException("Já existe uma categoria com o nome: " + nome);
+ throw new org.iftm.biblioteca.service.exceptions.NomeDuplicadoException("Já existe uma categoria com o nome: " + nome);
         }
     }
 
@@ -105,10 +103,11 @@ public class CategoriaServiceImpl implements CategoriaService {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com ID: " + id + " para exclusão."));
 
-        // Regra de negócio: Não permitir excluir categoria se tiver livros associados
-        if (livroRepository.countByCategoria(categoria) > 0) { // Supondo countByCategoria no LivroRepository
-            throw new CategoriaComLivrosException("Não é possível excluir a categoria '" + categoria.getNome() + "' pois existem livros associados a ela.");
+        // Regra de negócio: Não permitir exclusão se houver livros associados
+        if (livroRepository.countByCategoria(categoria) > 0) { // Supondo countByCategoria
+            throw new CategoriaComLivrosException("Não é possível excluir a categoria '" + categoria.getNome() + "' pois ela possui livros associados.");
         }
+
         categoriaRepository.deleteById(id);
     }
 

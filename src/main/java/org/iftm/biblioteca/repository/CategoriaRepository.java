@@ -1,5 +1,6 @@
 package org.iftm.biblioteca.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.iftm.biblioteca.entities.Categoria;
@@ -14,4 +15,6 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     // Métodos personalizados podem ser adicionados aqui se necessário.
 
     Optional<Categoria> findByNomeIgnoreCase(String nome);
+
+    List<Categoria> findByNomeContainingIgnoreCase(String trechoNome);
 }

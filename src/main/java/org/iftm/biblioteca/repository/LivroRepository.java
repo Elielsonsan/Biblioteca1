@@ -25,4 +25,6 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     List<Livro> findByCategoria(Categoria categoria);
 
     List<Livro> findByAnoPublicacaoGreaterThanEqual(Integer anoMinimo);
+
+    int countByCategoria(Categoria categoria);
 }

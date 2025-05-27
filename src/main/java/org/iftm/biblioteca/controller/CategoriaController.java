@@ -1,4 +1,4 @@
-package org.iftm.biblioteca.controller; // ou org.iftm.biblioteca.api
+package org.iftm.biblioteca.controller; // Pacote onde o controller está localizado
 
 import org.iftm.biblioteca.entities.Categoria;
 import org.iftm.biblioteca.repository.CategoriaRepository;
