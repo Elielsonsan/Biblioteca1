@@ -1,41 +1,47 @@
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 1, 9780545010221, Harry Potter e a Pedra Filosofal, 1);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 1, 9780545010222, Harry Potter e a Câmara Secreta, 2);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 1, 9780545010223, Harry Potter e o Prisioneiro de Azkaban, 3);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 1, 9780545010224, Harry Potter e o Cálice de Fogo, 4);  
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 1, 9780545010225, Harry Potter e a Ordem da Fênix, 5);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 1, 9780545010226, Harry Potter e o Enigma do Príncipe, 6);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 1, 9780545010227, Harry Potter e as Relíquias da Morte, 7);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.R.R. Tolkien, 2, 1, 2, 9780547928227, O Senhor dos Anéis: A Sociedade do Anel, 8);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.R.R. Tolkien, 2, 1, 2, 9780547928228, O Senhor dos Anéis: As Duas Torres, 9);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.R.R. Tolkien, 2, 1, 2, 9780547928229, O Senhor dos Anéis: O Retorno do Rei, 10);  
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.R.R. Tolkien, 2, 1, 2, 9780547928230, O Hobbit, 11);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, George R.R. Martin, 3, 1, 3, 9788556510010, A Guerra dos Tronos, 12);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, George R.R. Martin, 3, 1, 3, 9788556510020, A Fúria dos Reis, 13);  
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, George R.R. Martin, 3, 1, 3, 9788556510030, A Tormenta de Espadas, 14);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, George R.R. Martin, 3, 1, 3, 9788556510040, O Festim dos Corvos, 15);   
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, George R.R. Martin, 3, 1, 3, 9788556510050, A Dança dos Dragões, 16);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, George R.R. Martin, 3, 1, 3, 9788556510060, Os Ventos do Inverno, 17);  
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, George R.R. Martin, 3, 1, 3, 9788556510070, Os Sonhos de Primavera, 18);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010228, Harry Potter e a Criança Amaldiçoada, 19);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010229, Harry Potter: Os Contos de Beedle, o Bardo, 20);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010230, Harry Potter: Animais Fantásticos e Onde Habitam, 21);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010231, Harry Potter: Quadribol Através dos Séculos, 22);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010232, Harry Potter: A Magia do Cinema, 23);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010233, Harry Potter: A História da Magia, 24);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010234, Harry Potter: O Mundo Mágico de Harry Potter, 25);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010235, Harry Potter: O Livro dos Monstros, 26);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010236, Harry Potter: O Livro dos Feitiços, 27);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010237, Harry Potter: O Livro dos Feitiços e Poções, 28);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010238, Harry Potter: O Livro dos Feitiços e Poções Avançadas, 29);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010239, Harry Potter: O Livro dos Feitiços e Poções Avançadas II, 30);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010240, Harry Potter: O Livro dos Feitiços e Poções Avançadas III, 31);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010241, Harry Potter: O Livro dos Feitiços e Poções Avançadas IV, 32);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010242, Harry Potter: O Livro dos Feitiços e Poções Avançadas V, 33);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010243, Harry Potter: O Livro dos Feitiços e Poções Avançadas VI, 34);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010244, Harry Potter: O Livro dos Feitiços e Poções Avançadas VII, 35);   
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010245, Harry Potter: O Livro dos Feitiços e Poções Avançadas VIII, 36);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010246, Harry Potter: O Livro dos Feitiços e Poções Avançadas IX, 37);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010247, Harry Potter: O Livro dos Feitiços e Poções Avançadas X, 38);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010248, Harry Potter: O Livro dos Feitiços e Poções Avançadas XI, 39);
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010249, Harry Potter: O Livro dos Feitiços e Poções Avançadas XII, 40);       
-insert into tb_livro (ano_publicacao,autor,categoria_id,edicao,estante_id,isbn,titulo,id) values (2023, J.K. Rowling, 1, 1, 4, 9780545010250, Harry Potter: O Livro dos Feitiços e Poções Avançadas XIII, 41);
+-- Inserindo Categorias
+INSERT INTO tb_categoria (id, nome) VALUES (1, 'Ficção Científica');
+INSERT INTO tb_categoria (id, nome) VALUES (2, 'Fantasia');
+INSERT INTO tb_categoria (id, nome) VALUES (3, 'Romance');
+INSERT INTO tb_categoria (id, nome) VALUES (4, 'Técnico');
+INSERT INTO tb_categoria (id, nome) VALUES (5, 'História');
+
+-- Inserindo Estantes
+INSERT INTO tb_estante (id, nome) VALUES (1, 'Corredor A - Ficção');
+INSERT INTO tb_estante (id, nome) VALUES (2, 'Corredor B - Fantasia e Romance');
+INSERT INTO tb_estante (id, nome) VALUES (3, 'Corredor C - Não-Ficção');
+INSERT INTO tb_estante (id, nome) VALUES (4, 'Seção Especial - TI');
+
+-- Inserindo Clientes
+INSERT INTO tb_client (id, name, email) VALUES (1, 'Ana Silva', 'ana.silva@example.com');
+INSERT INTO tb_client (id, name, email) VALUES (2, 'Bruno Costa', 'bruno.costa@example.com');
+INSERT INTO tb_client (id, name, email) VALUES (3, 'Carla Dias', 'carla.dias@example.com');
+INSERT INTO tb_client (id, name, email) VALUES (4, 'Daniel Faria', 'daniel.faria@example.com');
+INSERT INTO tb_client (id, name, email) VALUES (5, 'Elisa Moreira', 'elisa.moreira@example.com');
+
+-- Inserindo Livros
+-- (ano_publicacao, autor, categoria_id, edicao, estante_id, isbn, titulo, id)
+
+-- Ficção Científica (Categoria ID: 1)
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (1, 'Duna', 'Frank Herbert', '978-8576570010', 1965, 1, 1, 1);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (2, 'Fundação', 'Isaac Asimov', '978-8576570386', 1951, 1, 1, 1);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (3, 'Neuromancer', 'William Gibson', '978-8576572007', 1984, 1, 1, 1);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (4, 'O Guia do Mochileiro das Galáxias', 'Douglas Adams', '978-8599296227', 1979, 1, 1, 1);
+
+-- Fantasia (Categoria ID: 2)
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (5, 'O Senhor dos Anéis: A Sociedade do Anel', 'J.R.R. Tolkien', '978-8533613379', 1954, 50, 2, 2);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (6, 'Harry Potter e a Pedra Filosofal', 'J.K. Rowling', '978-8532511010', 1997, 1, 2, 2);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (7, 'A Guerra dos Tronos', 'George R.R. Martin', '978-8580442789', 1996, 1, 2, 2);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (8, 'O Hobbit', 'J.R.R. Tolkien', '978-8533608429', 1937, 1, 2, 2);
+
+-- Romance (Categoria ID: 3)
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (9, 'Orgulho e Preconceito', 'Jane Austen', '978-8525416400', 1813, 1, 3, 2);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (10, 'O Morro dos Ventos Uivantes', 'Emily Brontë', '978-8525416394', 1847, 1, 3, 2);
+
+-- Técnico (Categoria ID: 4)
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (11, 'Código Limpo: Habilidades Práticas do Agile Software', 'Robert C. Martin', '978-8576082675', 2008, 1, 4, 4);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (12, 'Arquitetura Limpa: O Guia do Artesão para Estrutura e Design de Software', 'Robert C. Martin', '978-8550804606', 2017, 1, 4, 4);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (13, 'Java Efetivo', 'Joshua Bloch', '978-8576085324', 2018, 3, 4, 4);
+
+-- História (Categoria ID: 5)
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (14, 'Sapiens: Uma Breve História da Humanidade', 'Yuval Noah Harari', '978-8535925248', 2011, 1, 5, 3);
+INSERT INTO tb_livro (id, titulo, author, isbn, ano_publicacao, edicao, categoria_id, estante_id) VALUES (15, '1808', 'Laurentino Gomes', '978-8525056708', 2007, 1, 5, 3);

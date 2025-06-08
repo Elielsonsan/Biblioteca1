@@ -1,139 +1,153 @@
 package org.iftm.biblioteca.entities;
 
- import jakarta.persistence.*; 
- import java.io.Serializable;
- import java.util.Objects;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Objects;
 
- @Entity
- @Table(name = "tb_livro") // Nome da tabela no banco de dados
- public class Livro implements Serializable {
-     private static final long serialVersionUID = 1L;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
-     @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+@Entity
+@Table(name = "tb_livro") // Nome da tabela no banco de dados
+public class Livro implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-     @Column(nullable = false) // Garante que o título não seja nulo no banco
-     private String titulo;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-     private String autor;
+    @Column(nullable = false) // Garante que o título não seja nulo no banco
+    private String titulo;
 
-     // Adicionado campo para ISBN
-     private String isbn;
+    @Column(nullable = false) // Autor geralmente é obrigatório
+    private String author;
 
-     private Integer anoPublicacao;
+    // Adicionado campo para ISBN
+    @Column(nullable = false, unique = true) // ISBN é obrigatório e único
+    private String isbn;
 
-     // Adicionado campo para Edicao (Integer)
-     private Integer edicao;
+    private Integer anoPublicacao;
 
-     @ManyToOne
-     @JoinColumn(name = "categoria_id") // Nome da coluna de chave estrangeira
-     private Categoria categoria;
+    // Adicionado campo para Edicao (Integer)
+    private Integer edicao;
 
-     @ManyToOne
-     @JoinColumn(name = "estante_id") // Nome da coluna de chave estrangeira
-     private Estante estante;
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false) // Nome da coluna de chave estrangeira
+    private Categoria categoria;
 
-     // --- CONSTRUTORES ---
+    @ManyToOne
+    @JoinColumn(name = "estante_id", nullable = false) // Nome da coluna de chave estrangeira
+    private Estante estante;
 
-     // Construtor sem argumentos (OBRIGATÓRIO para JPA) - CORRIGIDO
-     public Livro() {
-     }
+    // --- CONSTRUTORES ---
 
-     // Construtor com TODOS os argumentos (para facilitar a criação de objetos)
-     // (Incluindo ISBN e Edição)
-     // O ID é gerado automaticamente, então não precisa ser passado
-     public Livro(Long id, String titulo, String autor, String isbn, Integer anoPublicacao, Integer edicao, Categoria categoria, Estante estante) {
-         this.id = id;
-         this.titulo = titulo;         // Atribui o título recebido
-         this.autor = autor;
-         this.isbn = isbn;             // Atribui o isbn recebido
-         this.anoPublicacao = anoPublicacao;
-         this.edicao = edicao;         // Atribui a edição recebida
-         this.categoria = categoria;     // Atribui o objeto Categoria recebido
-         this.estante = estante;         // Atribui o objeto Estante recebido
-     }
+    // Construtor sem argumentos (OBRIGATÓRIO para JPA) - CORRIGIDO
+    public Livro() {
+    }
 
-     // --- GETTERS E SETTERS ---
+    // Construtor com TODOS os argumentos (para facilitar a criação de objetos)
+    // (Incluindo ISBN e Edição)
+    // O ID é gerado automaticamente, então não precisa ser passado
+    public Livro(Long id, String titulo, String author, String isbn, Integer anoPublicacao, Integer edicao,
+            Categoria categoria, Estante estante) {
+        this.id = id;
+        this.titulo = titulo; // Atribui o título recebido
+        this.author = author;
+        this.isbn = isbn; // Atribui o isbn recebido
+        this.anoPublicacao = anoPublicacao;
+        this.edicao = edicao; // Atribui a edição recebida
+        this.categoria = categoria; // Atribui o objeto Categoria recebido
+        this.estante = estante; // Atribui o objeto Estante recebido
+    }
 
-     public Long getId() {
-         return id;
-     }
+    // --- GETTERS E SETTERS ---
 
-     public void setId(Long id) {
-         this.id = id;
-     }
+    public Long getId() {
+        return id;
+    }
 
-     public String getTitulo() {
-         return titulo;
-     }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-     public void setTitulo(String titulo) {
-         this.titulo = titulo;
-     }
+    public String getTitulo() {
+        return titulo;
+    }
 
-     public String getAutor() {
-         return autor;
-     }
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
 
-     public void setAutor(String autor) {
-         this.autor = autor;
-     }
+    public String getAuthor() {
+        return author;
+    }
 
-     public String getIsbn() {
-         return isbn;
-     }
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
-     public void setIsbn(String isbn) {
-         this.isbn = isbn;
-     }
+    public String getIsbn() {
+        return isbn;
+    }
 
-     public Integer getAnoPublicacao() {
-         return anoPublicacao;
-     }
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
 
-     public void setAnoPublicacao(Integer anoPublicacao) {
-         this.anoPublicacao = anoPublicacao;
-     }
+    public Integer getAnoPublicacao() {
+        return anoPublicacao;
+    }
 
-     public Integer getEdicao() {
-         return edicao;
-     }
+    public void setAnoPublicacao(Integer anoPublicacao) {
+        this.anoPublicacao = anoPublicacao;
+    }
 
-     public void setEdicao(Integer edicao) {
-         this.edicao = edicao;
-     }
+    public Integer getEdicao() {
+        return edicao;
+    }
 
-     public Categoria getCategoria() {
-         return categoria;
-     }
+    public void setEdicao(Integer edicao) {
+        this.edicao = edicao;
+    }
 
-     public void setCategoria(Categoria categoria) {
-         this.categoria = categoria;
-     }
+    public Categoria getCategoria() {
+        return categoria;
+    }
 
-     public Estante getEstante() {
-         return estante;
-     }
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
 
-     public void setEstante(Estante estante) {
-         this.estante = estante;
-     }
+    public Estante getEstante() {
+        return estante;
+    }
 
+    public void setEstante(Estante estante) {
+        this.estante = estante;
+    }
 
-     // --- equals() e hashCode() ---
-        // Implementação de equals e hashCode para comparar objetos Livro
+    // --- equals() e hashCode() ---
+    // Implementação de equals e hashCode para comparar objetos Livro
 
-     @Override
-     public boolean equals(Object o) {
-         if (this == o) return true;
-         if (o == null || getClass() != o.getClass()) return false;
-         Livro livro = (Livro) o;
-         return Objects.equals(id, livro.id);
-     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Livro livro = (Livro) o;
+        return Objects.equals(id, livro.id);
+    }
 
-     @Override
-     public int hashCode() {
-         return Objects.hash(id);
-     }
- }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+}

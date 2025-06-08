@@ -1,40 +1,22 @@
 package org.iftm.biblioteca.service;
 
-import org.iftm.biblioteca.entities.Client;
-import org.iftm.biblioteca.repository.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class ClientService {
+import org.iftm.biblioteca.dto.ClientDTO;
+import org.iftm.biblioteca.entities.Client;
 
-    @Autowired
-    private ClientRepository clientRepository;
+public interface ClientService {
 
-    public List<Client> findAll() {
-        return clientRepository.findAll();
-    }
+    List<Client> findAll();
 
-    public Client findById(Long id) {
-        Optional<Client> client = clientRepository.findById(id);
-        return client.orElseThrow();
-    }
+    Client findById(Long id);
 
-    public Client create(Client client) {
-        return clientRepository.save(client);
-    }
+    Client create(ClientDTO clientDTO);
 
-    public Client update(Long id, Client client) {
-        Client clientDB = findById(id);
-        clientDB.setName(client.getName());
-        clientDB.setEmail(client.getEmail());
-        return clientRepository.save(clientDB);
-    }
+    Client update(Long id, ClientDTO clientDTO);
 
-    public void delete(Long id) {
-        clientRepository.deleteById(id);
-    }
+    void delete(Long id);
+
+    Optional<Client> findByEmail(String email); // Exemplo de método adicional
 }

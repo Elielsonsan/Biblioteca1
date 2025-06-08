@@ -1,6 +1,12 @@
 package org.iftm.biblioteca.service.impl;
 
+import java.time.Year;
+import java.util.List;
+import java.util.Optional;
+
+import org.iftm.biblioteca.dto.LivroDTO;
 import org.iftm.biblioteca.entities.Categoria;
+import org.iftm.biblioteca.entities.Estante;
 import org.iftm.biblioteca.entities.Livro;
 import org.iftm.biblioteca.repository.CategoriaRepository;
 import org.iftm.biblioteca.repository.EstanteRepository;
@@ -8,17 +14,11 @@ import org.iftm.biblioteca.repository.LivroRepository;
 import org.iftm.biblioteca.service.LivroService;
 import org.iftm.biblioteca.service.exceptions.IsbnDuplicadoException;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
-import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
-
+import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException; // Para verificar strings vazias
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils; // Para verificar strings vazias
-
-import java.time.Year;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.util.StringUtils;
 
 @Service
 public class LivroServiceImpl implements LivroService {
@@ -32,60 +32,40 @@ public class LivroServiceImpl implements LivroService {
 
     // --- REGRAS DE NEGÓCIO (MÉTODOS PRIVADOS DE VALIDAÇÃO) ---
 
-    // Regra 1: Título não pode ser vazio e deve ter tamanho mínimo/máximo
-    private void validarTitulo(String titulo) {
-        if (!StringUtils.hasText(titulo)) { // StringUtils.hasText verifica null, vazio e só espaços
-            throw new RegraDeNegocioException("Título do livro não pode ser vazio.");
-        }
-        if (titulo.length() < 2 || titulo.length() > 255) {
-            throw new RegraDeNegocioException("Título do livro deve ter entre 2 e 255 caracteres.");
-        }
-    }
-
-    // Regra 2: Ano de publicação deve ser válido
-    private void validarAnoPublicacao(Integer anoPublicacao) {
-        if (anoPublicacao == null) {
-            throw new RegraDeNegocioException("Ano de publicação não pode ser nulo.");
-        }
+    private void validarAnoPublicacaoDTORules(Integer anoPublicacao) {
+        // Validações básicas (@NotNull, @Min, @Max) são feitas pelo @Valid no DTO.
+        // Esta validação pode ser mais específica, como verificar contra o ano atual.
         int anoAtual = Year.now().getValue();
-        if (anoPublicacao > anoAtual || anoPublicacao < 1400) { // 1400 é um exemplo de limite inferior
+        if (anoPublicacao != null && (anoPublicacao > anoAtual || anoPublicacao < 1400)) {
             throw new RegraDeNegocioException("Ano de publicação inválido. Deve ser entre 1400 e " + anoAtual + ".");
         }
     }
 
     // Regra 3: ISBN não pode ser duplicado (exceto para o próprio livro em caso
-    // deatualização
+    // de atualização
     private void validarIsbnUnico(String isbn, Long idLivroExistente) {
+        // @NotBlank no DTO já valida se está vazio.
         if (StringUtils.hasText(isbn)) {
             Optional<Livro> livroExistenteComIsbn = livroRepository.findByIsbn(isbn);
             if (livroExistenteComIsbn.isPresent() &&
                     (idLivroExistente == null || !livroExistenteComIsbn.get().getId().equals(idLivroExistente))) {
                 throw new IsbnDuplicadoException("ISBN '" + isbn + "' já cadastrado para outro livro.");
             }
-        } else {
-            throw new RegraDeNegocioException("ISBN não pode ser vazio."); // Ou nulo, dependendo do seu modelo
         }
     }
 
-    private void validarAssociacoes(Livro livro) {
-        if (livro.getCategoria() == null || livro.getCategoria().getId() == null) {
-            throw new RegraDeNegocioException("Categoria do livro não pode ser nula ou sem ID.");
-        }
-        if (!categoriaRepository.existsById(livro.getCategoria().getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Categoria com ID " + livro.getCategoria().getId() + " não encontrada.");
-        }
-        if (livro.getEstante() == null || livro.getEstante().getId() == null) {
-            throw new RegraDeNegocioException("Estante do livro não pode ser nula ou sem ID.");
-        }
-        if (!estanteRepository.existsById(livro.getEstante().getId())) {
-            throw new RecursoNaoEncontradoException(
-                    "Estante com ID " + livro.getEstante().getId() + " não encontrada.");
-        }
-        // Recarregar as associações para garantir que são entidades gerenciadas e
-        // válidas
-        livro.setCategoria(categoriaRepository.findById(livro.getCategoria().getId()).get());
-        livro.setEstante(estanteRepository.findById(livro.getEstante().getId()).get());
+    private Categoria carregarCategoriaValidada(Long categoriaId) {
+        // @NotNull no DTO já valida se ID é nulo.
+        return categoriaRepository.findById(categoriaId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Categoria com ID " + categoriaId + " não encontrada."));
+    }
+
+    private Estante carregarEstanteValidada(Long estanteId) {
+        // @NotNull no DTO já valida se ID é nulo.
+        return estanteRepository.findById(estanteId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Estante com ID " + estanteId + " não encontrada."));
     }
 
     // --- MÉTODOS CRUD (COM VALIDAÇÕES) ---
@@ -99,47 +79,50 @@ public class LivroServiceImpl implements LivroService {
 
     @Override
     @Transactional
-    public Livro salvarNovoLivro(Livro livro) {
-        if (livro.getId() != null) {
-            throw new RegraDeNegocioException("Para salvar um novo livro, o ID deve ser nulo.");
-        }
-        // Validações antes de salvar
-        // Se o livro já tiver um ID, isso indica que ele já existe e não deve ser
-        // tratado como um novo livro.
-        // Se o ID for nulo, significa que é um novo livro e deve ser salvo.
-        // Se o livro já existir, não deve ser salvo novamente.
-        validarTitulo(livro.getTitulo());
-        validarAnoPublicacao(livro.getAnoPublicacao());
-        validarIsbnUnico(livro.getIsbn(), null); // null porque é um livro novo
-        validarAssociacoes(livro);
+    public Livro salvarNovoLivro(LivroDTO livroDTO) {
+        validarAnoPublicacaoDTORules(livroDTO.getAnoPublicacao());
+        validarIsbnUnico(livroDTO.getIsbn(), null);
+
+        Categoria categoria = carregarCategoriaValidada(livroDTO.getCategoriaId());
+        Estante estante = carregarEstanteValidada(livroDTO.getEstanteId());
+
+        Livro livro = new Livro();
+        livro.setTitulo(livroDTO.getTitulo());
+        livro.setAuthor(livroDTO.getAuthor());
+        livro.setIsbn(livroDTO.getIsbn());
+        livro.setAnoPublicacao(livroDTO.getAnoPublicacao());
+        livro.setEdicao(livroDTO.getEdicao());
+        livro.setCategoria(categoria);
+        livro.setEstante(estante);
+
         return livroRepository.save(livro);
     }
 
-    @Override
+    // @Override // Removido pois o método está comentado na interface LivroService
     @Transactional
-    public List<Livro> salvarTodosLivros(List<Livro> livros) {
-        return livros.stream().map(this::salvarNovoLivro).collect(Collectors.toList());
+    public List<Livro> salvarTodosLivros(List<LivroDTO> livroDTOs) {
+        // return
+        // livroDTOs.stream().map(this::salvarNovoLivro).collect(Collectors.toList());
+        throw new UnsupportedOperationException("Batch save from DTOs not fully implemented yet.");
     }
 
     @Override
     @Transactional
-    public Livro atualizarLivro(Long id, Livro livroAtualizado) {
+    public Livro atualizarLivro(Long id, LivroDTO livroDTO) {
         return livroRepository.findById(id).map(livroExistente -> {
-            // Validações antes de atualizar
-            validarTitulo(livroAtualizado.getTitulo());
-            validarAnoPublicacao(livroAtualizado.getAnoPublicacao());
-            validarIsbnUnico(livroAtualizado.getIsbn(), id); // Passa o ID do livro existente
-            validarAssociacoes(livroAtualizado);
+            validarAnoPublicacaoDTORules(livroDTO.getAnoPublicacao());
+            validarIsbnUnico(livroDTO.getIsbn(), id);
 
-            // Atualiza os campos do livro existente com os novos valores
+            Categoria categoria = carregarCategoriaValidada(livroDTO.getCategoriaId());
+            Estante estante = carregarEstanteValidada(livroDTO.getEstanteId());
 
-            livroExistente.setTitulo(livroAtualizado.getTitulo());
-            livroExistente.setAutor(livroAtualizado.getAutor());
-            livroExistente.setIsbn(livroAtualizado.getIsbn());
-            livroExistente.setAnoPublicacao(livroAtualizado.getAnoPublicacao());
-            livroExistente.setEdicao(livroAtualizado.getEdicao());
-            livroExistente.setCategoria(livroAtualizado.getCategoria());
-            livroExistente.setEstante(livroAtualizado.getEstante());
+            livroExistente.setTitulo(livroDTO.getTitulo());
+            livroExistente.setAuthor(livroDTO.getAuthor());
+            livroExistente.setIsbn(livroDTO.getIsbn());
+            livroExistente.setAnoPublicacao(livroDTO.getAnoPublicacao());
+            livroExistente.setEdicao(livroDTO.getEdicao());
+            livroExistente.setCategoria(categoria);
+            livroExistente.setEstante(estante);
 
             return livroRepository.save(livroExistente);
         }).orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com ID: " + id));
@@ -161,7 +144,8 @@ public class LivroServiceImpl implements LivroService {
         // Se você quiser garantir que a operação foi bem-sucedida, pode verificar
         // se a lista de livros está vazia após a exclusão
         // if (livroRepository.count() > 0) {
-        // throw new RecursoNaoEncontradoException("Não foi possível apagar todos os livros.");
+        // throw new RecursoNaoEncontradoException("Não foi possível apagar todos os
+        // livros.");
         // }
         // Ou apenas logar a operação
         // logger.info("Todos os livros foram apagados com sucesso.");
@@ -184,11 +168,13 @@ public class LivroServiceImpl implements LivroService {
         // Se o livro for encontrado, retorna um Optional com o livro
         // Caso queira lançar uma exceção, pode fazer assim:
         // return livroRepository.findById(id)
-        // .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com ID: " + id));
+        // .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado
+        // com ID: " + id));
         // Ou, se preferir, pode usar o método acima e tratar o Optional no controller
         // ou onde for necessário
         // return livroRepository.findById(id);
-        // .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com ID: " + id));
+        // .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado
+        // com ID: " + id));
         // Ou, se preferir, pode usar o método acima e tratar o Optional no controller
     }
 
@@ -202,11 +188,14 @@ public class LivroServiceImpl implements LivroService {
             // e garantir que o usuário forneça um valor válido para a busca
             throw new RegraDeNegocioException("Trecho do título para busca não pode ser vazio.");
         }
-        return livroRepository.findByTituloContainingIgnoreCase(trechoTitulo); // Supondo que este Query Method exista e seja
-                                                                       // case-insensitive 
+        return livroRepository.findByTituloContainingIgnoreCase(trechoTitulo); // Supondo que este Query Method exista e
+                                                                               // seja
+        // case-insensitive
         // Caso contrário, retorna uma lista de livros que contêm o trecho no título
-        // O método findByTituloContainingIgnoreCase é um Query Method do Spring Data JPA
-        // que busca livros cujo título contém o trecho fornecido, ignorando maiúsculas e minúsculas
+        // O método findByTituloContainingIgnoreCase é um Query Method do Spring Data
+        // JPA
+        // que busca livros cujo título contém o trecho fornecido, ignorando maiúsculas
+        // e minúsculas
         // Se o trecho for vazio, retorna uma lista vazia
         // Se o trecho for nulo, lança uma exceção personalizada
         // Isso é importante para evitar consultas desnecessárias ao banco de dados
@@ -216,12 +205,23 @@ public class LivroServiceImpl implements LivroService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Livro> buscarPorAutor(String autor) {
-        if (!StringUtils.hasText(autor)) {
+    public List<Livro> buscarPorAutor(String author) {
+        if (!StringUtils.hasText(author)) {
             throw new RegraDeNegocioException("Nome do autor para busca não pode ser vazio.");
         }
-        return livroRepository.findByTituloContainingIgnoreCase(autor); // Supondo que este Query Method exista
+        return livroRepository.findByAuthor(author);
         // Caso contrário, retorna uma lista de livros que contêm o nome do autor
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Livro> buscarPorIsbn(String isbn) {
+        if (!StringUtils.hasText(isbn)) {
+            throw new RegraDeNegocioException("ISBN para busca não pode ser vazio.");
+        }
+        // Não é necessário validar unicidade aqui, apenas buscar.
+        // A validação de unicidade é feita ao salvar/atualizar.
+        return livroRepository.findByIsbn(isbn);
     }
 
     @Override

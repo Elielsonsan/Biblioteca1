@@ -1,51 +1,69 @@
 package org.iftm.biblioteca.controller; // Pacote onde o controller está localizado
 
+import java.util.List;
+
+import org.iftm.biblioteca.dto.CategoriaDTO;
 import org.iftm.biblioteca.entities.Categoria;
-import org.iftm.biblioteca.repository.CategoriaRepository;
+import org.iftm.biblioteca.service.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*; // Importa todas as anotações de mapeamento
+import org.springframework.http.ResponseEntity; // Importa todas as anotações de mapeamento
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/categorias") // Caminho base para endpoints de Categoria
 public class CategoriaController {
 
     @Autowired
-    private CategoriaRepository categoriaRepository;
+    private CategoriaService categoriaService;
 
     // Endpoint para buscar todas as categorias (GET /api/categorias)
     @GetMapping
     public ResponseEntity<List<Categoria>> buscarTodasCategorias() {
-        List<Categoria> categorias = categoriaRepository.findAll();
+        List<Categoria> categorias = categoriaService.buscarTodas();
         return ResponseEntity.ok(categorias);
     }
 
     // Endpoint para buscar uma categoria por ID (GET /api/categorias/{id})
     @GetMapping("/{id}")
     public ResponseEntity<Categoria> buscarCategoriaPorId(@PathVariable Long id) {
-        return categoriaRepository.findById(id)
-               .map(ResponseEntity::ok) // Se encontrar, retorna 200 OK com a categoria
-               .orElse(ResponseEntity.notFound().build()); // Senão, retorna 404 Not Found
+        // O método buscarPorId do serviço retorna Optional<Categoria>
+        // Se não encontrar, o serviço deve lançar RecursoNaoEncontradoException,
+        // que será tratado pelo @ControllerAdvice
+        return categoriaService.buscarPorId(id)
+                .map(ResponseEntity::ok) // Se encontrar, retorna 200 OK com a categoria
+                .orElse(ResponseEntity.notFound().build()); // Senão, retorna 404 Not Found
     }
 
     // Endpoint para criar uma nova categoria (POST /api/categorias)
     @PostMapping
-    public ResponseEntity<Categoria> criarCategoria(@RequestBody Categoria categoria) {
-        // @RequestBody converte o JSON do corpo da requisição para um objeto Categoria
-        // O JSON precisa ter pelo menos o campo "nome". O ID será gerado.
-        try {
-            // Garante que o ID seja nulo para criar uma nova entidade
-            categoria.setId(null);
-            Categoria novaCategoria = categoriaRepository.save(categoria);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novaCategoria); // Retorna 201 Created
-        } catch (Exception e) {
-             // Pode ser erro de validação (nome único duplicado, etc)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Retorna 400 Bad Request
-        }
+    public ResponseEntity<Categoria> criarCategoria(@Valid @RequestBody CategoriaDTO categoriaDTO) {
+        // Exceções são tratadas pelo @ControllerAdvice
+        Categoria novaCategoria = categoriaService.salvarNovaCategoria(categoriaDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novaCategoria);
     }
 
-    // Você pode adicionar @PutMapping("/{id}") e @DeleteMapping("/{id}") aqui depois
+    // Endpoint para atualizar uma categoria existente (PUT /api/categorias/{id})
+    @PutMapping("/{id}")
+    public ResponseEntity<Categoria> atualizarCategoria(@PathVariable Long id,
+            @Valid @RequestBody CategoriaDTO categoriaDTO) {
+        Categoria categoriaAtualizada = categoriaService.atualizarCategoria(id, categoriaDTO);
+        return ResponseEntity.ok(categoriaAtualizada);
+    }
+
+    // Endpoint para apagar uma categoria (DELETE /api/categorias/{id})
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> apagarCategoria(@PathVariable Long id) {
+        categoriaService.apagarCategoriaPorId(id);
+        return ResponseEntity.noContent().build();
+    }
 }

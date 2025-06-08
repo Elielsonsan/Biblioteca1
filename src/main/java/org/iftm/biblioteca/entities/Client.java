@@ -1,24 +1,34 @@
 package org.iftm.biblioteca.entities;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
-public class Client {
+@Table(name = "tb_client") // Opcional, mas bom para padronização com outras tabelas
+public class Client implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true) // Email geralmente é obrigatório e único
     private String email;
 
-    public Client() {}
+    public Client() {
+    }
 
     public Client(Long id, String name, String email) {
         this.id = id;
@@ -52,16 +62,16 @@ public class Client {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Client client = (Client) o;
-        return Objects.equals(id, client.id) &&
-                Objects.equals(name, client.name) &&
-                Objects.equals(email, client.email);
+        return Objects.equals(id, client.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email);
+        return Objects.hash(id);
     }
 }

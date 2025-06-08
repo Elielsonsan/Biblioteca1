@@ -1,13 +1,22 @@
 package org.iftm.biblioteca.entities;
 
-import jakarta.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "tb_estante")
 public class Estante implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -15,11 +24,10 @@ public class Estante implements Serializable {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String nome = "Estante B";
+    private String nome;
 
     @OneToMany(mappedBy = "estante")
-    private List<Livro> livros;
-
+    private List<Livro> livros = new java.util.ArrayList<>();
 
     // Construtor sem argumentos (obrigatorio para JPA)
     public Estante() {
@@ -59,8 +67,10 @@ public class Estante implements Serializable {
     // Implementação de equals e hashCode
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Estante estante = (Estante) o;
         return Objects.equals(id, estante.id);
     }
@@ -70,5 +80,4 @@ public class Estante implements Serializable {
         return Objects.hash(id);
     }
 
-   
 }

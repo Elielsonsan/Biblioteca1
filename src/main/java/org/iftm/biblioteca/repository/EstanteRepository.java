@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EstanteRepository extends JpaRepository<Estante, Long> {
 
-    Optional<Estante> findByNome(String nomeInexistente);
+    Optional<Estante> findByNome(String nome);
     // JpaRepository já fornece os métodos básicos de CRUD.
     // Métodos personalizados podem ser adicionados aqui se necessário.
 }
