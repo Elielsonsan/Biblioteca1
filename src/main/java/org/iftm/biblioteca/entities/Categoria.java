@@ -5,13 +5,15 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+    import jakarta.persistence.Table; // Adicionar este import
 
 @Entity
 @Table(name = "tb_categoria")
@@ -26,6 +28,7 @@ public class Categoria implements Serializable {
     @Column(nullable = false, unique = true)
     private String nome;
 
+    @JsonIgnore // Adicionar para teste rápido de loop de serialização
     @OneToMany(mappedBy = "categoria")
     private List<Livro> livros;
 

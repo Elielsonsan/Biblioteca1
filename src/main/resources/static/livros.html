@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Livros da Biblioteca</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        nav {
+            background-color: #333;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos para formulário e tabela */
+        .form-container,
+        .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.edit-btn {
+            background-color: #ffc107;
+        }
+
+        button.edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        button.delete-btn {
+            background-color: #dc3545;
+        }
+
+        button.delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/index.html">Início (Usuários)</a>
+        <a href="/categorias.html">Categorias</a>
+        <a href="/livros.html">Livros</a>
+        <a href="/estante.html">Estante</a>
+    </nav>
+
+    <div class="container">
+        <h1>Livros Disponíveis</h1>
+
+        <div class="form-container">
+            <h2>Adicionar/Editar Livro</h2>
+            <form id="livroForm">
+                <input type="hidden" id="livroId">
+                <div>
+                    <label for="tituloLivro">Título:</label>
+                    <input type="text" id="tituloLivro" required>
+                </div>
+                <div>
+                    <label for="autorLivro">Autor:</label>
+                    <input type="text" id="autorLivro" required>
+                </div>
+                <div>
+                    <label for="isbnLivro">ISBN:</label>
+                    <input type="text" id="isbnLivro" required>
+                </div>
+                <div>
+                    <label for="categoriaLivro">Categoria:</label>
+                    <select id="categoriaLivro" required>
+                        <option value="">Selecione uma categoria</option>
+                        <!-- Categorias serão carregadas aqui -->
+                    </select>
+                </div>
+                <div>
+                    <label for="estanteLivro">Estante:</label>
+                    <select id="estanteLivro" required>
+                        <option value="">Selecione uma estante</option>
+                        <!-- Estantes serão carregadas aqui -->
+                    </select>
+                </div>
+                <div>
+                    <label for="anoPublicacaoLivro">Ano de Publicação:</label>
+                    <input type="number" id="anoPublicacaoLivro" required min="1400" max="2099">
+                </div>
+                <div>
+                    <label for="edicaoLivro">Edição (opcional):</label>
+                    <input type="number" id="edicaoLivro" min="1">
+                </div>
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="resetLivroForm()">Limpar</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <h2>Lista de Livros</h2>
+            <table id="livrosTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>ISBN</th>
+                        <th>Categoria</th>
+                        <th>Estante</th>
+                        <th>Ano</th>
+                        <th>Estante</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas da tabela serão inseridas aqui -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const livrosApiUrl = 'http://localhost:8080/api/livros'; // Adicionado /api/
+        const categoriasApiUrl = 'http://localhost:8080/api/categorias'; // CORRIGIDO para incluir /api/
+        const estantesApiUrl = 'http://localhost:8080/api/estantes'; // URL para buscar estantes
+
+        const livroForm = document.getElementById('livroForm');
+        const livroIdInput = document.getElementById('livroId');
+        const tituloInput = document.getElementById('tituloLivro');
+        const autorInput = document.getElementById('autorLivro');
+        const isbnInput = document.getElementById('isbnLivro');
+        const categoriaSelect = document.getElementById('categoriaLivro');
+        const estanteSelect = document.getElementById('estanteLivro');
+        const anoPublicacaoInput = document.getElementById('anoPublicacaoLivro');
+        const edicaoInput = document.getElementById('edicaoLivro');
+        const livrosTableBody = document.getElementById('livrosTable').getElementsByTagName('tbody')[0];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategoriasParaSelect();
+            loadEstantesParaSelect(); // Carregar estantes
+            loadLivros();
+        });
+
+        async function loadCategoriasParaSelect() {
+            try {
+                const response = await fetch(categoriasApiUrl);
+                const categorias = await response.json();
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id; // Assumindo que o DTO de Categoria tem 'id'
+                    option.textContent = cat.nome; // Assumindo que o DTO de Categoria tem 'nome'
+                    categoriaSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias para o select:', error);
+            }
+        }
+
+        async function loadEstantesParaSelect() {
+            try {
+                const response = await fetch(estantesApiUrl);
+                const estantes = await response.json();
+                estantes.forEach(est => {
+                    const option = document.createElement('option');
+                    option.value = est.id; // Assumindo que Estante tem 'id'
+                    option.textContent = est.nome; // Assumindo que Estante tem 'nome'
+                    estanteSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar estantes para o select:', error);
+            }
+        }
+
+        async function loadLivros() {
+            try {
+                const response = await fetch(livrosApiUrl);
+                const livros = await response.json();
+                livrosTableBody.innerHTML = '';
+                livros.forEach(livro => {
+                    const row = livrosTableBody.insertRow();
+                    row.insertCell().textContent = livro.id;
+                    row.insertCell().textContent = livro.titulo;
+                    row.insertCell().textContent = livro.autor;
+                    row.insertCell().textContent = livro.isbn;
+                    // Assumindo que 'livro.categoria' é um objeto com 'nome' ou que você tem 'livro.categoriaNome'
+                    row.insertCell().textContent = livro.categoria ? livro.categoria.nome : 'N/A';
+                    row.insertCell().textContent = livro.anoPublicacao || 'N/A';
+                    row.insertCell().textContent = livro.estante ? livro.estante.nome : 'N/A'; // Exibir nome da estante
+
+                    const actionsCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Editar';
+                    editButton.classList.add('edit-btn');
+                    editButton.onclick = () => editLivro(livro);
+                    actionsCell.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Excluir';
+                    deleteButton.classList.add('delete-btn');
+                    deleteButton.onclick = () => deleteLivro(livro.id);
+                    actionsCell.appendChild(deleteButton);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar livros:', error);
+                alert('Não foi possível carregar os livros.');
+            }
+        }
+
+        livroForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const id = livroIdInput.value;
+            // Para POST/PUT de Livro, esperamos um DTO que aceite categoriaId
+            const livroData = {
+                titulo: tituloInput.value,
+                author: autorInput.value, // Corrigido de 'autor' para 'author'
+                isbn: isbnInput.value,
+                anoPublicacao: parseInt(anoPublicacaoInput.value),
+                edicao: edicaoInput.value ? parseInt(edicaoInput.value) : null, // Edição é opcional
+                categoriaId: parseInt(categoriaSelect.value), // Enviar o ID da categoria
+                estanteId: parseInt(estanteSelect.value) 
+            };
+
+            let method = 'POST';
+            let url = livrosApiUrl;
+
+            if (id) {
+                method = 'PUT';
+                url += `/${id}`;
+                livroData.id = parseInt(id);
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(livroData)
+                });
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+                resetLivroForm();
+                loadLivros();
+                alert(`Livro ${id ? 'atualizado' : 'salvo'} com sucesso!`);
+            } catch (error) {
+                console.error('Erro ao salvar livro:', error);
+                alert('Erro ao salvar livro.');
+            }
+        });
+
+        function editLivro(livro) {
+            livroIdInput.value = livro.id;
+            tituloInput.value = livro.titulo;
+            autorInput.value = livro.autor;
+            isbnInput.value = livro.isbn;
+            categoriaSelect.value = livro.categoria ? livro.categoria.id : ''; // Assumindo que 'livro.categoria.id' existe
+            anoPublicacaoInput.value = livro.anoPublicacao || '';
+            edicaoInput.value = livro.edicao || '';
+            estanteSelect.value = livro.estante ? livro.estante.id : ''; // Popular select da estante
+        }
+
+        async function deleteLivro(id) {
+            if (!confirm(`Tem certeza que deseja excluir o livro ID ${id}?`)) return;
+            await fetch(`${livrosApiUrl}/${id}`, { method: 'DELETE' });
+            loadLivros();
+            alert('Livro excluído com sucesso!');
+        }
+
+        function resetLivroForm() {
+            livroForm.reset();
+            livroIdInput.value = '';
+        }
+    </script>
+</body>
+
+</html>

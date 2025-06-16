@@ -1,35 +1,30 @@
 package org.iftm.biblioteca.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.iftm.biblioteca.dto.CategoriaDTO;
 import org.iftm.biblioteca.entities.Categoria;
 
+import jakarta.validation.Valid;
+
 public interface CategoriaService {
 
     // --- CRUD ---
-    Categoria salvarNovaCategoria(CategoriaDTO categoriaDTO);
+    public List<CategoriaDTO> findAll();
+    CategoriaDTO findById(Long id);
+    Categoria create(CategoriaDTO dto);
+    @Valid
+    CategoriaDTO update(Long id, CategoriaDTO dto);
+    void delete(Long id);
 
-    // List<Categoria> salvarTodasCategorias(List<CategoriaDTO> categoriaDTOs); //
-    // Avaliar necessidade
+    // Você pode manter outros métodos de consulta específicos aqui, se necessário,
+    // mas os métodos CRUD acima são os que o CategoriaController (DTO based) utiliza.
+    // Os métodos abaixo são exemplos de consultas que estavam na sua implementação
+    // e podem ser mantidos ou adaptados conforme a necessidade.
 
-    Categoria atualizarCategoria(Long id, CategoriaDTO categoriaDTO);
-
-    void apagarCategoriaPorId(Long id);
-
-    void apagarTodasCategorias(); // Cuidado com esta operação!
-
-    // --- CONSULTAS (Mínimo 5) ---
-    List<Categoria> buscarTodas();
-
-    Optional<Categoria> buscarPorId(Long id);
-
-    Optional<Categoria> buscarPorNomeExato(String nome); // Usa validação de nome
-
-    List<Categoria> buscarPorNomeContendo(String trechoNome);
-
-    List<Categoria> buscarCategoriasSemLivrosAssociados(); // Consulta que pode usar regra/lógica
-
-    long contarCategorias(); // Consulta simples adicional
+    // Optional<Categoria> buscarPorNomeExato(String nome);
+    // List<Categoria> buscarPorNomeContendo(String trechoNome);
+    // List<Categoria> buscarCategoriasSemLivrosAssociados();
+    // long contarCategorias();
+    // void apagarTodasCategorias(); // Cuidado com esta operação!
 }

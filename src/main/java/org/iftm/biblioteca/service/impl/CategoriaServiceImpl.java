@@ -2,6 +2,7 @@ package org.iftm.biblioteca.service.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors; // Adicionar este import
 
 import org.iftm.biblioteca.dto.CategoriaDTO;
 import org.iftm.biblioteca.entities.Categoria; // Para verificar livros associados
@@ -40,15 +41,15 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional
-    public Categoria salvarNovaCategoria(CategoriaDTO categoriaDTO) {
+    public Categoria create(CategoriaDTO categoriaDTO) { // Renomeado e alinhado com a interface
         // Validações básicas são feitas pelo @Valid no DTO.
         verificarNomeDuplicado(categoriaDTO.getNome(), null);
 
         Categoria categoria = new Categoria();
         categoria.setNome(categoriaDTO.getNome());
+        // O ID é gerado pelo banco de dados ao salvar
         return categoriaRepository.save(categoria);
     }
-
     // @Override // Removido pois o método está comentado na interface
     // CategoriaService
     @Transactional
@@ -61,19 +62,22 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional
-    public Categoria atualizarCategoria(Long id, CategoriaDTO categoriaDTO) {
-        return categoriaRepository.findById(id).map(categoriaExistente -> {
+    public CategoriaDTO update(Long id, CategoriaDTO categoriaDTO) { // Renomeado e tipo de retorno ajustado
+        try {
+            Categoria categoriaExistente = categoriaRepository.getReferenceById(id); // Evita consulta desnecessária
             // Validações básicas são feitas pelo @Valid no DTO.
             verificarNomeDuplicado(categoriaDTO.getNome(), id);
             categoriaExistente.setNome(categoriaDTO.getNome());
-            // Adicione outros campos para atualizar se houver
-            return categoriaRepository.save(categoriaExistente);
-        }).orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com ID: " + id));
+            categoriaExistente = categoriaRepository.save(categoriaExistente);
+            return new CategoriaDTO(categoriaExistente); // Converte para DTO
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            throw new RecursoNaoEncontradoException("Categoria não encontrada com ID: " + id + " para atualização.");
+        }
     }
 
     @Override
     @Transactional
-    public void apagarCategoriaPorId(Long id) {
+    public void delete(Long id) { // Renomeado de apagarCategoriaPorId para delete
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Categoria não encontrada com ID: " + id + " para exclusão."));
@@ -87,7 +91,7 @@ public class CategoriaServiceImpl implements CategoriaService {
         categoriaRepository.deleteById(id);
     }
 
-    @Override
+    // @Override // Removido pois não está na interface CategoriaService (versão DTO)
     @Transactional
     public void apagarTodasCategorias() {
         // CUIDADO: Esta operação pode ser perigosa.
@@ -106,17 +110,19 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Categoria> buscarTodas() {
-        return categoriaRepository.findAll();
+    public List<CategoriaDTO> findAll() { // Renomeado e tipo de retorno ajustado
+        List<Categoria> list = categoriaRepository.findAll();
+        return list.stream().map(CategoriaDTO::new).collect(Collectors.toList()); // Converte para List<CategoriaDTO>
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Categoria> buscarPorId(Long id) {
-        return categoriaRepository.findById(id);
+    public CategoriaDTO findById(Long id) { // Renomeado e tipo de retorno ajustado
+        Optional<Categoria> obj = categoriaRepository.findById(id);
+        Categoria entity = obj.orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com ID: " + id));
+        return new CategoriaDTO(entity); // Converte para CategoriaDTO
     }
-
-    @Override
+    // @Override // Removido pois não está na interface CategoriaService (versão DTO)
     @Transactional(readOnly = true)
     public Optional<Categoria> buscarPorNomeExato(String nome) {
         if (!StringUtils.hasText(nome)) {
@@ -127,7 +133,7 @@ public class CategoriaServiceImpl implements CategoriaService {
         return categoriaRepository.findByNomeIgnoreCase(nome); // Supondo findByNomeIgnoreCase
     }
 
-    @Override
+    // @Override // Removido pois não está na interface CategoriaService (versão DTO)
     @Transactional(readOnly = true)
     public List<Categoria> buscarPorNomeContendo(String trechoNome) {
         if (!StringUtils.hasText(trechoNome) || trechoNome.length() < 2) {
@@ -138,13 +144,13 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     // Consulta que utiliza lógica relacionada a uma regra de negócio (não ter
     // livros)
-    @Override
+    // @Override // Removido pois não está na interface CategoriaService (versão DTO)
     @Transactional(readOnly = true)
     public List<Categoria> buscarCategoriasSemLivrosAssociados() {
         return categoriaRepository.findCategoriasSemLivros();
     }
 
-    @Override
+    // @Override // Removido pois não está na interface CategoriaService (versão DTO)
     @Transactional(readOnly = true)
     public long contarCategorias() {
         return categoriaRepository.count();

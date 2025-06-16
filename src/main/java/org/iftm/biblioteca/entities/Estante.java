@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +28,7 @@ public class Estante implements Serializable {
     @Column(nullable = false, unique = true)
     private String nome;
 
+    @JsonIgnore // Adicionado para evitar loop de serialização JSON
     @OneToMany(mappedBy = "estante")
     private List<Livro> livros = new java.util.ArrayList<>();
 

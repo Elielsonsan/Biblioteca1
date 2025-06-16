@@ -12,6 +12,11 @@ import org.springframework.stereotype.Repository;
 @Repository // Opcional, mas boa prática
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
+    Optional<Livro> findByTitulo(String titulo);
+    // Método para buscar livros por título, ignorando maiúsculas/minúsculas
+    // Exemplo: livroRepository.findByTituloContainingIgnoreCase("algum título")
+    // Isso permite buscar livros que contenham a string "algum título" em qualquer parte do título
+    
     List<Livro> findByTituloContainingIgnoreCase(String keyword);
     // JpaRepository já fornece métodos como findAll(), findById(), save(),
     // deleteById()
@@ -36,5 +41,7 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     List<Livro> findByEstanteNome(String nomeEstante);
 
     int countByEstante(Estante estante);
+
+    List<Livro> findByAnoPublicacaoGreaterThan(Integer ano);
 
 }

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Minha Estante</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        nav {
+            background-color: #333;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos para formulário e tabela */
+        .form-container,
+        .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.edit-btn {
+            background-color: #ffc107;
+        }
+
+        button.edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        button.delete-btn {
+            background-color: #dc3545;
+        }
+
+        button.delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/index.html">Início (Usuários)</a>
+        <a href="/categorias.html">Categorias</a>
+        <a href="/livros.html">Livros</a>
+        <a href="/estante.html">Estante</a>
+    </nav>
+
+    <div class="container">
+        <h1>Minha Estante Virtual</h1>
+
+        <div class="form-container">
+            <h2>Adicionar/Editar Estante</h2>
+            <form id="estanteForm">
+                <input type="hidden" id="estanteId">
+                <div>
+                    <label for="nomeEstante">Nome da Estante:</label>
+                    <input type="text" id="nomeEstante" required>
+                </div>
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="resetEstanteForm()">Limpar</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <h2>Lista de Estantes</h2>
+            <table id="estantesTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas da tabela serão inseridas aqui -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    const estantesApiUrl = 'http://localhost:8080/api/estantes'; // Corrigido para "estantes" (plural)
+
+        const estanteForm = document.getElementById('estanteForm');
+        const estanteIdInput = document.getElementById('estanteId');
+        const nomeEstanteInput = document.getElementById('nomeEstante');
+        const estantesTableBody = document.getElementById('estantesTable').getElementsByTagName('tbody')[0];
+
+        document.addEventListener('DOMContentLoaded', loadEstantes);
+
+        async function loadEstantes() {
+            try {
+                const response = await fetch(estantesApiUrl);
+                const estantes = await response.json();
+                estantesTableBody.innerHTML = '';
+                estantes.forEach(estante => {
+                    const row = estantesTableBody.insertRow();
+                    row.insertCell().textContent = estante.id;
+                    row.insertCell().textContent = estante.nome; // Assumindo que 'estante' tem 'nome'
+
+                    const actionsCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Editar';
+                    editButton.classList.add('edit-btn');
+                    editButton.onclick = () => editEstante(estante);
+                    actionsCell.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Excluir';
+                    deleteButton.classList.add('delete-btn');
+                    deleteButton.onclick = () => deleteEstante(estante.id);
+                    actionsCell.appendChild(deleteButton);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar estantes:', error);
+                alert('Não foi possível carregar as estantes.');
+            }
+        }
+
+        estanteForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const id = estanteIdInput.value;
+            const estanteData = {
+                nome: nomeEstanteInput.value
+            };
+
+            let method = 'POST';
+            let url = estantesApiUrl;
+
+            if (id) {
+                method = 'PUT';
+                url += `/${id}`;
+                estanteData.id = parseInt(id);
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(estanteData)
+                });
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+                resetEstanteForm();
+                loadEstantes();
+                alert(`Estante ${id ? 'atualizada' : 'salva'} com sucesso!`);
+            } catch (error) {
+                console.error('Erro ao salvar estante:', error);
+                alert('Erro ao salvar estante.');
+            }
+        });
+
+        function editEstante(estante) {
+            estanteIdInput.value = estante.id;
+            nomeEstanteInput.value = estante.nome;
+        }
+
+        async function deleteEstante(id) {
+            if (!confirm(`Tem certeza que deseja excluir a estante ID ${id}?`)) return;
+            await fetch(`${estantesApiUrl}/${id}`, { method: 'DELETE' });
+            loadEstantes();
+            alert('Estante excluída com sucesso!');
+        }
+
+        function resetEstanteForm() {
+            estanteForm.reset();
+            estanteIdInput.value = '';
+        }
+    </script>
+</body>
+
+</html>

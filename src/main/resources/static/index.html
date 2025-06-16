@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Informações da Biblioteca</title>
+    <style>
+        /* Estilos CSS */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        #user-info {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            /* Adicionado para melhor visualização */
+            margin: 20px auto;
+            /* Centraliza na página */
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        #user-details,
+        #user-address,
+        #user-category,
+        #user-relatives {
+            margin-bottom: 20px;
+            color: blue;
+        }
+
+        #user-details p,
+        #user-address p,
+        #user-category p,
+        #user-relatives p {
+            margin: 5px 0;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+            display: flex;
+            /* Para alinhar input e botão */
+            align-items: center;
+            gap: 10px;
+            /* Espaçamento entre os elementos */
+        }
+
+        .input-container label {
+            display: block;
+            margin-bottom: 0;
+            /* Ajustado */
+            font-weight: bold;
+            white-space: nowrap;
+            /* Impede quebra de linha no label */
+        }
+
+        .input-container input {
+            flex-grow: 1;
+            /* Permite que o input ocupe o espaço restante */
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .input-container button {
+            margin-top: 0;
+            /* Ajustado */
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .input-container button:hover {
+            background-color: #0056b3;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: #ccc;
+            margin: 15px 0;
+        }
+
+        /* Estilos para a barra de navegação */
+        nav {
+            background-color: #333;
+            /* Cor de fundo da barra de navegação */
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            /* Espaço abaixo da navegação */
+        }
+
+        nav a {
+            color: white;
+            /* Cor do texto dos links */
+            margin: 0 15px;
+            /* Espaçamento entre os links */
+            text-decoration: none;
+            /* Remove sublinhado padrão */
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            /* Adiciona sublinhado ao passar o mouse */
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/categorias.html">Categorias</a>
+        <a href="/livros.html">Livros</a>
+        <a href="/estante.html">Estante</a>
+    </nav>
+    <div id="user-info">
+        <h1>Informações do Usuário da Biblioteca</h1>
+        <!-- Campo para digitar o ID do cliente/usuário -->
+        <div class="input-container">
+            <label for="client-id">Digite o ID do Usuário:</label>
+            <input type="number" id="client-id" placeholder="Ex: 1" min="1">
+            <button onclick="fetchData()">Buscar</button>
+        </div>
+        <!-- Área para exibir os dados do cliente/usuário -->
+        <div id="user-details"></div>
+        <h2>Endereço</h2>
+        <div id="user-address"></div>
+        <h2>Parentes</h2>
+        <div id="user-relatives"></div>
+    </div>
+
+    <script>
+        // Lógica JavaScript
+        function fetchData() {
+            const clientIdValue = document.getElementById('client-id').value;
+
+            // Limpa os dados anteriores e mensagens de erro
+            document.getElementById('user-details').innerHTML = "";
+            document.getElementById('user-address').innerHTML = "";
+            document.getElementById('user-relatives').innerHTML = "";
+
+            if (!clientIdValue.trim()) {
+                alert("Por favor, digite o ID do Usuário.");
+                document.getElementById('user-details').innerHTML = '<p class="error">ID do usuário não fornecido.</p>';
+                return;
+            }
+
+            const clientIdAsNumber = Number(clientIdValue);
+
+            if (isNaN(clientIdAsNumber) || !Number.isInteger(clientIdAsNumber) || clientIdAsNumber <= 0) {
+                alert("Por favor, digite um ID numérico válido e positivo (ex: 1, 2, 3...).");
+                document.getElementById('user-details').innerHTML = `<p class="error">ID inválido: '${clientIdValue}'. Deve ser um número inteiro positivo.</p>`;
+                return;
+            }
+
+            // Monta a URL com o ID validado.
+            // A estrutura da URL está correta para o seu ClientController.
+            const url = `http://localhost:8080/clients/${clientIdAsNumber}`;
+            console.log("ID do Cliente (numérico):", clientIdAsNumber); // Adicione esta linha para depuração
+            console.log("URL Gerada:", url); // Adicione esta linha para depuração
+
+            // Função para buscar os dados do JSON
+            async function fetchClientData() {
+                try {
+                    console.log("Tentando buscar URL:", url); // Adicione esta linha para depuração
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        // Trata erros de requisição, como 404 Not Found [10]
+                        throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+                    }
+                    const jsonData = await response.json(); // Converte a resposta para JSON [10]
+                    displayData(jsonData); // Chama a função para exibir os dados [10]
+                } catch (error) {
+                    console.error("Erro ao buscar os dados:", error);
+                    // Exibe uma mensagem de erro na página [10]
+                    document.getElementById('user-details').innerHTML = `
+                        <p class="error">Erro ao carregar os dados.</p>
+                        <p class="error">Detalhes: ${error.message}</p>
+                    `;
+                }
+            }
+
+            // Função para exibir os dados na página [11]
+            function displayData(jsonData) {
+                // Exibir informações do usuário [11]
+                const userDetails = document.getElementById('user-details');
+                userDetails.innerHTML = `
+                    <p><strong>Nome:</strong> ${jsonData.name}</p>
+                    <p><strong>CPF:</strong> ${jsonData.cpf}</p>
+                    <p><strong>Renda:</strong> R$ ${typeof jsonData.income === 'number' ? jsonData.income.toFixed(2) : 'N/A'}</p>
+                    <p><strong>Data de Nascimento:</strong> ${new Date(jsonData.birthDate).toLocaleDateString()}</p>
+                <p><strong>Número de Filhos:</strong> ${jsonData.childrenCount}</p>
+                `;
+
+                // Exibir endereço do usuário (se tiver relacionamento) [12]
+                const userAddress = document.getElementById('user-address');
+                // Ajustado para verificar os campos de endereço diretamente em jsonData
+                if (jsonData.street || jsonData.city || jsonData.state || jsonData.zipCode) { 
+                    userAddress.innerHTML = `
+                        <p><strong>Rua:</strong> ${jsonData.street || 'N/A'}</p>
+                        <p><strong>Cidade:</strong> ${jsonData.city || 'N/A'}</p> 
+                        <p><strong>Estado:</strong> ${jsonData.state || 'N/A'}</p>
+                        <p><strong>CEP:</strong> ${jsonData.zipCode || 'N/A'}</p>
+                    `;
+                } else {
+                    userAddress.innerHTML = "<p>Endereço não disponível.</p>";
+                }
+
+                // Exibir parentes do usuário (se tiver relacionamento ManyToMany) [13]
+                const userRelatives = document.getElementById('user-relatives');
+                // Seção de Parentes removida conforme solicitado.
+                // Se você decidir manter os parentes, o código original para exibi-los
+                // (que foi removido neste diff) pode ser usado.
+                // Atualmente, a div user-relatives permanecerá vazia ou você pode remover
+                // o elemento <h2>Parentes</h2> e <div id="user-relatives"></div> completamente do HTML.
+                userRelatives.innerHTML = "<p>Funcionalidade de parentes desativada.</p>"; // Ou remova a div
+            }
+
+            // Iniciar a busca dos dados [14]
+            fetchClientData();
+        }
+    </script>
+</body>
+
+</html>

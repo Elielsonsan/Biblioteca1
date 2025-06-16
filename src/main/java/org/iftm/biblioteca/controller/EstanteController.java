@@ -1,23 +1,24 @@
 package org.iftm.biblioteca.controller;
 
-import java.util.List;
+import java.net.URI;
+    import java.util.List; // Adicionar import
 
 import org.iftm.biblioteca.dto.EstanteDTO;
 import org.iftm.biblioteca.entities.Estante;
 import org.iftm.biblioteca.service.EstanteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping; // Importa todas as anotações de mapeamento
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping; // Importa todas as anotações de mapeamento
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import jakarta.validation.Valid;
+    import jakarta.validation.Valid; // Adicionar import
 
 @RestController
 @RequestMapping("/api/estantes") // Caminho base para endpoints de Estante
@@ -46,8 +47,12 @@ public class EstanteController {
     @PostMapping
     public ResponseEntity<Estante> criarEstante(@Valid @RequestBody EstanteDTO estanteDTO) {
         // Exceções são tratadas pelo @ControllerAdvice
-        Estante novaEstante = estanteService.salvarNovaEstante(estanteDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novaEstante);
+        Estante estanteCriada = estanteService.salvarNovaEstante(estanteDTO);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(estanteCriada.getId()) // Assumindo que Estante tem getId()
+                .toUri();
+        return ResponseEntity.created(location).body(estanteCriada);
     }
 
     // Endpoint para atualizar uma estante existente (PUT /api/estantes/{id})
@@ -60,7 +65,7 @@ public class EstanteController {
 
     // Endpoint para apagar uma estante (DELETE /api/estantes/{id})
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> apagarEstante(@PathVariable Long id) {
+public ResponseEntity<Void> apagarEstante(@PathVariable Long id) { // Alterado para ResponseEntity<Void>
         // Exceções são tratadas pelo @ControllerAdvice
         estanteService.apagarEstantePorId(id);
         return ResponseEntity.noContent().build();

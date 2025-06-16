@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Categorias de Livros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        nav {
+            background-color: #333;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos para formulário e tabela */
+        .form-container, .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button.edit-btn { background-color: #ffc107; }
+        button.edit-btn:hover { background-color: #e0a800; }
+        button.delete-btn { background-color: #dc3545; }
+        button.delete-btn:hover { background-color: #c82333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/index.html">Início (Usuários)</a>
+        <a href="/categorias.html">Categorias</a>
+        <a href="/livros.html">Livros</a>
+        <a href="/estante.html">Estante</a>
+    </nav>
+
+    <div class="container">
+        <h1>Categorias de Livros</h1>
+
+        <div class="form-container">
+            <h2>Adicionar/Editar Categoria</h2>
+            <form id="categoriaForm">
+                <input type="hidden" id="categoriaId">
+                <div>
+                    <label for="nomeCategoria">Nome da Categoria:</label>
+                    <input type="text" id="nomeCategoria" required minlength="3" maxlength="50">
+                </div>
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="resetForm()">Limpar</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <h2>Lista de Categorias</h2>
+            <table id="categoriasTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas da tabela serão inseridas aqui pelo JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    const apiUrl = 'http://localhost:8080/api/categorias'; // Ajustado para /api/categorias
+        const form = document.getElementById('categoriaForm');
+        const categoriaIdInput = document.getElementById('categoriaId');
+        const nomeCategoriaInput = document.getElementById('nomeCategoria');
+        const categoriasTableBody = document.getElementById('categoriasTable').getElementsByTagName('tbody')[0];
+
+        // Carregar categorias ao iniciar a página
+        document.addEventListener('DOMContentLoaded', loadCategorias);
+
+        async function loadCategorias() {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+                const categorias = await response.json();
+
+                categoriasTableBody.innerHTML = ''; // Limpa a tabela
+                categorias.forEach(cat => {
+                    const row = categoriasTableBody.insertRow();
+                    row.insertCell().textContent = cat.id;
+                    row.insertCell().textContent = cat.nome;
+
+                    const actionsCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Editar';
+                    editButton.classList.add('edit-btn');
+                    editButton.onclick = () => editCategoria(cat);
+                    actionsCell.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Excluir';
+                    deleteButton.classList.add('delete-btn');
+                    deleteButton.onclick = () => deleteCategoria(cat.id);
+                    actionsCell.appendChild(deleteButton);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                alert('Não foi possível carregar as categorias.');
+            }
+        }
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = categoriaIdInput.value;
+            const nome = nomeCategoriaInput.value;
+
+            const categoriaData = { nome };
+            let method = 'POST';
+            let url = apiUrl;
+
+            if (id) { // Se tem ID, é uma atualização (PUT)
+                method = 'PUT';
+                url += `/${id}`;
+                categoriaData.id = parseInt(id);
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(categoriaData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+                }
+                
+                resetForm();
+                loadCategorias();
+                alert(`Categoria ${id ? 'atualizada' : 'salva'} com sucesso!`);
+            } catch (error) {
+                console.error('Erro ao salvar categoria:', error);
+                alert(`Erro ao salvar categoria: ${error.message}`);
+            }
+        });
+
+        function editCategoria(categoria) {
+            categoriaIdInput.value = categoria.id;
+            nomeCategoriaInput.value = categoria.nome;
+        }
+
+        async function deleteCategoria(id) {
+            if (!confirm(`Tem certeza que deseja excluir a categoria ID ${id}?`)) return;
+            
+            await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+            loadCategorias();
+            alert('Categoria excluída com sucesso!');
+        }
+
+        function resetForm() {
+            form.reset();
+            categoriaIdInput.value = ''; // Garante que o ID oculto seja limpo
+        }
+    </script>
+</body>
+</html>

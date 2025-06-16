@@ -10,6 +10,7 @@ import org.iftm.biblioteca.service.LivroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity; // Importa todas as anotações de mapeamento
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import jakarta.validation.Valid;
 @RestController // Indica que esta classe é um Controller REST (combina @Controller e
                 // @ResponseBody)
 @RequestMapping("/api/livros") // Define o caminho base para todos os endpoints neste controller
+@CrossOrigin(origins = "*")
 public class LivroController {
 
     @Autowired // Injeta automaticamente uma instância de LivroRepository
