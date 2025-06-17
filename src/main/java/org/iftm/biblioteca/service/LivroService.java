@@ -34,4 +34,6 @@ public interface LivroService {
     Optional<Livro> buscarPorIsbn(String isbn); // Consulta por ISBN (único)
 
     List<Livro> buscarLivrosPublicadosAposAno(Integer ano); // Consulta que pode se relacionar a uma regra
+
+    List<Livro> buscarLivrosPorTermoGeral(String termo); // Adicionado para busca geral
 }

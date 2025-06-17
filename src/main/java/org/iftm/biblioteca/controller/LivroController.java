@@ -2,15 +2,15 @@ package org.iftm.biblioteca.controller; // Pacote onde o controller está locali
 
 // Importa as classes necessárias para o controller
 
-import java.util.List;
+import java.net.URI;
+import java.util.List; // Adicionar para ServletUriComponentsBuilder
 
 import org.iftm.biblioteca.dto.LivroDTO;
 import org.iftm.biblioteca.entities.Livro;
 import org.iftm.biblioteca.service.LivroService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity; // Importa todas as anotações de mapeamento
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin; // Importa todas as anotações de mapeamento
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController; // Adicionar para parâmetros de busca
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import jakarta.validation.Valid;
+import jakarta.validation.Valid; // Adicionar para construir URI
 
 @RestController // Indica que esta classe é um Controller REST (combina @Controller e
                 // @ResponseBody)
@@ -31,11 +33,18 @@ public class LivroController {
     @Autowired // Injeta automaticamente uma instância de LivroRepository
     private LivroService livroService;
 
-    // Endpoint para buscar todos os livros (GET /api/livros)
+    // Endpoint para buscar todos os livros ou filtrar por termo (GET /api/livros ou /api/livros?search=termo)
     @GetMapping
-    public ResponseEntity<List<Livro>> buscarTodosLivros() {
-        List<Livro> livros = livroService.buscarTodos();
-        return ResponseEntity.ok(livros); // Retorna a lista com status HTTP 200 OK
+    public ResponseEntity<List<Livro>> getAllLivros(
+            @RequestParam(name = "search", required = false) String termoBusca) {
+        List<Livro> livros;
+        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
+            // Você precisará adicionar este método ao LivroService e LivroRepository
+            livros = livroService.buscarLivrosPorTermoGeral(termoBusca);
+        } else {
+            livros = livroService.buscarTodos();
+        }
+        return ResponseEntity.ok(livros);
     }
 
     // Endpoint para buscar um livro por ID (GET /api/livros/{id})
@@ -51,7 +60,9 @@ public class LivroController {
     public ResponseEntity<Livro> criarLivro(@Valid @RequestBody LivroDTO livroDTO) {
         // Exceções são tratadas pelo @ControllerAdvice
         Livro novoLivro = livroService.salvarNovoLivro(livroDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoLivro);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(novoLivro.getId()).toUri();
+        return ResponseEntity.created(uri).body(novoLivro);
     }
 
     // Endpoint para atualizar um livro existente (PUT /api/livros/{id})
@@ -59,12 +70,14 @@ public class LivroController {
     public ResponseEntity<Livro> atualizarLivro(@PathVariable Long id, @Valid @RequestBody LivroDTO livroDTO) {
         // Exceções são tratadas pelo @ControllerAdvice
         Livro livroAtualizado = livroService.atualizarLivro(id, livroDTO);
+        // Lembre-se que o método atualizarLivro no LivroServiceImpl precisa ser implementado.
+        // Atualmente ele lança UnsupportedOperationException.
         return ResponseEntity.ok(livroAtualizado);
     }
 
     // Endpoint para apagar um livro (DELETE /api/livros/{id})
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletarLivro(@PathVariable Long id) {
+    public ResponseEntity<Void> deletarLivro(@PathVariable Long id) { // Alterado para ResponseEntity<Void>
         // Exceções são tratadas pelo @ControllerAdvice
         livroService.apagarLivroPorId(id);
         return ResponseEntity.noContent().build();

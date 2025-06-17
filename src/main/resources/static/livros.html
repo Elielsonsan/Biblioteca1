@@ -130,6 +130,36 @@
         <h1>Livros Disponíveis</h1>
 
         <div class="form-container">
+            <h2>Buscar Livros</h2>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="termoBusca" placeholder="Digite o título, autor ou ISBN" style="flex-grow: 1;">
+                <button onclick="buscarLivros()">Buscar</button>
+                <button onclick="limparBusca()">Limpar Busca</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h2>Lista de Livros</h2>
+            <table id="livrosTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>ISBN</th>
+                        <th>Categoria</th>
+                        <th>Ano</th>
+                        <th>Estante</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas da tabela serão inseridas aqui -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-container">
             <h2>Adicionar/Editar Livro</h2>
             <form id="livroForm">
                 <input type="hidden" id="livroId">
@@ -171,28 +201,6 @@
                 <button type="button" onclick="resetLivroForm()">Limpar</button>
             </form>
         </div>
-
-        <div class="table-container">
-            <h2>Lista de Livros</h2>
-            <table id="livrosTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Título</th>
-                        <th>Autor</th>
-                        <th>ISBN</th>
-                        <th>Categoria</th>
-                        <th>Estante</th>
-                        <th>Ano</th>
-                        <th>Estante</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Linhas da tabela serão inseridas aqui -->
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <script>
@@ -210,6 +218,7 @@
         const anoPublicacaoInput = document.getElementById('anoPublicacaoLivro');
         const edicaoInput = document.getElementById('edicaoLivro');
         const livrosTableBody = document.getElementById('livrosTable').getElementsByTagName('tbody')[0];
+        const termoBuscaInput = document.getElementById('termoBusca');
 
         document.addEventListener('DOMContentLoaded', () => {
             loadCategoriasParaSelect();
@@ -247,9 +256,17 @@
             }
         }
 
-        async function loadLivros() {
+        async function loadLivros(termo = '') {
+            let url = livrosApiUrl;
+            if (termo) {
+                // Ajuste o endpoint da API para aceitar um parâmetro de busca, por exemplo /api/livros/buscar?termo=XYZ
+                // Ou, se sua API já filtra por query params como /api/livros?titulo=XYZ ou /api/livros?autor=XYZ
+                // você precisará ajustar a URL de acordo.
+                // Para este exemplo, vamos supor um endpoint /api/livros?search=TERMO
+                url += `?search=${encodeURIComponent(termo)}`;
+            }
             try {
-                const response = await fetch(livrosApiUrl);
+                const response = await fetch(url);
                 const livros = await response.json();
                 livrosTableBody.innerHTML = '';
                 livros.forEach(livro => {
@@ -259,8 +276,8 @@
                     row.insertCell().textContent = livro.autor;
                     row.insertCell().textContent = livro.isbn;
                     // Assumindo que 'livro.categoria' é um objeto com 'nome' ou que você tem 'livro.categoriaNome'
-                    row.insertCell().textContent = livro.categoria ? livro.categoria.nome : 'N/A';
-                    row.insertCell().textContent = livro.anoPublicacao || 'N/A';
+                    row.insertCell().textContent = livro.categoriaNome || (livro.categoria ? livro.categoria.nome : 'N/A'); // Prioriza categoriaNome se existir
+                    row.insertCell().textContent = livro.anoPublicacao || 'N/A'; // Coluna Ano
                     row.insertCell().textContent = livro.estante ? livro.estante.nome : 'N/A'; // Exibir nome da estante
 
                     const actionsCell = row.insertCell();
@@ -282,6 +299,15 @@
             }
         }
 
+        function buscarLivros() {
+            const termo = termoBuscaInput.value.trim();
+            loadLivros(termo);
+        }
+
+        function limparBusca() {
+            termoBuscaInput.value = '';
+            loadLivros();
+        }
         livroForm.addEventListener('submit', async function (event) {
             event.preventDefault();
             const id = livroIdInput.value;
@@ -326,7 +352,7 @@
             tituloInput.value = livro.titulo;
             autorInput.value = livro.autor;
             isbnInput.value = livro.isbn;
-            categoriaSelect.value = livro.categoria ? livro.categoria.id : ''; // Assumindo que 'livro.categoria.id' existe
+            categoriaSelect.value = livro.categoriaId || (livro.categoria ? livro.categoria.id : ''); // Prioriza categoriaId
             anoPublicacaoInput.value = livro.anoPublicacao || '';
             edicaoInput.value = livro.edicao || '';
             estanteSelect.value = livro.estante ? livro.estante.id : ''; // Popular select da estante

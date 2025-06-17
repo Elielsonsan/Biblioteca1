@@ -7,7 +7,9 @@ import org.iftm.biblioteca.entities.Categoria;
 import org.iftm.biblioteca.entities.Estante;
 import org.iftm.biblioteca.entities.Livro;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository; // Adicionar este import
 
 @Repository // Opcional, mas boa prática
 public interface LivroRepository extends JpaRepository<Livro, Long> {
@@ -43,5 +45,12 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     int countByEstante(Estante estante);
 
     List<Livro> findByAnoPublicacaoGreaterThan(Integer ano);
+
+    // Método para busca geral por título, autor ou ISBN, com EAGER fetching para categoria e estante
+    @Query("SELECT l FROM Livro l LEFT JOIN FETCH l.categoria LEFT JOIN FETCH l.estante WHERE " +
+           "LOWER(l.titulo) LIKE LOWER(concat('%', :termo, '%')) OR " +
+           "LOWER(l.author) LIKE LOWER(concat('%', :termo, '%')) OR " +
+           "LOWER(l.isbn) LIKE LOWER(concat('%', :termo, '%'))")
+    List<Livro> searchByTermoGeral(@Param("termo") String termo);
 
 }

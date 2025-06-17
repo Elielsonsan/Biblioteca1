@@ -59,10 +59,34 @@ public class LivroServiceImpl implements LivroService {
     // Implementar os outros métodos da interface LivroService...
 
     @Override
+    @Transactional
     public Livro atualizarLivro(Long id, LivroDTO livroDTO) {
-        // Similar ao salvar, mas primeiro busca o livro existente
-        // e atualiza seus campos.
-        throw new UnsupportedOperationException("Unimplemented method 'atualizarLivro'");
+        Livro livroExistente = livroRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com ID: " + id));
+
+        // Verifica se o ISBN foi alterado e se o novo ISBN já existe para outro livro
+        if (livroDTO.getIsbn() != null && !livroDTO.getIsbn().equals(livroExistente.getIsbn())) {
+            livroRepository.findByIsbn(livroDTO.getIsbn()).ifPresent(outroLivro -> {
+                if (!outroLivro.getId().equals(id)) {
+                    throw new RegraDeNegocioException("Já existe outro livro com o ISBN informado: " + livroDTO.getIsbn());
+                }
+            });
+        }
+
+        Categoria categoria = categoriaRepository.findById(livroDTO.getCategoriaId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com ID: " + livroDTO.getCategoriaId()));
+        Estante estante = estanteRepository.findById(livroDTO.getEstanteId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Estante não encontrada com ID: " + livroDTO.getEstanteId()));
+
+        livroExistente.setTitulo(livroDTO.getTitulo());
+        livroExistente.setAuthor(livroDTO.getAuthor());
+        livroExistente.setIsbn(livroDTO.getIsbn());
+        livroExistente.setAnoPublicacao(livroDTO.getAnoPublicacao());
+        livroExistente.setEdicao(livroDTO.getEdicao());
+        livroExistente.setCategoria(categoria);
+        livroExistente.setEstante(estante);
+
+        return livroRepository.save(livroExistente);
     }
 
     @Override
@@ -136,5 +160,15 @@ public class LivroServiceImpl implements LivroService {
         // Assumindo que você quer uma busca exata pelo nome do autor,
         // e que o nome do campo na entidade Livro é 'author'.
         return livroRepository.findByAuthor(autor);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Livro> buscarLivrosPorTermoGeral(String termo) {
+        if (termo == null || termo.trim().isEmpty()) {
+            return buscarTodos(); // Ou lançar exceção se preferir que um termo seja sempre fornecido
+        }
+        // Este método precisa ser adicionado ao LivroRepository
+        return livroRepository.searchByTermoGeral(termo.toLowerCase());
     }
 }
