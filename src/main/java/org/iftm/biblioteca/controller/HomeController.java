@@ -1,19 +1,20 @@
 package org.iftm.biblioteca.controller;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController // @RestController combina @Controller e @ResponseBody
+@Controller // Alterado para Controller para servir páginas Thymeleaf
 public class HomeController {
 
     /**
      * Página principal da aplicação.
      *
-     * @return uma mensagem de boas-vindas
+     * @return o nome do template da página inicial (home.html)
      */
     @GetMapping("/") // Mapeia requisições GET para o caminho raiz "/"
-    public String home() {
-        return "Bem-vindo à Biblioteca!"; // Mensagem simples a ser exibida
+    public String homePage() {
+        // O Spring Boot procurará por /src/main/resources/templates/home.html
+        return "home";
     }
 
     // Se você estivesse usando um template engine como Thymeleaf,

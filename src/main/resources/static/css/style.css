@@ -1,0 +1,361 @@
+/* --- Configurações Globais --- */
+:root {
+    --cor-fundo: #f1f5f9;
+    --cor-texto-primario: #0F172A;
+    --cor-texto-secundario: #475569;
+    --cor-verde-iftm: #2E9D41;
+    --cor-sombra-escura: #c9d9e8;
+    --cor-sombra-clara: #ffffff;
+}
+
+body {
+    background-color: var(--cor-fundo);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 2rem;
+    color: var(--cor-texto-secundario);
+}
+
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- 1. Estilo da Navegação em Cartões --- */
+.navegacao-principal {
+    width: 100%;
+    max-width: 800px; 
+    margin-bottom: 1.5rem;
+}
+
+.navegacao-principal ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    gap: 1.5rem;
+}
+
+.navegacao-principal a {
+    display: block;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--cor-texto-secundario);
+    background-color: var(--cor-fundo);
+    border-radius: 12px;
+    box-shadow: 5px 5px 10px var(--cor-sombra-escura),
+                -5px -5px 10px var(--cor-sombra-clara);
+    transition: all 0.2s ease-in-out;
+}
+
+.navegacao-principal a:hover {
+    box-shadow: inset 2px 2px 5px var(--cor-sombra-escura),
+                inset -2px -2px 5px var(--cor-sombra-clara);
+    color: var(--cor-texto-primario);
+}
+
+/* --- Estilo Genérico de Cartão --- */
+.cartao {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--cor-fundo);
+    border-radius: 24px;
+    padding: 2.5rem 3rem;
+    box-shadow: 8px 8px 16px var(--cor-sombra-escura), 
+                -8px -8px 16px var(--cor-sombra-clara);
+    display: flex;
+    align-items: center;
+}
+
+/* --- 2. Estilo do Cartão de Apresentação --- */
+.cartao-apresentacao {
+    padding: 1.5rem 3rem;
+}
+
+.coluna-texto {
+    flex: 0 0 75%;
+    padding-right: 2rem;
+    text-align: center;
+}
+
+.coluna-logo {
+    flex: 0 0 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.coluna-logo img {
+    max-width: 200px;
+    height: auto;
+}
+
+.coluna-texto h1 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--cor-verde-iftm);
+    margin-bottom: 0.5rem;
+}
+
+.coluna-texto .slogan {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--cor-verde-iftm);
+    margin-bottom: 1rem;
+}
+
+.coluna-texto p {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 70ch;
+    margin: 0 auto;
+}
+
+/* --- 3. Estilo do Cartão de Busca --- */
+.cartao-busca {
+    margin-top: 3rem; 
+    flex-direction: column;
+    gap: 2rem; 
+}
+
+.barra-busca-container {
+    width: 90%;
+    display: flex;
+    align-items: center;
+    background-color: var(--cor-fundo); 
+    border-radius: 50px;
+    padding: 1.1rem 1.5rem;
+    box-shadow: 8px 8px 16px var(--cor-sombra-escura),
+                -8px -8px 16px var(--cor-sombra-clara);
+    transition: box-shadow 0.3s ease;
+}
+
+.barra-busca-container:focus-within {
+    box-shadow: inset 3px 3px 6px var(--cor-sombra-escura),
+                inset -3px -3px 6px var(--cor-sombra-clara);
+}
+
+.barra-busca-container .icone-principal {
+    font-size: 1.2rem;
+    color: var(--cor-texto-secundario);
+    margin-right: 1rem;
+}
+
+.barra-busca-container input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: var(--cor-texto-primario);
+}
+
+.barra-busca-container input::placeholder {
+    color: #94A3B8;
+}
+
+.icones-filtro {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.icones-filtro button {
+    background-color: var(--cor-fundo);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+    box-shadow: 3px 3px 6px var(--cor-sombra-escura),
+                -3px -3px 6px var(--cor-sombra-clara);
+    transition: all 0.2s ease-in-out;
+}
+
+.icones-filtro button:hover {
+    color: var(--cor-verde-iftm);
+    box-shadow: inset 2px 2px 4px var(--cor-sombra-escura),
+                inset -2px -2px 4px var(--cor-sombra-clara);
+}
+
+.botoes-acao-container {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.botoes-acao-container button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.botao-secundario {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-secundario);
+    box-shadow: 4px 4px 8px var(--cor-sombra-escura),
+                -4px -4px 8px var(--cor-sombra-clara);
+}
+
+.botao-secundario:hover {
+    box-shadow: inset 2px 2px 5px var(--cor-sombra-escura),
+                inset -2px -2px 5px var(--cor-sombra-clara);
+    color: var(--cor-texto-primario);
+}
+
+/* --- 4. Estilo dos Resultados da Busca (Novo Formato) --- */
+.container-resultados {
+    /* As propriedades visuais (sombra, fundo, borda, etc) vêm da classe .cartao */
+    /* Deixamos apenas o que é específico para este container */
+    margin-top: 3rem;
+    flex-direction: column; /* Para empilhar os resultados verticalmente */
+    align-items: stretch; /* Para os itens se alinharem corretamente */
+}
+
+.item-resultado {
+    display: flex;
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.item-resultado:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.info-detalhada {
+    flex: 1;
+}
+
+.linha-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.linha-info i {
+    font-size: 1.1rem;
+    color: var(--cor-texto-secundario);
+    width: 20px;
+    text-align: center;
+}
+
+.linha-info p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.linha-info p strong {
+    font-family: 'Kanit', sans-serif;
+    font-size: 1.2rem;
+    color: var(--cor-texto-primario);
+}
+
+.descricao-detalhada, .bibliografia-detalhada {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--cor-texto-secundario);
+    padding-left: 36px;
+    margin-bottom: 1rem;
+}
+
+.capa-livro img {
+    width: 120px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* --- REGRAS PARA TELAS MENORES (CELULARES) --- */
+@media (max-width: 860px) {
+
+    body {
+        padding: 1rem; 
+    }
+    
+    .navegacao-principal ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .cartao-apresentacao {
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .coluna-texto {
+        flex: 1; 
+        padding-right: 0;
+    }
+    
+    .coluna-logo {
+        flex: 1;
+    }
+
+    .coluna-texto h1 {
+        font-size: 2rem;
+    }
+
+    .coluna-texto .slogan {
+        font-size: 1.1rem;
+    }
+
+    .barra-busca-container {
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+    }
+
+    .barra-busca-container input {
+        min-width: 0;
+    }
+    
+    .icones-filtro {
+        margin-left: 0;
+        margin: 0 auto;
+    }
+
+    .botoes-acao-container {
+        flex-direction: column;
+        width: 90%;
+        align-items: stretch;
+    }
+
+    /* Regras responsivas para a nova lista de resultados */
+    .container-resultados {
+        padding: 1rem;
+    }
+
+    .item-resultado {
+        flex-direction: column-reverse; 
+        gap: 1rem;
+    }
+
+    .capa-livro {
+        margin: 0 auto;
+    }
+
+    .descricao-detalhada, .bibliografia-detalhada {
+        padding-left: 0;
+    }
+}
