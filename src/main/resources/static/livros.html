@@ -272,8 +272,8 @@
                 livros.forEach(livro => {
                     const row = livrosTableBody.insertRow();
                     row.insertCell().textContent = livro.id;
-                    row.insertCell().textContent = livro.titulo;
-                    row.insertCell().textContent = livro.autor;
+                    row.insertCell().textContent = livro.titulo; // Mantém como está
+                    row.insertCell().textContent = livro.author; // Alterado de livro.autor para livro.author
                     row.insertCell().textContent = livro.isbn;
                     // Assumindo que 'livro.categoria' é um objeto com 'nome' ou que você tem 'livro.categoriaNome'
                     row.insertCell().textContent = livro.categoriaNome || (livro.categoria ? livro.categoria.nome : 'N/A'); // Prioriza categoriaNome se existir
@@ -350,7 +350,7 @@
         function editLivro(livro) {
             livroIdInput.value = livro.id;
             tituloInput.value = livro.titulo;
-            autorInput.value = livro.autor;
+            autorInput.value = livro.author; // Alterado de livro.autor para livro.author
             isbnInput.value = livro.isbn;
             categoriaSelect.value = livro.categoriaId || (livro.categoria ? livro.categoria.id : ''); // Prioriza categoriaId
             anoPublicacaoInput.value = livro.anoPublicacao || '';
