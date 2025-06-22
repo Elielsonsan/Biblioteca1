@@ -13,7 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-    import jakarta.persistence.Table; // Adicionar este import
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_categoria")
@@ -30,7 +30,7 @@ public class Categoria implements Serializable {
 
     @JsonIgnore // Adicionar para teste rápido de loop de serialização
     @OneToMany(mappedBy = "categoria")
-    private List<Livro> livros;
+    private List<Livro> livros = new java.util.ArrayList<>();
 
     // Construtor sem argumentos (obrigatorio para JPA)
     public Categoria() {

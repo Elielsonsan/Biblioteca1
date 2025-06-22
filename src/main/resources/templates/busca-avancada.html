@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca Avançada - Biblioteca do IFTM</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <nav class="navegacao-principal">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a th:href="@{/livros.html}">Livros</a></li>
+            <li><a th:href="@{/categorias.html}">Categoria</a></li>
+            <li><a th:href="@{/estante.html}">Estante</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="cartao cartao-apresentacao">
+            <div class="coluna-texto">
+                <h1>Busca Avançada de Livros</h1>
+                <p class="slogan">Refine sua pesquisa com mais opções.</p>
+                <p>Utilize os campos abaixo para encontrar exatamente o que procura em nosso acervo.</p>
+            </div>
+            <div class="coluna-logo">
+                <img th:src="@{/images/logo-iftm.png}" alt="Logo IFTM">
+            </div>
+        </section>
+
+        <section class="cartao">
+            <h2>Opções de Busca</h2>
+            <form id="buscaAvancadaForm">
+                <div style="margin-bottom: 1rem;">
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" name="titulo" placeholder="Título do livro">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="autor">Autor:</label>
+                    <input type="text" id="autor" name="autor" placeholder="Nome do autor">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="isbn">ISBN:</label>
+                    <input type="text" id="isbn" name="isbn" placeholder="ISBN do livro">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="categoria">Categoria:</label>
+                    <select id="categoria" name="categoria">
+                        <option value="">Todas as Categorias</option>
+                        <!-- Opções de categoria podem ser carregadas dinamicamente via Thymeleaf ou JS -->
+                    </select>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="estante">Estante:</label>
+                    <select id="estante" name="estanteId">
+                        <option value="">Todas as Estantes</option>
+                        <!-- Opções de estante serão carregadas dinamicamente via JS -->
+                    </select>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="anoPublicacao">Ano de Publicação (a partir de):</label>
+                    <input type="number" id="anoPublicacao" name="anoPublicacao" min="1400" max="2099" placeholder="Ex: 2000">
+                </div>
+                <div class="botoes-acao-container">
+                    <button type="submit" class="botao-secundario">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Buscar Avançado</span>
+                    </button>
+                    <button type="button" id="btnLimpar" class="botao-secundario">
+                        <i class="fa-solid fa-broom"></i>
+                        <span>Limpar Campos</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Seção para exibir resultados da busca avançada, controlada por JS -->
+        <section id="secaoResultados" class="cartao container-resultados" style="display: none;">
+            <h2>Resultados da Busca Avançada</h2>
+            <div id="listaResultados">
+                <!-- Resultados serão inseridos aqui via JS -->
+            </div>
+        </section>
+
+        <section id="secaoSemResultados" class="cartao" style="display: none;">
+            <p>Nenhum livro encontrado com os critérios da busca.</p>
+        </section>
+
+    </main>
+
+    <script>
+        const form = document.getElementById('buscaAvancadaForm');
+        const btnLimpar = document.getElementById('btnLimpar');
+
+        const secaoResultados = document.getElementById('secaoResultados');
+        const listaResultados = document.getElementById('listaResultados');
+        const secaoSemResultados = document.getElementById('secaoSemResultados');
+
+        const categoriaSelect = document.getElementById('categoria');
+        const estanteSelect = document.getElementById('estante');
+
+        // URLs das suas APIs
+        const livrosApiUrl = '/api/livros';
+        const categoriasApiUrl = '/api/categorias';
+        const estantesApiUrl = '/api/estantes';
+
+        // Carrega as opções dos selects quando a página é carregada
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOptions(categoriasApiUrl, categoriaSelect, 'Todas as Categorias');
+            loadOptions(estantesApiUrl, estanteSelect, 'Todas as Estantes');
+        });
+
+        // Adiciona o listener para o envio do formulário
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Impede o recarregamento da página
+            realizarBusca();
+        });
+
+        // Adiciona o listener para o botão de limpar
+        btnLimpar.addEventListener('click', () => {
+            form.reset();
+            secaoResultados.style.display = 'none';
+            secaoSemResultados.style.display = 'none';
+            listaResultados.innerHTML = '';
+        });
+
+        // Função genérica para carregar opções em um <select>
+        async function loadOptions(apiUrl, selectElement) {
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Falha ao carregar dados da API');
+                const items = await response.json();
+
+                items.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.nome;
+                    selectElement.appendChild(option);
+                });
+            } catch (error) {
+                console.error(`Erro ao carregar opções de ${selectElement.id}:`, error);
+            }
+        }
+
+        // Função principal que realiza a busca
+        async function realizarBusca() {
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            // Adiciona aos parâmetros de busca apenas os campos preenchidos
+            for (const [key, value] of formData.entries()) {
+                if (value) {
+                    params.append(key, value);
+                }
+            }
+
+            // Monta a URL final para a API.
+            // Assumimos que sua API em /api/livros aceita estes parâmetros para filtrar.
+            const url = `${livrosApiUrl}?${params.toString()}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Erro na busca: ${response.status}`);
+                const livros = await response.json();
+                renderizarResultados(livros);
+            } catch (error) {
+                console.error('Erro ao realizar busca avançada:', error);
+                alert('Ocorreu um erro ao buscar os livros.');
+            }
+        }
+
+        // Função que desenha os resultados na tela
+        function renderizarResultados(livros) {
+            listaResultados.innerHTML = ''; // Limpa resultados anteriores
+
+            if (livros && livros.length > 0) {
+                livros.forEach(livro => {
+                    const itemResultado = document.createElement('div');
+                    itemResultado.className = 'item-resultado';
+
+                    // Usamos o mesmo HTML do seu design para os resultados
+                    itemResultado.innerHTML = `
+                        <div class="info-detalhada">
+                            <div class="linha-info">
+                                <i class="fa-solid fa-copyright" title="Autor"></i>
+                                <p>${livro.author || 'N/A'}</p>
+                            </div>
+                            <div class="linha-info">
+                                <i class="fa-solid fa-book" title="Título"></i>
+                                <p><strong>${livro.titulo || 'N/A'}</strong></p>
+                            </div>
+                            <div class="linha-info">
+                                <i class="fa-solid fa-barcode" title="ISBN"></i>
+                                <p>${livro.isbn || 'N/A'}</p>
+                            </div>
+                            <div class="linha-info">
+                                <i class="fa-solid fa-tags" title="Categoria"></i>
+                                <p>${livro.categoriaNome || (livro.categoria ? livro.categoria.nome : 'N/A')}</p>
+                            </div>
+                            <div class="linha-info">
+                                <i class="fa-solid fa-box-archive" title="Estante"></i>
+                                <p>${livro.estanteNome || (livro.estante ? livro.estante.nome : 'N/A')}</p>
+                            </div>
+                        </div>
+                        <div class="capa-livro">
+                            <img src="/images/capa-placeholder.png" alt="Capa do Livro ${livro.titulo}">
+                        </div>
+                    `;
+                    listaResultados.appendChild(itemResultado);
+                });
+                secaoResultados.style.display = 'flex'; // 'flex' para manter o layout do .cartao
+                secaoSemResultados.style.display = 'none';
+            } else {
+                secaoResultados.style.display = 'none';
+                secaoSemResultados.style.display = 'flex'; // 'flex' para manter o layout do .cartao
+            }
+        }
+    </script>
+</body>
+</html>
+</body>
+</html>

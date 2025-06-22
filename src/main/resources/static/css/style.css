@@ -25,6 +25,12 @@ main {
     align-items: center;
 }
 
+form {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 /* --- 1. Estilo da Navegação em Cartões --- */
 .navegacao-principal {
     width: 100%;
@@ -179,7 +185,7 @@ main {
     transition: all 0.2s ease-in-out;
 }
 
-.icones-filtro button:hover {
+.icones-filtro button:hover, .icones-filtro button.active {
     color: var(--cor-verde-iftm);
     box-shadow: inset 2px 2px 4px var(--cor-sombra-escura),
                 inset -2px -2px 4px var(--cor-sombra-clara);
@@ -190,7 +196,9 @@ main {
     gap: 1.5rem;
 }
 
-.botoes-acao-container button {
+
+.botoes-acao-container > button,
+.botoes-acao-container > a {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -201,6 +209,7 @@ main {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    text-decoration: none;
 }
 
 .botao-secundario {
@@ -216,13 +225,17 @@ main {
     color: var(--cor-texto-primario);
 }
 
-/* --- 4. Estilo dos Resultados da Busca (Novo Formato) --- */
-.container-resultados {
-    /* As propriedades visuais (sombra, fundo, borda, etc) vêm da classe .cartao */
-    /* Deixamos apenas o que é específico para este container */
+/* --- 4. Estilo dos Resultados da Busca --- */
+#secaoSemResultados {
+    justify-content: center;
+    padding: 1.5rem;
     margin-top: 3rem;
-    flex-direction: column; /* Para empilhar os resultados verticalmente */
-    align-items: stretch; /* Para os itens se alinharem corretamente */
+}
+
+.container-resultados {
+    margin-top: 3rem;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .item-resultado {
@@ -283,6 +296,13 @@ main {
     box-shadow: 0 5px 15px rgba(0,0,0,0.15);
 }
 
+/* --- EFEITO DE CLIQUE (TEXTO VERDE) --- */
+.navegacao-principal a:active,
+.icones-filtro button:active,
+.botoes-acao-container > *:active {
+    color: var(--cor-verde-iftm);
+}
+
 /* --- REGRAS PARA TELAS MENORES (CELULARES) --- */
 @media (max-width: 860px) {
 
@@ -341,7 +361,6 @@ main {
         align-items: stretch;
     }
 
-    /* Regras responsivas para a nova lista de resultados */
     .container-resultados {
         padding: 1rem;
     }

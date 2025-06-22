@@ -153,8 +153,18 @@ public class RestExceptionHandler {
 
 
 
-    // Um handler genérico para outras exceções não tratadas pode ser útil
-    // @ExceptionHandler(Exception.class)
-    // public ResponseEntity<StandardError> genericException(Exception e,
-    // HttpServletRequest request) { ... }
+    /**
+     * Handler genérico para exceções não tratadas.
+     * Captura qualquer exceção não tratada pelos handlers específicos e retorna um erro 500.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<StandardError> genericException(Exception e, HttpServletRequest request) {
+        StandardError err = new StandardError();
+        err.setTimestamp(Instant.now());
+        err.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        err.setError("Erro interno do servidor");
+        err.setMessage("Ocorreu um erro inesperado no processamento da sua requisição. Detalhe: " + e.getMessage());
+        err.setPath(request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
+    }
 }
