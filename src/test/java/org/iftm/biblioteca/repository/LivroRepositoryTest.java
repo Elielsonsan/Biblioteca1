@@ -16,11 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 @DataJpaTest // Carrega o contexto do Spring apenas para testes de repositório
-// Não carrega o contexto completo da aplicação
-// Isso é mais rápido e adequado para testes de repositório
-// Carrega apenas os beans necessários para testes de repositório
-// Não carrega o contexto completo da aplicação
-// Isso é mais rápido e adequado para testes de repositório
 class LivroRepositoryTest {
 
     @Autowired
@@ -28,16 +23,6 @@ class LivroRepositoryTest {
 
     @Autowired
     private LivroRepository livroRepository; // O repositório que estamos testando
-
-    // Atributos de teste
-    // Usamos @Autowired para injetar dependências do Spring
-    // Usamos @BeforeEach para preparar o ambiente de teste antes de cada teste
-    // Usamos @DisplayName para dar nomes descritivos aos testes
-    // Usamos @Test para marcar métodos de teste
-    // Usamos @DataJpaTest para carregar o contexto do Spring apenas para testes de
-    // repositório
-    // Usamos @Autowired para injetar dependências do Spring
-    // Usamos @BeforeEach para preparar o ambiente de teste antes de cada teste
     private Categoria catFantasia;
     private Categoria catFiccao;
     private Estante estA1;
@@ -45,7 +30,7 @@ class LivroRepositoryTest {
     private Livro livroHobbit;
     private Livro livroDuna;
 
-    @SuppressWarnings("unused") // Suprime o aviso da IDE, pois o JUnit usa este método
+    // O JUnit usa este método via reflexão, o aviso da IDE pode ser ignorado ou configurado.
     @BeforeEach // metodo setUp() é chamado antes de cada teste
     void setUp() {
         // Criar e persistir categorias e estantes antes de cada teste usando
@@ -63,8 +48,8 @@ class LivroRepositoryTest {
 
         // Criar e persistir Livros usando as entidades relacionadas ja criadas
         // Usa categorias e estantes criadas no setUp
-        livroHobbit = new Livro(null, "O Hobbit", "J.R.R. Tolkien", "1122334455", 1937, 1, catFantasia, estA1);
-        livroDuna = new Livro(null, "Duna", "Frank Herbert", "1234567890", 1965, 1, catFiccao, estB2);
+        livroHobbit = new Livro(null, "O Hobbit", "J.R.R. Tolkien", "1122334455", 1937, 1, "/images/hobbit.png", catFantasia, estA1);
+        livroDuna = new Livro(null, "Duna", "Frank Herbert", "1234567890", 1965, 1, "/images/duna.png", catFiccao, estB2);
         entityManager.persist(livroHobbit);
         entityManager.persist(livroDuna);
 
@@ -78,21 +63,20 @@ class LivroRepositoryTest {
     void save_LivrValido_RetornarId() {
         // arrange cria um novo livro associado a categorias e estantes
         // Usa categorias e estantes criadas no setUp
-        Livro novoLivro = new Livro(null, "Neuromancer", "William Gibson", "9988776655", 1984, 1, catFiccao, estA1);
+        Livro novoLivro = new Livro(null, "Neuromancer", "William Gibson", "9988776655", 1984, 1, "/images/neuromancer.png", catFiccao, estA1);
 
         // Act
         Livro livroSalvo = livroRepository.save(novoLivro);
 
         // Assert
-        assertThat(livroSalvo).isNotNull();
-        assertThat(livroSalvo.getId()).isNotNull();
-        assertThat(livroSalvo.getTitulo()).isEqualTo("Neuromancer");
-        assertThat(livroSalvo.getAuthor()).isEqualTo("William Gibson");
-        // Verifica associações
-        assertThat(livroSalvo.getCategoria()).isNotNull();
-        assertThat(livroSalvo.getCategoria().getId()).isEqualTo(catFiccao.getId());
-        assertThat(livroSalvo.getEstante()).isNotNull();
-        assertThat(livroSalvo.getEstante().getId()).isEqualTo(estA1.getId());
+        assertThat(livroSalvo).isNotNull().satisfies(livro -> {
+            assertThat(livro.getId()).isNotNull();
+            assertThat(livro.getTitulo()).isEqualTo("Neuromancer");
+            assertThat(livro.getAutor()).isEqualTo("William Gibson");
+            assertThat(livro.getCapaUrl()).isEqualTo("/images/neuromancer.png");
+            assertThat(livro.getCategoria().getId()).isEqualTo(catFiccao.getId());
+            assertThat(livro.getEstante().getId()).isEqualTo(estA1.getId());
+        });
 
         // Verifica no banco
         Livro livroDoBanco = entityManager.find(Livro.class, livroSalvo.getId());
@@ -130,15 +114,13 @@ class LivroRepositoryTest {
 
         // Assert
         assertThat(optionalLivro).isPresent();
-        Livro livroEncontrado = optionalLivro.get();
-        assertThat(livroEncontrado.getId()).isEqualTo(idExistente);
-        assertThat(livroEncontrado.getTitulo()).isEqualTo("Duna");
-        assertThat(livroEncontrado.getAuthor()).isEqualTo("Frank Herbert");
-        // Verifica relacionamentos
-        assertThat(livroEncontrado.getCategoria()).isNotNull();
-        assertThat(livroEncontrado.getCategoria().getNome()).isEqualTo("Ficção Científica");
-        assertThat(livroEncontrado.getEstante()).isNotNull();
-        assertThat(livroEncontrado.getEstante().getNome()).isEqualTo("B2"); // Assumindo que Estante usa 'nome'
+        assertThat(optionalLivro.get()).satisfies(livroEncontrado -> {
+            assertThat(livroEncontrado.getId()).isEqualTo(idExistente);
+            assertThat(livroEncontrado.getTitulo()).isEqualTo("Duna");
+            assertThat(livroEncontrado.getAutor()).isEqualTo("Frank Herbert");
+            assertThat(livroEncontrado.getCategoria().getNome()).isEqualTo("Ficção Científica");
+            assertThat(livroEncontrado.getEstante().getNome()).isEqualTo("B2");
+        });
     }
 
     @Test
@@ -169,23 +151,23 @@ class LivroRepositoryTest {
         assertThat(livros.get(0).getTitulo()).isEqualTo("O Hobbit");
     }
 
-    // Exemplo: Supondo que você tenha `List<Livro> findByAutor(String autor);`
+    // Exemplo: Supondo que você tenha `List<Livro> findByAutor(String autor);` no repositório
     @Test
     @DisplayName("Deve encontrar livros pelo autor 'Frank Herbert'")
     void findByAutor_QuandoAutorExiste_DeveRetornarLivros() {
         // Arrange
         String autor = "Frank Herbert";
 
-        // Act
-        List<Livro> livros = livroRepository.findByAuthor(autor);
+        // Act - Lembre-se de renomear o método no LivroRepository para findByAutor
+        List<Livro> livros = livroRepository.findByAutor(autor); // O método agora é findByAutor
 
         // Assert
         assertThat(livros).isNotNull().hasSize(1);
-        assertThat(livros.get(0).getAuthor()).isEqualTo(autor);
+        assertThat(livros.get(0).getAutor()).isEqualTo(autor);
         assertThat(livros.get(0).getTitulo()).isEqualTo("Duna");
     }
 
-    // Exemplo: Supondo que voce tenha `List<Livro> findByCategoriaNome(String
+    // Exemplo: Supondo que você tenha `List<Livro> findByCategoriaNome(String
     // nome);`
     @Test
     @DisplayName("Deve encontrar livros pela categoria 'Fantasia' (findByCategoriaNome)")

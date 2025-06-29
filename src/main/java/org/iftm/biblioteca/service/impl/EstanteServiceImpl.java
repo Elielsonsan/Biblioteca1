@@ -11,7 +11,6 @@ import org.iftm.biblioteca.service.EstanteService;
 import org.iftm.biblioteca.service.exceptions.NomeDuplicadoException;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
 import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -19,12 +18,15 @@ import org.springframework.util.StringUtils;
 @Service
 public class EstanteServiceImpl implements EstanteService {
 
-    @Autowired
-    private EstanteRepository estanteRepository;
+    private final EstanteRepository estanteRepository;
+    private final LivroRepository livroRepository; // Para verificar livros associados na exclusão
 
-    @Autowired
-    private LivroRepository livroRepository; // Para verificar livros associados na exclusão
-
+    // Injeção de dependência via construtor (melhor prática)
+    public EstanteServiceImpl(EstanteRepository estanteRepository, LivroRepository livroRepository) {
+        this.estanteRepository = estanteRepository;
+        this.livroRepository = livroRepository;
+    }
+    
     private void verificarNomeDuplicado(String nome, Long idAtual) {
         Optional<Estante> estanteExistente = estanteRepository.findByNome(nome); // Assumindo que findByNome é
                                                                                  // case-sensitive ou ajustado conforme

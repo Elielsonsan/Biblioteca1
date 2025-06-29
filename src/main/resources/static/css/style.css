@@ -1,4 +1,6 @@
-/* --- Configurações Globais --- */
+/* ==================================================================== */
+/* --- 1. CONFIGURAÇÕES GLOBAIS E VARIÁVEIS ---                       */
+/* ==================================================================== */
 :root {
     --cor-fundo: #f1f5f9;
     --cor-texto-primario: #0F172A;
@@ -19,10 +21,11 @@ body {
 }
 
 main {
-    width: 100%;
+    width: 100%;    
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 3rem; /* Adiciona espaçamento consistente entre os cartões */
 }
 
 form {
@@ -31,7 +34,11 @@ form {
     justify-content: center;
 }
 
-/* --- 1. Estilo da Navegação em Cartões --- */
+/* ==================================================================== */
+/* --- 2. COMPONENTES REUTILIZÁVEIS ---                               */
+/* ==================================================================== */
+
+/* --- Navegação Principal --- */
 .navegacao-principal {
     width: 100%;
     max-width: 800px; 
@@ -67,7 +74,6 @@ form {
 /* --- Estilo Genérico de Cartão --- */
 .cartao {
     width: 100%;
-    max-width: 800px;
     background-color: var(--cor-fundo);
     border-radius: 24px;
     padding: 2.5rem 3rem;
@@ -77,125 +83,11 @@ form {
     align-items: center;
 }
 
-/* --- 2. Estilo do Cartão de Apresentação --- */
-.cartao-apresentacao {
-    padding: 1.5rem 3rem;
-}
-
-.coluna-texto {
-    flex: 0 0 75%;
-    padding-right: 2rem;
-    text-align: center;
-}
-
-.coluna-logo {
-    flex: 0 0 25%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.coluna-logo img {
-    max-width: 200px;
-    height: auto;
-}
-
-.coluna-texto h1 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--cor-verde-iftm);
-    margin-bottom: 0.5rem;
-}
-
-.coluna-texto .slogan {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: var(--cor-verde-iftm);
-    margin-bottom: 1rem;
-}
-
-.coluna-texto p {
-    font-size: 1rem;
-    line-height: 1.6;
-    max-width: 70ch;
-    margin: 0 auto;
-}
-
-/* --- 3. Estilo do Cartão de Busca --- */
-.cartao-busca {
-    margin-top: 3rem; 
-    flex-direction: column;
-    gap: 2rem; 
-}
-
-.barra-busca-container {
-    width: 90%;
-    display: flex;
-    align-items: center;
-    background-color: var(--cor-fundo); 
-    border-radius: 50px;
-    padding: 1.1rem 1.5rem;
-    box-shadow: 8px 8px 16px var(--cor-sombra-escura),
-                -8px -8px 16px var(--cor-sombra-clara);
-    transition: box-shadow 0.3s ease;
-}
-
-.barra-busca-container:focus-within {
-    box-shadow: inset 3px 3px 6px var(--cor-sombra-escura),
-                inset -3px -3px 6px var(--cor-sombra-clara);
-}
-
-.barra-busca-container .icone-principal {
-    font-size: 1.2rem;
-    color: var(--cor-texto-secundario);
-    margin-right: 1rem;
-}
-
-.barra-busca-container input {
-    flex-grow: 1;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 1.1rem;
-    color: var(--cor-texto-primario);
-}
-
-.barra-busca-container input::placeholder {
-    color: #94A3B8;
-}
-
-.icones-filtro {
-    display: flex;
-    gap: 0.5rem;
-    margin-left: 1rem;
-}
-
-.icones-filtro button {
-    background-color: var(--cor-fundo);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    font-size: 1rem;
-    color: var(--cor-texto-secundario);
-    cursor: pointer;
-    box-shadow: 3px 3px 6px var(--cor-sombra-escura),
-                -3px -3px 6px var(--cor-sombra-clara);
-    transition: all 0.2s ease-in-out;
-}
-
-.icones-filtro button:hover, .icones-filtro button.active {
-    color: var(--cor-verde-iftm);
-    box-shadow: inset 2px 2px 4px var(--cor-sombra-escura),
-                inset -2px -2px 4px var(--cor-sombra-clara);
-}
-
+/* --- Estilo de Botões --- */
 .botoes-acao-container {
     display: flex;
     gap: 1.5rem;
 }
-
 
 .botoes-acao-container > button,
 .botoes-acao-container > a {
@@ -225,17 +117,221 @@ form {
     color: var(--cor-texto-primario);
 }
 
-/* --- 4. Estilo dos Resultados da Busca --- */
+.botao-principal {
+    background-color: var(--cor-verde-iftm);
+    color: white;
+    box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
+}
+
+.botao-principal:hover {
+    background-color: #298a3a;
+}
+
+
+/* ==================================================================== */
+/* --- 3. ESTILOS ESPECÍFICOS DA PÁGINA HOME ---                      */
+/* ==================================================================== */
+
+.cartao-apresentacao {
+    max-width: 800px;
+    padding: 1.5rem 3rem;
+}
+
+.cartao-apresentacao .coluna-texto {
+    flex: 0 0 75%;
+    padding-right: 2rem;
+    text-align: center;
+}
+
+.cartao-apresentacao .coluna-logo {
+    flex: 0 0 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cartao-apresentacao .coluna-logo img {
+    max-width: 200px;
+    height: auto;
+}
+
+.cartao-apresentacao .coluna-texto h1 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--cor-verde-iftm);
+    margin-bottom: 0.5rem;
+}
+
+.cartao-apresentacao .slogan {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--cor-verde-iftm);
+    margin-bottom: 1rem;
+}
+
+.cartao-apresentacao p {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 70ch;
+    margin: 0 auto;
+}
+
+.cartao-busca {
+    max-width: 800px;
+    padding: 2.5rem 3rem; /* Padroniza o padding com os outros cartões */
+    flex-direction: column;
+    gap: 2rem; 
+}
+
+.home .barra-busca-container { /* Seletor mais específico para a home */
+    width: 100%;
+}
+
+.barra-busca-container {
+    position: relative; /* Contexto para a lista de autocomplete */
+    display: flex;
+    align-items: center;
+    background-color: var(--cor-fundo); 
+    border-radius: 50px;
+    padding: 0 1.5rem; /* Remove padding vertical para não interferir no posicionamento absoluto */
+    min-height: 72px;  /* Controla a altura para alinhar itens verticalmente */
+    border: 1px solid var(--cor-sombra-escura);
+    transition: all 0.3s ease-out; /* Anima todas as propriedades, incluindo border-radius */
+}
+
+/* Estilo para quando a barra de busca está em foco (controlado por JS) */
+.barra-busca-container.focused {
+    /* Achata os cantos inferiores da pílula para se conectar com a lista */
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none; /* Remove a borda inferior para uma junção perfeita */
+}
+
+.barra-busca-container:focus-within {
+    /* Restaura o efeito de profundidade na pílula quando está em foco */
+    box-shadow: inset 4px 4px 8px var(--cor-sombra-escura), 
+                inset -4px -4px 8px var(--cor-sombra-clara);
+}
+
+.barra-busca-container .icone-principal {
+    font-size: 1.2rem;
+    color: var(--cor-texto-secundario);
+    margin-right: 1rem;
+}
+
+.input-wrapper {
+    flex-grow: 1;     /* Faz o wrapper ocupar o espaço disponível */
+    display: flex;
+    align-self: stretch; /* Força o wrapper a ocupar toda a altura do container */
+    align-items: center; /* Centraliza o input verticalmente dentro do wrapper */
+}
+
+.barra-busca-container input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: var(--cor-texto-primario);
+}
+
+.icones-filtro {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: 1rem;
+}
+
+.filtro-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: var(--cor-fundo);
+    border: none;
+    border-radius: 50%;
+    color: var(--cor-texto-secundario);
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 8px var(--cor-sombra-escura),
+                -4px -4px 8px var(--cor-sombra-clara);
+    transition: all 0.2s ease-in-out;
+}
+
+.filtro-btn:hover {
+    color: var(--cor-texto-primario);
+}
+
+.filtro-btn.active,
+.filtro-btn:active {
+    box-shadow: inset 2px 2px 5px var(--cor-sombra-escura),
+                inset -2px -2px 5px var(--cor-sombra-clara);
+    color: var(--cor-verde-iftm);
+}
+
 #secaoSemResultados {
     justify-content: center;
-    padding: 1.5rem;
-    margin-top: 3rem;
+    max-width: 800px;
+    padding: 1.5rem; /* Padding menor para uma mensagem simples */
+}
+
+/* --- Componente de Autocomplete --- */
+.autocomplete-list {
+    /* Estado inicial: colapsado e invisível */
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    /* Define a animação */
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-in-out;
+
+    position: absolute;
+    background-color: var(--cor-fundo);
+    
+    /* A borda superior é removida para se juntar à pílula */
+    border: none; /* A moldura é removida, a borda é definida apenas pela sombra */
+    
+    z-index: 99;
+    top: 100%; /* Posiciona logo abaixo do container da barra de busca */
+    left: 0;
+    right: 0;
+    margin-top: -1px; /* Puxa a lista para cima para cobrir a borda inferior da pílula */
+    
+    /* O arredondamento corresponde ao da pílula quando focada */
+    border-radius: 0 0 50px 50px; 
+    /* A sombra é removida daqui, pois o container principal (.barra-busca-container) já a fornece,
+       criando a ilusão de um painel único e contínuo. */
+    overflow: hidden; /* Garante que os itens internos respeitem o border-radius */
+    padding: 8px; /* Espaçamento interno para os itens */
+}
+
+.autocomplete-item {
+    padding: 12px 24px;
+    cursor: pointer;
+    color: var(--cor-texto-primario);
+    font-size: 1rem;
+    border-radius: 42px; /* Arredondamento para combinar com a pílula */
+    transition: all 0.2s ease-in-out;
+}
+
+.autocomplete-item:hover {
+    box-shadow: inset 2px 2px 5px var(--cor-sombra-escura),
+                inset -2px -2px 5px var(--cor-sombra-clara);
+    color: var(--cor-verde-iftm);
+}
+
+.autocomplete-list.active {
+    max-height: 300px; /* Altura máxima que a lista pode atingir */
+    opacity: 1;
+    visibility: visible;
 }
 
 .container-resultados {
-    margin-top: 3rem;
+    max-width: 800px;
+    /* A margem superior é agora controlada pelo 'gap' do container 'main' */
     flex-direction: column;
     align-items: stretch;
+    /* As propriedades de fundo, sombra e padding são herdadas da classe .cartao */
 }
 
 .item-resultado {
@@ -252,60 +348,269 @@ form {
     padding-bottom: 0;
 }
 
-.info-detalhada {
-    flex: 1;
+.info-detalhada { flex: 1; }
+.linha-info { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+.linha-info i { font-size: 1.1rem; color: var(--cor-texto-secundario); width: 20px; text-align: center; }
+.linha-info p { margin: 0; font-size: 1rem; }
+/* Estilo especial para o título do livro quando ele está destacado (em negrito) */
+.info-titulo p strong { 
+    font-family: 'Kanit', sans-serif; 
+    font-size: 1.2rem; 
+    color: var(--cor-texto-primario); 
 }
+.descricao-detalhada, .bibliografia-detalhada { font-size: 0.9rem; line-height: 1.6; color: var(--cor-texto-secundario); padding-left: 36px; margin-bottom: 1rem; }
+.capa-livro img { width: 120px; height: auto; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
 
-.linha-info {
+
+/* ==================================================================== */
+/* --- 4. ESTILOS ESPECÍFICOS DA PÁGINA DE GERENCIAMENTO ---          */
+/* ==================================================================== */
+
+.gerenciar-container {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1400px;
 }
 
-.linha-info i {
-    font-size: 1.1rem;
-    color: var(--cor-texto-secundario);
-    width: 20px;
+.cartao-titulo {
     text-align: center;
+    padding: 2.5rem 3rem; /* Padroniza o padding com o .cartao base */
+    max-width: 800px; /* Alinha a largura com os outros cartões */
+    flex-direction: column; /* Para empilhar h1 e p */
 }
 
-.linha-info p {
-    margin: 0;
-    font-size: 1rem;
-}
-
-.linha-info p strong {
+.cartao-titulo h1 {
     font-family: 'Kanit', sans-serif;
-    font-size: 1.2rem;
-    color: var(--cor-texto-primario);
+    color: var(--cor-verde-iftm); /* Cor verde aplicada */
+    font-size: 2.5rem;
+    margin: 0;
 }
 
-.descricao-detalhada, .bibliografia-detalhada {
-    font-size: 0.9rem;
-    line-height: 1.6;
+.cartao-titulo p {
+    margin: 0.5rem 0 0 0;
+    font-size: 1.1rem;
+}
+
+.filtro-select {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
     color: var(--cor-texto-secundario);
-    padding-left: 36px;
-    margin-bottom: 1rem;
+    background-color: var(--cor-fundo);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 3px 3px 6px var(--cor-sombra-escura), -3px -3px 6px var(--cor-sombra-clara);
+    margin-left: 1rem;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none; /* Propriedade padrão para compatibilidade */
 }
 
-.capa-livro img {
-    width: 120px;
-    height: auto;
+.cartao-gerenciar {
+    max-width: 800px; /* Alinha a largura com os outros cartões */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 2.5rem 3rem; /* Padroniza o padding com o .cartao base */
+}
+
+.cartao-gerenciar h2 {
+    font-family: 'Kanit', sans-serif;
+    color: var(--cor-texto-primario);
+    font-size: 1.5rem;
+    margin: 0;
+    width: 100%;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Formulário de Gerenciamento */
+.gerenciar-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 4rem; /* Aumenta o espaçamento horizontal para alinhar os campos */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group.grid-span-2 {
+    grid-column: span 2;
+}
+
+.gerenciar-form label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--cor-texto-primario);
+    background-color: var(--cor-fundo);
+    border: none;
+    border-radius: 12px;
+    box-shadow: inset 3px 3px 6px var(--cor-sombra-escura),
+                inset -3px -3px 6px var(--cor-sombra-clara);
+}
+
+.form-input:focus {
+    outline: 2px solid var(--cor-verde-iftm);
+    outline-offset: 2px;
+}
+
+.form-buttons {
+    margin-top: 1rem;
+    justify-content: flex-start;
+}
+
+/* Tabela de Livros */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+#livrosTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#livrosTable th, #livrosTable td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+#livrosTable th {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--cor-texto-secundario);
+}
+
+#livrosTable tbody tr:hover {
+    background-color: #e9eef5;
+}
+
+.botao-acao {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    margin: 0 0.2rem;
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    width: 36px;
+    height: 36px;
+    transition: all 0.2s ease-in-out;
+}
+.botao-acao.editar { color: #3b82f6; }
+.botao-acao.excluir { color: #ef4444; }
+.botao-acao:hover { background-color: var(--cor-sombra-escura); }
+
+/* Janela Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-/* --- EFEITO DE CLIQUE (TEXTO VERDE) --- */
+.modal-content {
+    flex-direction: column;
+    width: 90%;
+    max-width: 700px;
+    animation: zoomIn 0.3s ease-out;
+    box-shadow: none;
+}
+
+.modal-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+    font-family: 'Kanit', sans-serif;
+    color: var(--cor-texto-primario);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--cor-texto-secundario);
+}
+
+.modal-body {
+    padding-top: 1.5rem;
+    width: 100%;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+
+/* ==================================================================== */
+/* --- 5. EFEITO DE CLIQUE E ESTADOS ATIVOS ---                       */
+/* ==================================================================== */
 .navegacao-principal a:active,
 .icones-filtro button:active,
-.botoes-acao-container > *:active {
+.botoes-acao-container > *:active,
+.botao-acao:active {
     color: var(--cor-verde-iftm);
 }
 
-/* --- REGRAS PARA TELAS MENORES (CELULARES) --- */
-@media (max-width: 860px) {
+/* ==================================================================== */
+/* --- 6. REGRAS PARA TELAS MENORES (RESPONSIVIDADE) ---              */
+/* ==================================================================== */
+@media (max-width: 1024px) { /* Aumentando o breakpoint para tablets */
+    .gerenciar-container {
+        max-width: 100%;
+    }
+    
+    .layout-dois-cards {
+        flex-direction: column;
+    }
+    
+    .coluna-principal, .coluna-formulario {
+        flex: 1;
+    }
+}
 
+@media (max-width: 860px) {
     body {
         padding: 1rem; 
     }
@@ -316,6 +621,10 @@ form {
         gap: 1rem;
     }
 
+    .cartao-apresentacao, .cartao-busca, .container-resultados, .cartao-gerenciar {
+        max-width: 100%;
+    }
+
     .cartao-apresentacao {
         flex-direction: column;
         padding: 1.5rem;
@@ -323,20 +632,20 @@ form {
         text-align: center;
     }
     
-    .coluna-texto {
+    .cartao-apresentacao .coluna-texto {
         flex: 1; 
         padding-right: 0;
     }
     
-    .coluna-logo {
+    .cartao-apresentacao .coluna-logo {
         flex: 1;
     }
 
-    .coluna-texto h1 {
+    .cartao-apresentacao .coluna-texto h1 {
         font-size: 2rem;
     }
 
-    .coluna-texto .slogan {
+    .cartao-apresentacao .slogan {
         font-size: 1.1rem;
     }
 
@@ -345,23 +654,22 @@ form {
         gap: 1rem;
         padding: 1rem 1.5rem;
     }
-
-    .barra-busca-container input {
-        min-width: 0;
-    }
     
-    .icones-filtro {
-        margin-left: 0;
-        margin: 0 auto;
-    }
+    .barra-busca-container input { min-width: 0; }
+    .icones-filtro { margin-left: 0; margin: 0 auto; }
 
     .botoes-acao-container {
         flex-direction: column;
         width: 90%;
         align-items: stretch;
     }
+    .botoes-acao-container.form-buttons {
+        flex-direction: row; /* Mantém botões do form lado a lado se couber */
+        width: 100%;
+        justify-content: flex-start;
+    }
 
-    .container-resultados {
+    .container-resultados, .cartao-gerenciar {
         padding: 1rem;
     }
 
@@ -376,5 +684,13 @@ form {
 
     .descricao-detalhada, .bibliografia-detalhada {
         padding-left: 0;
+    }
+    
+    .gerenciar-form .form-grid {
+        grid-template-columns: 1fr; /* Coluna única no formulário */
+    }
+
+    .form-group.grid-span-2 {
+        grid-column: span 1;
     }
 }

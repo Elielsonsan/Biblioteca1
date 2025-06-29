@@ -33,18 +33,37 @@ public class LivroController {
     @Autowired // Injeta automaticamente uma instância de LivroRepository
     private LivroService livroService;
 
-    // Endpoint para buscar todos os livros ou filtrar por termo (GET /api/livros ou /api/livros?search=termo)
+    // Endpoint para buscar todos os livros ou filtrar por termo, título, autor ou
+    // ISBN
     @GetMapping
     public ResponseEntity<List<Livro>> getAllLivros(
-            @RequestParam(name = "search", required = false) String termoBusca) {
+            @RequestParam(name = "termo", required = false) String termoBusca,
+            @RequestParam(name = "titulo", required = false) String titulo,
+            @RequestParam(name = "autor", required = false) String autor,
+            @RequestParam(name = "isbn", required = false) String isbn) {
         List<Livro> livros;
-        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
-            // Você precisará adicionar este método ao LivroService e LivroRepository
+        if (titulo != null && !titulo.trim().isEmpty()) {
+            livros = livroService.buscarPorTituloContendo(titulo);
+        } else if (autor != null && !autor.trim().isEmpty()) {
+            livros = livroService.buscarPorAutor(autor);
+        } else if (isbn != null && !isbn.trim().isEmpty()) {
+            // Este método precisa ser criado no service e repository
+            livros = livroService.buscarPorIsbnContendo(isbn);
+        } else if (termoBusca != null && !termoBusca.trim().isEmpty()) {
             livros = livroService.buscarLivrosPorTermoGeral(termoBusca);
         } else {
             livros = livroService.buscarTodos();
         }
         return ResponseEntity.ok(livros);
+    }
+
+    // Endpoint para obter sugestões de autocomplete
+    @GetMapping("/sugestoes")
+    public ResponseEntity<List<String>> getSugestoes(
+            @RequestParam("termo") String termo,
+            @RequestParam(name = "filtro", defaultValue = "termo") String filtro) {
+        List<String> sugestoes = livroService.buscarSugestoes(termo, filtro);
+        return ResponseEntity.ok(sugestoes);
     }
 
     // Endpoint para buscar um livro por ID (GET /api/livros/{id})

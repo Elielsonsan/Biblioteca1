@@ -27,7 +27,7 @@ public class Livro implements Serializable {
     private String titulo;
 
     @Column(nullable = false) // Autor geralmente é obrigatório
-    private String author;
+    private String autor;
 
     // Adicionado campo para ISBN
     @Column(nullable = false, unique = true) // ISBN é obrigatório e único
@@ -37,6 +37,9 @@ public class Livro implements Serializable {
 
     // Adicionado campo para Edicao (Integer)
     private Integer edicao;
+
+    // Adicionado campo para a URL da capa do livro
+    private String capaUrl;
 
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false) // Nome da coluna de chave estrangeira
@@ -55,14 +58,15 @@ public class Livro implements Serializable {
     // Construtor com TODOS os argumentos (para facilitar a criação de objetos)
     // (Incluindo ISBN e Edição)
     // O ID é gerado automaticamente, então não precisa ser passado
-    public Livro(Long id, String titulo, String author, String isbn, Integer anoPublicacao, Integer edicao,
-            Categoria categoria, Estante estante) {
+    public Livro(Long id, String titulo, String autor, String isbn, Integer anoPublicacao, Integer edicao,
+            String capaUrl, Categoria categoria, Estante estante) {
         this.id = id;
         this.titulo = titulo; // Atribui o título recebido
-        this.author = author;
+        this.autor = autor;
         this.isbn = isbn; // Atribui o isbn recebido
         this.anoPublicacao = anoPublicacao;
         this.edicao = edicao; // Atribui a edição recebida
+        this.capaUrl = capaUrl;
         this.categoria = categoria; // Atribui o objeto Categoria recebido
         this.estante = estante; // Atribui o objeto Estante recebido
     }
@@ -85,12 +89,12 @@ public class Livro implements Serializable {
         this.titulo = titulo;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getAutor() {
+        return autor;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setAutor(String autor) {
+        this.autor = autor;
     }
 
     public String getIsbn() {
@@ -131,6 +135,14 @@ public class Livro implements Serializable {
 
     public void setEstante(Estante estante) {
         this.estante = estante;
+    }
+
+    public String getCapaUrl() {
+        return capaUrl;
+    }
+
+    public void setCapaUrl(String capaUrl) {
+        this.capaUrl = capaUrl;
     }
 
     // --- equals() e hashCode() ---

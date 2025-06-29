@@ -103,21 +103,21 @@ public class DataLoader implements CommandLineRunner {
                                 && estante4Salva != null) {
 
                         Livro l1 = new Livro(null, "O Senhor dos Anéis", "J.R.R. Tolkien", "1234567890", 1954, 5,
-                                        fantasiaSalva, estante1Salva);
+                                        "/images/capa-placeholder.png", fantasiaSalva, estante1Salva);
                         Livro l2 = new Livro(null, "Harry Potter e a Pedra Filosofal", "J.K. Rowling", "0987654321",
-                                        1997, 3, fantasiaSalva, estante2Salva);
-                        Livro l3 = new Livro(null, "O Hobbit", "J.R.R. Tolkien", "1122334455", 1937, 4, fantasiaSalva,
-                                        estante3Salva);
+                                        1997, 3, "/images/capa-placeholder.png", fantasiaSalva, estante2Salva);
+                        Livro l3 = new Livro(null, "O Hobbit", "J.R.R. Tolkien", "1122334455", 1937, 4,
+                                        "/images/capa-placeholder.png", fantasiaSalva, estante3Salva);
                         Livro l4 = new Livro(null, "Dom Casmurro", "Machado de Assis", "2233445566", 1899, 2,
-                                        romanceSalvo, estante1Salva);
+                                        "/images/capa-placeholder.png", romanceSalvo, estante1Salva);
                         Livro l5 = new Livro(null, "A Moreninha", "Joaquim Manuel de Macedo", "3344556677", 1844, 1,
-                                        romanceSalvo, estante2Salva);
+                                        "/images/capa-placeholder.png", romanceSalvo, estante2Salva);
                         Livro l6 = new Livro(null, "O Pequeno Príncipe", "Antoine de Saint-Exupéry", "4455667788", 1943,
-                                        6, ficcaoSalva, estante3Salva); // Use ficcaoSalva
+                                        6, "/images/capa-placeholder.png", ficcaoSalva, estante3Salva); // Use ficcaoSalva
                         Livro l7 = new Livro(null, "A Revolução dos Bichos", "George Orwell", "5566778899", 1945, 2,
-                                        ficcaoSalva, estante1Salva); // Use ficcaoSalva
+                                        "/images/capa-placeholder.png", ficcaoSalva, estante1Salva); // Use ficcaoSalva
                         Livro l8 = new Livro(null, "1984", "George Orwell", "6677889900", 1949, 3,
-                                        ficcaoSalva, estante2Salva);
+                                        "/images/capa-placeholder.png", ficcaoSalva, estante2Salva);
                         // Exemplo de livro usando a nova estante e uma categoria existente
                         // Supondo que categoria "Romance" (ID 4 pelo DataLoader) e "Seção Especial -
                         // TI" (ID 4 pelo DataLoader)

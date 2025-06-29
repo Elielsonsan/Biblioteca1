@@ -1,152 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informações da Biblioteca</title>
-    <style>
-        /* Estilos CSS */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        #user-info {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            /* Adicionado para melhor visualização */
-            margin: 20px auto;
-            /* Centraliza na página */
-        }
-
-        h1,
-        h2 {
-            color: #333;
-        }
-
-        #user-details,
-        #user-address,
-        #user-category,
-        #user-relatives {
-            margin-bottom: 20px;
-            color: blue;
-        }
-
-        #user-details p,
-        #user-address p,
-        #user-category p,
-        #user-relatives p {
-            margin: 5px 0;
-        }
-
-        .error {
-            color: red;
-            font-weight: bold;
-        }
-
-        .input-container {
-            margin-bottom: 20px;
-            display: flex;
-            /* Para alinhar input e botão */
-            align-items: center;
-            gap: 10px;
-            /* Espaçamento entre os elementos */
-        }
-
-        .input-container label {
-            display: block;
-            margin-bottom: 0;
-            /* Ajustado */
-            font-weight: bold;
-            white-space: nowrap;
-            /* Impede quebra de linha no label */
-        }
-
-        .input-container input {
-            flex-grow: 1;
-            /* Permite que o input ocupe o espaço restante */
-            padding: 8px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .input-container button {
-            margin-top: 0;
-            /* Ajustado */
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .input-container button:hover {
-            background-color: #0056b3;
-        }
-
-        hr {
-            border: 0;
-            height: 1px;
-            background: #ccc;
-            margin: 15px 0;
-        }
-
-        /* Estilos para a barra de navegação */
-        nav {
-            background-color: #333;
-            /* Cor de fundo da barra de navegação */
-            padding: 10px 0;
-            text-align: center;
-            margin-bottom: 20px;
-            /* Espaço abaixo da navegação */
-        }
-
-        nav a {
-            color: white;
-            /* Cor do texto dos links */
-            margin: 0 15px;
-            /* Espaçamento entre os links */
-            text-decoration: none;
-            /* Remove sublinhado padrão */
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-            /* Adiciona sublinhado ao passar o mouse */
-        }
-    </style>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
-    <nav>
-        <a href="/categorias.html">Categorias</a>
-        <a href="/livros.html">Livros</a>
-        <a href="/estante.html">Estante</a>
-    </nav>
-    <div id="user-info">
-        <h1>Informações do Usuário da Biblioteca</h1>
-        <!-- Campo para digitar o ID do cliente/usuário -->
-        <div class="input-container">
-            <label for="client-id">Digite o ID do Usuário:</label>
-            <input type="number" id="client-id" placeholder="Ex: 1" min="1">
-            <button onclick="fetchData()">Buscar</button>
-        </div>
-        <!-- Área para exibir os dados do cliente/usuário -->
-        <div id="user-details"></div>
-        <h2>Endereço</h2>
-        <div id="user-address"></div>
-        <h2>Parentes</h2>
-        <div id="user-relatives"></div>
-    </div>
+    <main>
+        <section class="cartao cartao-gerenciar">
+            <h2>Informações do Usuário da Biblioteca</h2>
+            <!-- Campo para digitar o ID do cliente/usuário -->
+            <div class="gerenciar-form">
+                <div class="form-group">
+                    <label for="client-id">Digite o ID do Usuário:</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="number" id="client-id" placeholder="Ex: 1" min="1" class="form-input">
+                        <button onclick="fetchData()" class="botao-secundario">Buscar</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Área para exibir os dados do cliente/usuário -->
+            <div id="user-details" class="info-cliente"></div>
+            <h2 id="endereco-title" style="display: none;">Endereço</h2>
+            <div id="user-address" class="info-cliente"></div>
+            <h2 id="parentes-title" style="display: none;">Parentes</h2>
+            <div id="user-relatives" class="info-cliente"></div>
+        </section>
+    </main>
 
     <script>
         // Lógica JavaScript
@@ -157,6 +40,8 @@
             document.getElementById('user-details').innerHTML = "";
             document.getElementById('user-address').innerHTML = "";
             document.getElementById('user-relatives').innerHTML = "";
+            document.getElementById('endereco-title').style.display = 'none';
+            document.getElementById('parentes-title').style.display = 'none';
 
             if (!clientIdValue.trim()) {
                 alert("Por favor, digite o ID do Usuário.");
@@ -174,7 +59,7 @@
 
             // Monta a URL com o ID validado.
             // A estrutura da URL está correta para o seu ClientController.
-            const url = `http://localhost:8080/clients/${clientIdAsNumber}`;
+            const url = `/clients/${clientIdAsNumber}`;
             console.log("ID do Cliente (numérico):", clientIdAsNumber); // Adicione esta linha para depuração
             console.log("URL Gerada:", url); // Adicione esta linha para depuração
 
@@ -205,6 +90,7 @@
                 const userDetails = document.getElementById('user-details');
                 userDetails.innerHTML = `
                     <p><strong>Nome:</strong> ${jsonData.name}</p>
+                    <p><strong>Email:</strong> ${jsonData.email}</p>
                     <p><strong>CPF:</strong> ${jsonData.cpf}</p>
                     <p><strong>Renda:</strong> R$ ${typeof jsonData.income === 'number' ? jsonData.income.toFixed(2) : 'N/A'}</p>
                     <p><strong>Data de Nascimento:</strong> ${new Date(jsonData.birthDate).toLocaleDateString()}</p>
@@ -214,7 +100,8 @@
                 // Exibir endereço do usuário (se tiver relacionamento) [12]
                 const userAddress = document.getElementById('user-address');
                 // Ajustado para verificar os campos de endereço diretamente em jsonData
-                if (jsonData.street || jsonData.city || jsonData.state || jsonData.zipCode) { 
+                if (jsonData.street || jsonData.city || jsonData.state || jsonData.zipCode) {
+                    document.getElementById('endereco-title').style.display = 'block';
                     userAddress.innerHTML = `
                         <p><strong>Rua:</strong> ${jsonData.street || 'N/A'}</p>
                         <p><strong>Cidade:</strong> ${jsonData.city || 'N/A'}</p> 
@@ -232,6 +119,7 @@
                 // (que foi removido neste diff) pode ser usado.
                 // Atualmente, a div user-relatives permanecerá vazia ou você pode remover
                 // o elemento <h2>Parentes</h2> e <div id="user-relatives"></div> completamente do HTML.
+                document.getElementById('parentes-title').style.display = 'block';
                 userRelatives.innerHTML = "<p>Funcionalidade de parentes desativada.</p>"; // Ou remova a div
             }
 

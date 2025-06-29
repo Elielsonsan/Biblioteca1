@@ -12,8 +12,9 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 </head>
-<body>
+<body class="home">
 
     <nav class="navegacao-principal">
         <ul>
@@ -41,23 +42,27 @@
             <section class="cartao cartao-busca">
                 <div class="barra-busca-container">
                     <i class="fa-solid fa-magnifying-glass icone-principal"></i>                    
-                    <input type="text" id="termoBusca" name="termo" placeholder="Ex: Paulo Freire; Conceição Evaristo">
+                    <div class="input-wrapper">
+                        <input type="text" id="termoBusca" name="termo" placeholder="Ex: Paulo Freire; Conceição Evaristo">
+                    </div>
                     <div class="icones-filtro">
                         <!-- Funcionalidade de filtro pode ser implementada no backend -->
-                        <button type="button" title="Buscar por Autor"><i class="fa-solid fa-user"></i></button>
-                        <button type="button" title="Buscar por Título"><i class="fa-solid fa-book-open"></i></button>
-                        <button type="button" title="Buscar por ISBN"><i class="fa-solid fa-barcode"></i></button>
+                        <button type="button" class="filtro-btn" data-filter="autor" title="Buscar por Autor"><i class="fa-solid fa-user"></i></button>
+                        <button type="button" class="filtro-btn" data-filter="titulo" title="Buscar por Título"><i class="fa-solid fa-book-open"></i></button>
+                        <button type="button" class="filtro-btn" data-filter="isbn" title="Buscar por ISBN"><i class="fa-solid fa-barcode"></i></button>
                     </div>
+                    <!-- Container para as sugestões de autocomplete (movido para cá para o posicionamento correto) -->
+                    <div id="autocomplete-list" class="autocomplete-list"></div>
                 </div>
                 <div class="botoes-acao-container">
                     <button type="submit" class="botao-secundario">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <span>Buscar</span>
                     </button>
-                    <a th:href="@{/}" class="botao-secundario" style="text-decoration: none;">
+                    <button type="button" id="limparBuscaBtn" class="botao-secundario">
                         <i class="fa-solid fa-broom"></i>
                         <span>Limpar</span>
-                    </a>
+                    </button>
                     <!-- O botão de busca avançada levar a outra página -->
                     <a th:href="@{/busca-avancada}" class="botao-secundario" style="text-decoration: none;">
                         <i class="fa-solid fa-list-check"></i>
@@ -85,16 +90,27 @@
     <script>
         const form = document.getElementById('homeSearchForm');
         const termoBuscaInput = document.getElementById('termoBusca');
+        const autocompleteList = document.getElementById('autocomplete-list');
 
         const secaoResultados = document.getElementById('secaoResultados');
         const listaResultados = document.getElementById('listaResultados');
         const secaoSemResultados = document.getElementById('secaoSemResultados');
+        const buscaContainer = document.querySelector('.barra-busca-container');
+        const limparBuscaBtn = document.getElementById('limparBuscaBtn');
         const tituloResultados = document.getElementById('tituloResultados');
 
-        const filterButtons = document.querySelectorAll('.filtro-btn');
-        let activeFilter = 'search'; // Filtro padrão é a busca geral
+        const filterButtons = document.querySelectorAll('.icones-filtro .filtro-btn');
+        let activeFilter = 'termo'; // Filtro padrão é a busca geral pelo name do input
+        let isSelectingSuggestion = false; // Flag para controlar o evento de input ao clicar na sugestão
 
         const livrosApiUrl = '/api/livros';
+        const sugestoesApiUrl = '/api/livros/sugestoes';
+
+        // Listener para o novo botão de limpar
+        limparBuscaBtn.addEventListener('click', () => {
+            resetarEstadoDaBusca();
+            limparApenasListaDeResultados();
+        });
 
         // Adiciona listeners para os botões de filtro
         filterButtons.forEach(button => {
@@ -104,7 +120,7 @@
                 // Se o botão clicado já está ativo, desativa todos (volta para busca geral)
                 if (button.classList.contains('active')) {
                     button.classList.remove('active');
-                    activeFilter = 'search';
+                    activeFilter = 'termo';
                 } else {
                     // Remove a classe 'active' de todos os botões
                     filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -112,30 +128,118 @@
                     button.classList.add('active');
                     activeFilter = filterType;
                 }
+                termoBuscaInput.focus(); // Foca no input para o usuário continuar digitando
             });
         });
 
         form.addEventListener('submit', (event) => {
             event.preventDefault(); // Impede o recarregamento da página
             const termo = termoBuscaInput.value.trim();
-            if (termo) {
+            if (termo) { 
+                autocompleteList.classList.remove('active'); // Esconde a lista ao submeter
                 // Passa o filtro ativo para a função de busca
                 realizarBusca(termo, activeFilter);
             } else {
-                // Se a busca for vazia, limpa os resultados
-                limparResultados();
+                // Se a busca for submetida vazia, reseta tudo
+                resetarEstadoDaBusca();
+                limparApenasListaDeResultados();
             }
         });
 
-        function limparResultados() {
+        // Listener para o input de busca para acionar o autocomplete
+        termoBuscaInput.addEventListener('input', async () => {
+            // Se o evento de input foi acionado por um clique na sugestão,
+            // reseta a flag e ignora esta execução para não reabrir a lista.
+            if (isSelectingSuggestion) {
+                isSelectingSuggestion = false;
+                return;
+            }
+
+            const termo = termoBuscaInput.value.trim();
+
+            // Controla a animação de expansão da pílula
+            if (termo.length > 0) {
+                buscaContainer.classList.add('focused');
+            } else {
+                buscaContainer.classList.remove('focused');
+            }
+
+            if (termo.length < 2) { // Só busca sugestões com 2+ caracteres
+                autocompleteList.classList.remove('active');
+                return;
+            }
+
+            try {
+                const url = `${sugestoesApiUrl}?termo=${encodeURIComponent(termo)}&filtro=${activeFilter}`;
+                const response = await fetch(url);
+                if (!response.ok) return;
+                const sugestoes = await response.json();
+                renderizarSugestoes(sugestoes);
+            } catch (error) {
+                console.error('Erro ao buscar sugestões:', error);
+                autocompleteList.classList.remove('active');
+            }
+        });
+
+        // Adiciona a classe 'focused' quando o input ganha foco, mas apenas se já houver texto
+        termoBuscaInput.addEventListener('focus', () => {
+            if (termoBuscaInput.value.trim().length > 0) {
+                buscaContainer.classList.add('focused');
+            }
+        });
+
+        // Remove a classe 'focused' e esconde a lista quando o foco é perdido
+        termoBuscaInput.addEventListener('blur', () => {
+            // Usa um pequeno delay para permitir que cliques em itens da lista ou filtros sejam processados
+            setTimeout(() => {
+                if (!buscaContainer.contains(document.activeElement)) {
+                    buscaContainer.classList.remove('focused');
+                    autocompleteList.classList.remove('active');
+                }
+            }, 150); // 150ms é um tempo seguro
+        });
+
+        function renderizarSugestoes(sugestoes) {
+            autocompleteList.innerHTML = '';
+            if (sugestoes.length === 0) {
+                autocompleteList.classList.remove('active');
+                return;
+            }
+
+            sugestoes.forEach(sugestao => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.textContent = sugestao;
+                item.addEventListener('click', () => {
+                    isSelectingSuggestion = true; // Ativa a flag para ignorar o próximo evento de 'input'
+                    termoBuscaInput.value = sugestao; // Preenche o input com a sugestão clicada
+                    autocompleteList.classList.remove('active'); // Esconde a lista
+                    // Chama a função de busca diretamente, garantindo que o filtro ativo seja usado.
+                    realizarBusca(sugestao, activeFilter);
+                });
+                autocompleteList.appendChild(item);
+            });
+            autocompleteList.classList.add('active'); // Ativa a lista para mostrar com animação
+        }
+
+        function limparApenasListaDeResultados() {
             listaResultados.innerHTML = '';
             secaoResultados.style.display = 'none';
             secaoSemResultados.style.display = 'none';
+        }
+
+        function resetarEstadoDaBusca() {
             filterButtons.forEach(btn => btn.classList.remove('active'));
-            activeFilter = 'search';
+            autocompleteList.classList.remove('active');
+            buscaContainer.classList.remove('focused');
+            termoBuscaInput.value = '';
+            activeFilter = 'termo';
         }
 
         async function realizarBusca(termo, filtro) {
+            // Garante que a lista de sugestões seja fechada ao iniciar uma busca
+            autocompleteList.classList.remove('active');
+
             // Constrói a URL dinamicamente com base no filtro ativo
             const url = `${livrosApiUrl}?${filtro}=${encodeURIComponent(termo)}`;
 
@@ -143,30 +247,45 @@
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Erro na busca: ${response.status}`);
                 const livros = await response.json();
-                renderizarResultados(livros, termo);
+                renderizarResultados(livros, termo, filtro);
             } catch (error) {
                 console.error('Erro ao realizar busca:', error);
                 alert('Ocorreu um erro ao buscar os livros.');
             }
         }
 
-        function renderizarResultados(livros, termo) {
-            limparResultados();
+        function renderizarResultados(livros, termo, filtro) {
+            limparApenasListaDeResultados();
 
             if (livros && livros.length > 0) {
-                tituloResultados.textContent = `Resultados da busca por "${termo}"`;
+                let tipoBusca = "termo geral";
+                if (filtro === 'autor') tipoBusca = 'autor';
+                if (filtro === 'titulo') tipoBusca = 'título';
+                if (filtro === 'isbn') tipoBusca = 'ISBN';
+
+                tituloResultados.textContent = `Resultados para ${tipoBusca} "${termo}"`;
+
+                const placeholderCapa = '/images/capa-placeholder.png';
                 livros.forEach(livro => {
+                    const capaSrc = livro.capaUrl && livro.capaUrl.trim() !== '' ? livro.capaUrl : placeholderCapa;
+                    
+                    // Envolve o campo da busca com <strong> para aplicar o destaque.
+                    // O filtro 'termo' (geral) e 'titulo' destacam o título.
+                    const autorHtml = (filtro === 'autor') ? `<strong>${livro.autor || 'N/A'}</strong>` : (livro.autor || 'N/A');
+                    const tituloHtml = (filtro === 'titulo' || filtro === 'termo') ? `<strong>${livro.titulo || 'N/A'}</strong>` : (livro.titulo || 'N/A');
+                    const isbnHtml = (filtro === 'isbn') ? `<strong>${livro.isbn || 'N/A'}</strong>` : (livro.isbn || 'N/A');
+
                     const itemResultado = document.createElement('div');
                     itemResultado.className = 'item-resultado';
                     itemResultado.innerHTML = `
-                        <div class="info-detalhada">
-                            <div class="linha-info"><i class="fa-solid fa-copyright" title="Autor"></i><p>${livro.author || 'N/A'}</p></div>
-                            <div class="linha-info"><i class="fa-solid fa-book" title="Título"></i><p><strong>${livro.titulo || 'N/A'}</strong></p></div>
-                            <div class="linha-info"><i class="fa-solid fa-barcode" title="ISBN"></i><p>${livro.isbn || 'N/A'}</p></div>
+                        <div class="info-detalhada"> 
+                            <div class="linha-info"><i class="fa-solid fa-copyright" title="Autor"></i><p>${autorHtml}</p></div>
+                            <div class="linha-info info-titulo"><i class="fa-solid fa-book" title="Título"></i><p>${tituloHtml}</p></div>
+                            <div class="linha-info"><i class="fa-solid fa-barcode" title="ISBN"></i><p>${isbnHtml}</p></div>
                             <div class="linha-info"><i class="fa-solid fa-tags" title="Categoria"></i><p>${livro.categoriaNome || (livro.categoria ? livro.categoria.nome : 'N/A')}</p></div>
                             <div class="linha-info"><i class="fa-solid fa-box-archive" title="Estante"></i><p>${livro.estanteNome || (livro.estante ? livro.estante.nome : 'N/A')}</p></div>
                         </div>
-                        <div class="capa-livro"><img src="/images/capa-placeholder.png" alt="Capa do Livro ${livro.titulo}"></div>
+                        <div class="capa-livro"><img src="${capaSrc}" alt="Capa do Livro ${livro.titulo}" onerror="this.onerror=null;this.src='${placeholderCapa}';"></div>
                     `;
                     listaResultados.appendChild(itemResultado);
                 });

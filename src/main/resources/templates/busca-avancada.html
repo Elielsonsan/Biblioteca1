@@ -39,33 +39,33 @@
         <section class="cartao">
             <h2>Opções de Busca</h2>
             <form id="buscaAvancadaForm">
-                <div style="margin-bottom: 1rem;">
+                <div class="form-group-busca">
                     <label for="titulo">Título:</label>
                     <input type="text" id="titulo" name="titulo" placeholder="Título do livro">
                 </div>
-                <div style="margin-bottom: 1rem;">
+                <div class="form-group-busca">
                     <label for="autor">Autor:</label>
                     <input type="text" id="autor" name="autor" placeholder="Nome do autor">
                 </div>
-                <div style="margin-bottom: 1rem;">
+                <div class="form-group-busca">
                     <label for="isbn">ISBN:</label>
                     <input type="text" id="isbn" name="isbn" placeholder="ISBN do livro">
                 </div>
-                <div style="margin-bottom: 1rem;">
+                <div class="form-group-busca">
                     <label for="categoria">Categoria:</label>
-                    <select id="categoria" name="categoria">
+                    <select id="categoria" name="categoriaId">
                         <option value="">Todas as Categorias</option>
                         <!-- Opções de categoria podem ser carregadas dinamicamente via Thymeleaf ou JS -->
                     </select>
                 </div>
-                <div style="margin-bottom: 1rem;">
+                <div class="form-group-busca">
                     <label for="estante">Estante:</label>
                     <select id="estante" name="estanteId">
                         <option value="">Todas as Estantes</option>
                         <!-- Opções de estante serão carregadas dinamicamente via JS -->
                     </select>
                 </div>
-                <div style="margin-bottom: 1rem;">
+                <div class="form-group-busca">
                     <label for="anoPublicacao">Ano de Publicação (a partir de):</label>
                     <input type="number" id="anoPublicacao" name="anoPublicacao" min="1400" max="2099" placeholder="Ex: 2000">
                 </div>
@@ -114,7 +114,7 @@
 
         // Carrega as opções dos selects quando a página é carregada
         document.addEventListener('DOMContentLoaded', () => {
-            loadOptions(categoriasApiUrl, categoriaSelect, 'Todas as Categorias');
+            loadOptions(categoriasApiUrl, categoriaSelect, 'Todas as Categorias'); // O texto é usado como placeholder
             loadOptions(estantesApiUrl, estanteSelect, 'Todas as Estantes');
         });
 
@@ -133,12 +133,20 @@
         });
 
         // Função genérica para carregar opções em um <select>
-        async function loadOptions(apiUrl, selectElement) {
+        async function loadOptions(apiUrl, selectElement, defaultOptionText) {
             try {
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error('Falha ao carregar dados da API');
                 const items = await response.json();
 
+                // Limpa opções existentes (exceto a primeira, que é o placeholder)
+                while (selectElement.options.length > 1) {
+                    selectElement.remove(1);
+                }
+                // Atualiza o texto da opção padrão, se fornecido
+                if (defaultOptionText && selectElement.options[0]) {
+                    selectElement.options[0].textContent = defaultOptionText;
+                }
                 items.forEach(item => {
                     const option = document.createElement('option');
                     option.value = item.id;
@@ -181,8 +189,10 @@
         function renderizarResultados(livros) {
             listaResultados.innerHTML = ''; // Limpa resultados anteriores
 
+            const placeholderCapa = '/images/capa-placeholder.png';
             if (livros && livros.length > 0) {
                 livros.forEach(livro => {
+                    const capaSrc = livro.capaUrl && livro.capaUrl.trim() !== '' ? livro.capaUrl : placeholderCapa;
                     const itemResultado = document.createElement('div');
                     itemResultado.className = 'item-resultado';
 
@@ -190,8 +200,8 @@
                     itemResultado.innerHTML = `
                         <div class="info-detalhada">
                             <div class="linha-info">
-                                <i class="fa-solid fa-copyright" title="Autor"></i>
-                                <p>${livro.author || 'N/A'}</p>
+                                <i class="fa-solid fa-copyright" title="Autor"></i> 
+                                <p>${livro.autor || 'N/A'}</p>
                             </div>
                             <div class="linha-info">
                                 <i class="fa-solid fa-book" title="Título"></i>
@@ -211,7 +221,7 @@
                             </div>
                         </div>
                         <div class="capa-livro">
-                            <img src="/images/capa-placeholder.png" alt="Capa do Livro ${livro.titulo}">
+                            <img src="${capaSrc}" alt="Capa do Livro ${livro.titulo}" onerror="this.onerror=null;this.src='${placeholderCapa}';">
                         </div>
                     `;
                     listaResultados.appendChild(itemResultado);
@@ -224,7 +234,5 @@
             }
         }
     </script>
-</body>
-</html>
 </body>
 </html>

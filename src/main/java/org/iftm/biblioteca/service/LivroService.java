@@ -36,4 +36,10 @@ public interface LivroService {
     List<Livro> buscarLivrosPublicadosAposAno(Integer ano); // Consulta que pode se relacionar a uma regra
 
     List<Livro> buscarLivrosPorTermoGeral(String termo); // Adicionado para busca geral
+
+    List<Livro> buscarPorIsbnContendo(String isbn);
+
+    // --- Métodos para Funcionalidades Avançadas ---
+
+    List<String> buscarSugestoes(String termo, String filtro);
 }
