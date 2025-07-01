@@ -11,6 +11,7 @@ import org.iftm.biblioteca.service.EstanteService;
 import org.iftm.biblioteca.service.exceptions.NomeDuplicadoException;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
 import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -80,7 +81,15 @@ public class EstanteServiceImpl implements EstanteService {
             throw new RegraDeNegocioException(
                     "Não é possível excluir a estante '" + estante.getNome() + "' pois ela possui livros associados.");
         }
-        estanteRepository.deleteById(id);
+        try {
+            estanteRepository.deleteById(id);
+            estanteRepository.flush(); // Força a execução do SQL para capturar a exceção aqui mesmo.
+        } catch (DataIntegrityViolationException e) {
+            // Este bloco atua como uma segunda camada de proteção caso a verificação acima falhe.
+            // Ele traduz o erro genérico do banco de dados em uma exceção de negócio clara.
+            throw new RegraDeNegocioException(
+                    "Não é possível excluir a estante '" + estante.getNome() + "' pois ela possui livros associados.");
+        }
     }
 
     @Override

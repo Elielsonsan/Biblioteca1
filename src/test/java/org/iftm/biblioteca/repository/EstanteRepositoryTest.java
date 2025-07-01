@@ -24,9 +24,8 @@ class EstanteRepositoryTest {
     private Estante estante1;
     private Estante estante2;
 
-    @SuppressWarnings("unused") // Suprime o aviso da IDE, pois o JUnit usa este método
     @BeforeEach // Roda antes de cada @Test
-    void setUp() {
+    protected void setUp() {
         // Cria e persiste algumas estantes para os testes
         // Usa o construtor (Long id, String nome) que corrigimos anteriormente
         estante1 = new Estante(null, "Corredor A - Prateleira 1");

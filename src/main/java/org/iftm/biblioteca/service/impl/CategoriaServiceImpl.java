@@ -14,6 +14,7 @@ import org.iftm.biblioteca.service.exceptions.NomeDuplicadoException;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
 import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -88,7 +89,14 @@ public class CategoriaServiceImpl implements CategoriaService {
                     + "' pois ela possui livros associados.");
         }
 
-        categoriaRepository.deleteById(id);
+        try {
+            categoriaRepository.deleteById(id);
+            categoriaRepository.flush(); // Força a execução do SQL para capturar a exceção aqui mesmo.
+        } catch (DataIntegrityViolationException e) {
+            // Este bloco atua como uma segunda camada de proteção caso a verificação acima falhe.
+            throw new CategoriaComLivrosException("Não é possível excluir a categoria '" + categoria.getNome()
+                    + "' pois ela possui livros associados.");
+        }
     }
 
     // @Override // Removido pois não está na interface CategoriaService (versão DTO)

@@ -1,44 +1,64 @@
 package org.iftm.biblioteca.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import org.iftm.biblioteca.entities.Livro;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class LivroDTO {
 
-    @NotBlank(message = "Título do livro não pode ser vazio.")
-    @Size(min = 2, max = 255, message = "Título do livro deve ter entre 2 e 255 caracteres.")
+    private Long id;
+
+    @NotBlank(message = "Título não pode ser vazio.")
+    @Size(min = 2, max = 100, message = "Título deve ter entre 2 e 100 caracteres.")
     private String titulo;
 
-    @NotBlank(message = "Autor do livro não pode ser vazio.")
-    @Size(min = 2, max = 150, message = "Nome do autor deve ter entre 2 e 150 caracteres.")
+    @NotBlank(message = "Autor não pode ser vazio.")
     private String autor;
 
     @NotBlank(message = "ISBN não pode ser vazio.")
-    // Regex simplificada para ISBN-10 ou ISBN-13 (sem hífens)
-    @Pattern(regexp = "^(?:[0-9]{9}[0-9X]|97[89][0-9]{10})$", message = "ISBN inválido. Deve ser um ISBN-10 ou ISBN-13 válido sem hífens.")
     private String isbn;
 
-    @NotNull(message = "Ano de publicação não pode ser nulo.")
-    @Min(value = 1400, message = "Ano de publicação deve ser no mínimo 1400.")
-    @Max(value = 2099, message = "Ano de publicação inválido.") // Idealmente, o máximo seria o ano atual (requer validador customizado)
+    @NotNull(message = "Ano de publicação é obrigatório.")
     private Integer anoPublicacao;
 
-    // Opcional, pode ser uma URL
+    private Integer edicao;
     private String capaUrl;
 
-    private Integer edicao;
-
-    @NotNull(message = "ID da categoria não pode ser nulo.")
+    @NotNull(message = "Categoria é obrigatória.")
     private Long categoriaId;
+    private String categoriaNome;
 
-    @NotNull(message = "ID da estante não pode ser nulo.")
+    @NotNull(message = "Estante é obrigatória.")
     private Long estanteId;
+    private String estanteNome;
+
+    public LivroDTO() {
+    }
+
+    // Construtor que converte uma Entidade Livro para LivroDTO
+    public LivroDTO(Livro entity) {
+        this.id = entity.getId();
+        this.titulo = entity.getTitulo();
+        this.autor = entity.getAutor();
+        this.isbn = entity.getIsbn();
+        this.anoPublicacao = entity.getAnoPublicacao();
+        this.edicao = entity.getEdicao();
+        this.capaUrl = entity.getCapaUrl();
+        if (entity.getCategoria() != null) {
+            this.categoriaId = entity.getCategoria().getId();
+            this.categoriaNome = entity.getCategoria().getNome();
+        }
+        if (entity.getEstante() != null) {
+            this.estanteId = entity.getEstante().getId();
+            this.estanteNome = entity.getEstante().getNome();
+        }
+    }
 
     // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public String getAutor() { return autor; }
@@ -47,12 +67,16 @@ public class LivroDTO {
     public void setIsbn(String isbn) { this.isbn = isbn; }
     public Integer getAnoPublicacao() { return anoPublicacao; }
     public void setAnoPublicacao(Integer anoPublicacao) { this.anoPublicacao = anoPublicacao; }
-    public String getCapaUrl() { return capaUrl; }
-    public void setCapaUrl(String capaUrl) { this.capaUrl = capaUrl; }
     public Integer getEdicao() { return edicao; }
     public void setEdicao(Integer edicao) { this.edicao = edicao; }
+    public String getCapaUrl() { return capaUrl; }
+    public void setCapaUrl(String capaUrl) { this.capaUrl = capaUrl; }
     public Long getCategoriaId() { return categoriaId; }
     public void setCategoriaId(Long categoriaId) { this.categoriaId = categoriaId; }
+    public String getCategoriaNome() { return categoriaNome; }
+    public void setCategoriaNome(String categoriaNome) { this.categoriaNome = categoriaNome; }
     public Long getEstanteId() { return estanteId; }
     public void setEstanteId(Long estanteId) { this.estanteId = estanteId; }
+    public String getEstanteNome() { return estanteNome; }
+    public void setEstanteNome(String estanteNome) { this.estanteNome = estanteNome; }
 }

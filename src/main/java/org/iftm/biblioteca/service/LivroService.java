@@ -4,42 +4,45 @@ import java.util.List;
 import java.util.Optional;
 
 import org.iftm.biblioteca.dto.LivroDTO;
+import org.iftm.biblioteca.dto.SugestaoDTO;
 import org.iftm.biblioteca.entities.Livro;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface LivroService {
 
-    // --- CRUD ---
-    Livro salvarNovoLivro(LivroDTO livroDTO); // Inserir um registro
+    Livro salvarNovoLivro(LivroDTO livroDTO);
 
-    // List<Livro> salvarTodosLivros(List<LivroDTO> livroDTOs); // Inserir um
-    // conjunto
+    Livro atualizarLivro(Long id, LivroDTO livroDTO);
 
-    Livro atualizarLivro(Long id, LivroDTO livroDTO); // Modificar um registro
+    void apagarLivroPorId(Long id);
 
-    void apagarLivroPorId(Long id); // Apagar um registro
+    void apagarTodosLivros();
 
-    void apagarTodosLivros(); // Apagar todos os registros
+    Page<LivroDTO> search(String id, String titulo, String autor, String isbn, String categoriaNome, String estanteNome,
+            String termo, Pageable pageable);
 
-    // --- CONSULTAS (Mínimo 5) ---
-    List<Livro> buscarTodos();
+    Page<LivroDTO> buscarTodos(Pageable pageable);
 
     Optional<Livro> buscarPorId(Long id);
+
+    List<Livro> buscarLivrosPublicadosAposAno(Integer ano);
+
+    Optional<Livro> buscarPorIsbn(String isbn);
+
+    List<Livro> buscarPorCategoria(Long categoriaId);
 
     List<Livro> buscarPorTituloContendo(String trechoTitulo);
 
     List<Livro> buscarPorAutor(String autor);
 
-    List<Livro> buscarPorCategoria(Long categoriaId); // Consulta usando ID da categoria
-
-    Optional<Livro> buscarPorIsbn(String isbn); // Consulta por ISBN (único)
-
-    List<Livro> buscarLivrosPublicadosAposAno(Integer ano); // Consulta que pode se relacionar a uma regra
-
-    List<Livro> buscarLivrosPorTermoGeral(String termo); // Adicionado para busca geral
+    List<Livro> buscarLivrosPorTermoGeral(String termo);
 
     List<Livro> buscarPorIsbnContendo(String isbn);
 
-    // --- Métodos para Funcionalidades Avançadas ---
+    List<Livro> buscarPorCategoriaNomeContendo(String nomeCategoria);
 
-    List<String> buscarSugestoes(String termo, String filtro);
+    List<Livro> buscarPorEstanteNomeContendo(String nomeEstante);
+
+    List<SugestaoDTO> buscarSugestoes(String termo, String filtro);
 }

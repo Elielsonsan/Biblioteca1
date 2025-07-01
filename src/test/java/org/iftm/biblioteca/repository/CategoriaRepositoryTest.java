@@ -26,12 +26,11 @@ class CategoriaRepositoryTest {
     private Categoria cat1;
     private Categoria cat2;
 
-    @SuppressWarnings("unused") // Suprime o aviso da IDE, pois o JUnit usa este método
     @BeforeEach
     // metodo setUp() é chamado antes de cada teste
     // Isso garante que os dados estejam sempre no estado inicial antes de cada
     // teste
-    void setUp() {
+    protected void setUp() {
         // Cria duas categorias para usar nos testes
         cat1 = new Categoria(null, "Fantasia");
         cat2 = new Categoria(null, "Ficção Científica");

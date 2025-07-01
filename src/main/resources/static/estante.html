@@ -236,9 +236,20 @@
 
         async function deleteEstante(id) {
             if (!confirm(`Tem certeza que deseja excluir a estante ID ${id}?`)) return;
-            await fetch(`${estantesApiUrl}/${id}`, { method: 'DELETE' });
-            loadEstantes();
-            alert('Estante excluída com sucesso!');
+            try {
+                const response = await fetch(`${estantesApiUrl}/${id}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    // Extrai a mensagem de erro do backend para exibir ao usuário
+                    const errorData = await response.json().catch(() => null);
+                    const errorMessage = errorData?.message || `Erro ${response.status}: Não foi possível excluir a estante.`;
+                    throw new Error(errorMessage);
+                }
+                loadEstantes();
+                alert('Estante excluída com sucesso!');
+            } catch (error) {
+                console.error(`Erro ao excluir estante ${id}:`, error);
+                alert(`Erro ao excluir a estante:\n${error.message}`);
+            }
         }
 
         function resetEstanteForm() {

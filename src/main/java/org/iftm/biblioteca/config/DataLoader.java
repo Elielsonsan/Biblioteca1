@@ -1,7 +1,6 @@
 package org.iftm.biblioteca.config;
 
 // --- Imports Necessários ---
-
 import java.math.BigDecimal;
 import java.time.LocalDate; // Adicionar para BigDecimal
 import java.util.Arrays; // Adicionar para LocalDate
@@ -20,13 +19,12 @@ import org.iftm.biblioteca.repository.EstanteRepository; // Adicionar import par
 import org.iftm.biblioteca.repository.LivroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-@Component
+// @Component // Desativado temporariamente para usar o data.sql
 public class DataLoader implements CommandLineRunner {
 
         // --- Declara os repositórios como membros da classe ---

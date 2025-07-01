@@ -21,28 +21,39 @@
     </nav>
 
     <main>
-        <section class="cartao cartao-titulo">
-            <h1>Gerenciar Livros</h1>
-            <p>Adicione, edite, busque e remova livros do acervo.</p>
+        <section class="cartao cartao-apresentacao">
+            <div class="coluna-texto">
+                <h1>Gerenciar Livros</h1>
+                <p class="slogan">Adicione, edite, busque e remova livros do acervo.</p>
+            </div>
+            <div class="coluna-logo">
+                <img src="/images/logo-iftm.png" alt="Logo IFTM">
+            </div>
         </section>
 
         <section class="cartao cartao-busca">
             <div class="barra-busca-container">
                 <i class="fa-solid fa-magnifying-glass icone-principal"></i>
-                <input type="text" id="termoBusca" placeholder="Digite para buscar...">
-                <select id="filtroBusca" class="filtro-select">
-                    <option value="titulo">Buscar por Título</option>
-                    <option value="autor">por Autor</option>
-                    <option value="isbn">por ISBN</option>
-                    <option value="id">por ID</option>
-                    <option value="categoriaNome">por Categoria</option>
-                    <option value="estanteNome">por Estante</option>
-                </select>
+                <div class="input-wrapper">
+                    <input type="text" id="termoBusca" placeholder="Comece a sua busca por aqui...">
+                </div>
+                <div class="filtro-select-wrapper">
+                    <select id="filtroBusca" class="filtro-select">
+                        <option value="" disabled selected>Critério de Busca</option>
+                        <option value="titulo">Título</option>
+                        <option value="autor">Autor</option>
+                        <option value="isbn">ISBN</option>
+                        <option value="id">ID</option>
+                        <option value="categoriaNome">Categoria</option>
+                        <option value="estanteNome">Estante</option>
+                    </select>
+                </div>
             </div>
+            <div id="autocomplete-list" class="autocomplete-list"></div>
             <div class="botoes-acao-container">
-                <button id="btnBuscar" class="botao-secundario"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
-                <button id="btnLimparBusca" class="botao-secundario"><i class="fa-solid fa-broom"></i><span>Limpar</span></button>
-                <button id="btnAdicionarLivro" class="botao-principal"><i class="fa-solid fa-plus"></i><span>Adicionar Livro</span></button>
+                <button id="btnBuscar" class="botao-secundario" title="Realizar a busca com os termos e filtros definidos"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
+                <button id="btnLimparBusca" class="botao-secundario" title="Limpar o campo de busca e os resultados"><i class="fa-solid fa-broom"></i><span>Limpar</span></button>
+                <button id="btnAdicionarLivro" class="botao-principal" title="Abrir formulário para adicionar um novo livro"><i class="fa-solid fa-plus"></i><span>Adicionar Livro</span></button>
             </div>
         </section>
 
@@ -56,14 +67,18 @@
                         <tr>
                             <th>ID</th>
                             <th>Título</th>
-                            <th>Autor</th>
-                            <th>ISBN</th>
+                            <th>Autor & ISBN</th>
+                            <th>Categoria & Estante</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         </tbody>
                 </table>
+            </div>
+            <!-- Container para os botões de paginação -->
+            <div class="paginacao-container" id="paginacao-container">
+                <!-- Botões serão gerados pelo JavaScript -->
             </div>
         </section>
     </main>
@@ -80,43 +95,54 @@
                     <div class="form-grid">
                         <div class="form-group grid-span-2">
                             <label for="tituloLivro">Título:</label>
-                            <input type="text" id="tituloLivro" class="form-input" required>
+                            <input type="text" id="tituloLivro" name="titulo" class="form-input" required minlength="2" maxlength="100">
+                            <div class="error-message"></div>
                         </div>
                         <div class="form-group grid-span-2">
                             <label for="autorLivro">Autor:</label>
-                            <input type="text" id="autorLivro" class="form-input" required>
+                            <input type="text" id="autorLivro" name="autor" class="form-input" required minlength="2" maxlength="100">
+                            <div class="error-message"></div>
                         </div>
                         <div class="form-group grid-span-2">
                             <label for="isbnLivro">ISBN:</label>
-                            <input type="text" id="isbnLivro" class="form-input" required>
+                            <input type="text" id="isbnLivro" name="isbn" class="form-input" required title="Digite um ISBN-10 ou ISBN-13 válido.">
+                            <small class="form-hint">Digite um ISBN-10 ou ISBN-13 válido. Hifens são opcionais.</small>
+                            <div class="error-message"></div>
                         </div>
                         <div class="form-group">
                             <label for="anoPublicacaoLivro">Ano:</label>
-                            <input type="number" id="anoPublicacaoLivro" class="form-input" required min="1400"
-                                max="2099">
+                            <input type="number" id="anoPublicacaoLivro" name="anoPublicacao" class="form-input" required min="1400" max="2099">
+                            <small class="form-hint">Ex: 1997</small>
+                            <div class="error-message"></div>
                         </div>
                         <div class="form-group">
                             <label for="categoriaLivro">Categoria:</label>
-                            <select id="categoriaLivro" class="form-input" required><option value="">Selecione...</option></select>
+                            <select id="categoriaLivro" name="categoriaId" class="form-input" required><option value="">Selecione...</option></select>
+                            <div class="error-message"></div>
                         </div>
                         <div class="form-group">
                             <label for="edicaoLivro">Edição:</label>
-                            <input type="number" id="edicaoLivro" class="form-input" min="1" value="1">
+                            <input type="number" id="edicaoLivro" name="edicao" class="form-input" min="1" value="1">
+                            <div class="error-message"></div>
                         </div>
                         <div class="form-group">
                             <label for="estanteLivro">Estante:</label>
-                            <select id="estanteLivro" class="form-input" required><option value="">Selecione...</option></select>
+                            <select id="estanteLivro" name="estanteId" class="form-input" required><option value="">Selecione...</option></select>
+                            <div class="error-message"></div>
                         </div>
                         <div class="form-group grid-span-2">
                             <label for="capaUrlLivro">URL da Capa:</label>
-                            <input type="text" id="capaUrlLivro" class="form-input" placeholder="/images/capa.png">
+                            <input type="text" id="capaUrlLivro" name="capaUrl" class="form-input" placeholder="https://exemplo.com/capa.png ou /images/capa.png">
+                            <div class="error-message"></div>
                         </div>
                     </div>
                     <div class="botoes-acao-container form-buttons">
-                        <button type="submit" class="botao-principal"><i
-                                class="fa-solid fa-floppy-disk"></i><span>Salvar</span></button>
-                        <button type="button" class="botao-secundario" id="btnLimparForm"><i
-                                class="fa-solid fa-eraser"></i><span>Limpar</span></button>
+                        <button type="submit" class="botao-principal">
+                            <i class="fa-solid fa-floppy-disk"></i><span>Salvar</span>
+                        </button>
+                        <button type="button" class="botao-secundario" id="btnLimparForm">
+                            <i class="fa-solid fa-eraser"></i><span>Limpar</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -127,6 +153,7 @@
         // URLs da API
         const livrosApiUrl = '/api/livros';
         const categoriasApiUrl = '/api/categorias';
+        const sugestoesApiUrl = '/api/livros/sugestoes';
         const estantesApiUrl = '/api/estantes';
 
         // Elementos do DOM
@@ -135,7 +162,14 @@
         const livrosTableBody = document.getElementById('livrosTable').getElementsByTagName('tbody')[0];
         const btnBuscar = document.getElementById('btnBuscar');
         const btnLimparBusca = document.getElementById('btnLimparBusca');
+        const autocompleteList = document.getElementById('autocomplete-list');
+        const buscaContainer = document.querySelector('.barra-busca-container');
+        let isSelectingSuggestion = false;
         const listaVaziaMsg = document.getElementById('listaVaziaMsg');
+
+        // Variáveis de Paginação
+        let currentPage = 0;
+        const paginacaoContainer = document.getElementById('paginacao-container');
 
         // Elementos do Modal e Formulário
         const modal = document.getElementById('formModal');
@@ -155,6 +189,17 @@
         const edicaoInput = document.getElementById('edicaoLivro');
         const capaUrlInput = document.getElementById('capaUrlLivro');
 
+        // Objeto de configuração para melhorar a heurística da busca
+        const filtroConfigs = {
+            termo: { placeholder: 'Busque por título, autor, ISBN...', icon: 'fa-magnifying-glass' },
+            titulo: { placeholder: 'Digite o título do livro...', icon: 'fa-book-open' },
+            autor: { placeholder: 'Digite o nome do autor...', icon: 'fa-user' },
+            isbn: { placeholder: 'Digite o ISBN do livro...', icon: 'fa-barcode' },
+            id: { placeholder: 'Digite o ID exato do livro...', icon: 'fa-hashtag' },
+            categoriaNome: { placeholder: 'Digite o nome da categoria...', icon: 'fa-tags' },
+            estanteNome: { placeholder: 'Digite o nome da estante...', icon: 'fa-box-archive' }
+        };
+
         // --- LÓGICA PRINCIPAL ---
         document.addEventListener('DOMContentLoaded', () => {
             loadCategoriasParaSelect();
@@ -162,68 +207,107 @@
             btnBuscar.addEventListener('click', buscarLivros);
             btnLimparBusca.addEventListener('click', limparBusca);
             loadLivros();
+
+            // Listeners para autocomplete e UI da busca
+            termoBuscaInput.addEventListener('input', handleInput);
+            termoBuscaInput.addEventListener('focus', handleFocus);
+            termoBuscaInput.addEventListener('blur', handleBlur);
+            filtroBuscaSelect.addEventListener('change', atualizarInterfaceDeBusca);
+
         });
+
+        // --- FUNÇÕES DE UI DA BUSCA ---
+        function atualizarInterfaceDeBusca() {
+            const filtroSelecionado = filtroBuscaSelect.value || 'termo';
+            const config = filtroConfigs[filtroSelecionado];
+            const iconePrincipal = buscaContainer.querySelector('.icone-principal');
+            termoBuscaInput.placeholder = config.placeholder;
+            iconePrincipal.className = `fa-solid ${config.icon} icone-principal`;
+        }
 
         // --- FUNÇÕES DE BUSCA ---
         function buscarLivros() {
+            autocompleteList.classList.remove('active'); // Esconde sugestões
+            buscaContainer.classList.remove('focused'); // Contrai a barra
+            currentPage = 0; // Reseta para a primeira página ao fazer uma nova busca
             const termo = termoBuscaInput.value.trim();
-            const filtro = filtroBuscaSelect.value;
-            loadLivros(termo, filtro);
+            const filtro = filtroBuscaSelect.value || 'termo'; // Busca livre (termo) como padrão
+            loadLivros(termo, filtro, currentPage);
         }
 
         function limparBusca() {
+            autocompleteList.classList.remove('active');
+            buscaContainer.classList.remove('focused');
             termoBuscaInput.value = '';
-            filtroBuscaSelect.value = 'titulo';
-            loadLivros();
+            termoBuscaInput.placeholder = 'Comece a sua busca por aqui...';
+            filtroBuscaSelect.value = ''; // Reseta para o placeholder "Critério de Busca"
+            // Reseta o ícone para o padrão
+            const iconePrincipal = buscaContainer.querySelector('.icone-principal');
+            iconePrincipal.className = `fa-solid ${filtroConfigs['termo'].icon} icone-principal`;
+            currentPage = 0; // Reseta para a primeira página
+            loadLivros('', 'termo', currentPage);
         }
 
-        async function loadLivros(termo = '', filtro = 'titulo') {
+        async function loadLivros(termo = '', filtro = 'termo', page = 0) {
             let url = livrosApiUrl;
+            const params = new URLSearchParams();
+            params.append('page', page);
+            params.append('size', 10); // Fixo em 10 livros por página
+
             if (termo) {
-                if (filtro === 'id') {
-                    url += `/${encodeURIComponent(termo)}`;
-                } else {
-                    // Constrói a URL com parâmetros de consulta, ex: /api/livros?titulo=Duna
-                    // O backend precisa ser capaz de lidar com esses filtros.
-                    const params = new URLSearchParams();
-                    params.append(filtro, termo);
-                    url += `?${params.toString()}`;
-                }
+                // Todos os filtros, incluindo 'id', agora são tratados como parâmetros de consulta
+                params.append(filtro, termo);
             }
+            url += `?${params.toString()}`;
+
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     if (response.status === 404) {
-                        renderizarTabela([]); // Limpa a tabela se não encontrar (ex: busca por ID)
+                        renderizarPagina({ content: [], totalPages: 0 }); // Limpa a tabela
                         return;
                     }
                     throw new Error(`Erro na requisição: ${response.status}`);
                 }
-                const data = await response.json();
-                // Se a busca for por ID, a API retorna um objeto; senão, uma lista.
-                // Normalizamos para sempre trabalhar com uma lista.
-                const livros = Array.isArray(data) ? data : [data];
-                renderizarTabela(livros);
+                const pageData = await response.json();
+                renderizarPagina(pageData);
             } catch (error) {
                 console.error('Erro ao carregar livros:', error);
                 alert('Não foi possível buscar os livros. Verifique o console para mais detalhes.');
             }
         }
 
-        function renderizarTabela(livros) {
-            livrosTableBody.innerHTML = '';
+        function renderizarPagina(pageData, append = false) {
+            const livros = pageData.content;
+            if (!append) {
+                livrosTableBody.innerHTML = '';
+            }
+
             if (!livros || livros.length === 0) {
-                listaVaziaMsg.style.display = 'block';
-                document.querySelector('.table-wrapper').style.display = 'none';
+                if (!append) { // Só mostra a mensagem de vazio se for uma nova busca, não ao carregar mais
+                    listaVaziaMsg.style.display = 'block';
+                    document.querySelector('.table-wrapper').style.display = 'none';
+                }
             } else {
                 listaVaziaMsg.style.display = 'none';
                 document.querySelector('.table-wrapper').style.display = 'block';
                 livros.forEach(livro => {
                     const row = livrosTableBody.insertRow();
-                    row.insertCell().textContent = livro.id;
-                    row.insertCell().textContent = livro.titulo;
-                    row.insertCell().textContent = livro.autor;
-                    row.insertCell().textContent = livro.isbn;
+                    row.insertCell().textContent = livro.id;                    
+                    row.insertCell().innerHTML = `<i class="fa-solid fa-book"></i><span>${livro.titulo}</span>`;
+
+                    const autorIsbnCell = row.insertCell();
+                    autorIsbnCell.innerHTML = `
+                        <div class="info-cell"><i class="fa-solid fa-user" title="Autor"></i><span>${livro.autor || 'N/A'}</span></div>
+                        <div class="info-cell"><i class="fa-solid fa-barcode" title="ISBN"></i><span>${livro.isbn || 'N/A'}</span></div>
+                    `;
+
+                    const categoriaEstanteCell = row.insertCell();
+                    categoriaEstanteCell.innerHTML = `
+                        <div class="info-cell"><i class="fa-solid fa-tags" title="Categoria"></i><span>${livro.categoriaNome || 'N/A'}</span></div>
+                        <div class="info-cell"><i class="fa-solid fa-box-archive" title="Estante"></i><span>${livro.estanteNome || 'N/A'}</span></div>
+                    `;
+
                     const actionsCell = row.insertCell();
                     // Usar JSON.stringify é uma forma prática de passar o objeto completo para a função de edição.
                     actionsCell.innerHTML = `
@@ -232,6 +316,122 @@
                     `;
                 });
             }
+            renderizarPaginacao(pageData);
+        }
+
+        function renderizarPaginacao(pageData) {
+            paginacaoContainer.innerHTML = '';
+
+            if (!pageData.last) { // Se não for a última página
+                const mostrarMaisBtn = document.createElement('button');
+                mostrarMaisBtn.innerHTML = '<i class="fa-solid fa-angles-down"></i><span>Mostrar mais 10 títulos</span>';
+                mostrarMaisBtn.className = 'paginacao-btn';
+                mostrarMaisBtn.onclick = () => {
+                    currentPage = pageData.number + 1; // Pede a próxima página
+                    const termo = termoBuscaInput.value.trim();
+                    const filtro = filtroBuscaSelect.value || 'termo';
+                    loadLivros(termo, filtro, currentPage, true); // O 'true' indica para adicionar, não substituir
+                };
+                paginacaoContainer.appendChild(mostrarMaisBtn);
+                paginacaoContainer.style.display = 'flex';
+            } else {
+                paginacaoContainer.style.display = 'none';
+            }
+        }
+
+        // --- FUNÇÕES DE AUTOCOMPLETE E UI (ADAPTADAS DA HOME) ---
+
+        async function handleInput() {
+            if (isSelectingSuggestion) {
+                isSelectingSuggestion = false;
+                return;
+            }
+            const termo = termoBuscaInput.value.trim();
+            const filtro = filtroBuscaSelect.value || 'termo'; // Usa 'termo' como padrão
+
+            if (termo.length > 0) {
+                buscaContainer.classList.add('focused');
+            } else {
+                buscaContainer.classList.remove('focused');
+            }
+
+            if (termo.length < 2) { // Só busca sugestões com 2+ caracteres
+                autocompleteList.classList.remove('active');
+                return;
+            }
+
+            try {
+                const url = `${sugestoesApiUrl}?termo=${encodeURIComponent(termo)}&filtro=${filtro}`;
+                const response = await fetch(url);
+                if (!response.ok) return;
+                const sugestoes = await response.json();
+                renderizarSugestoes(sugestoes);
+            } catch (error) {
+                console.error('Erro ao buscar sugestões:', error);
+                autocompleteList.classList.remove('active');
+            }
+        }
+
+        function handleFocus() {
+            atualizarInterfaceDeBusca(); // Ao focar, atualiza o placeholder para o do filtro ativo
+            if (termoBuscaInput.value.trim().length > 0) {
+                buscaContainer.classList.add('focused');
+            }
+        }
+
+        function handleBlur() {
+            // Usa um pequeno delay para permitir que cliques em itens da lista ou filtros sejam processados
+            setTimeout(() => {
+                if (!buscaContainer.contains(document.activeElement)) {
+                    buscaContainer.classList.remove('focused');
+                    autocompleteList.classList.remove('active');
+                }
+                // Se o campo de busca estiver vazio ao perder o foco, retorna ao placeholder inicial
+                if (termoBuscaInput.value.trim() === '') {
+                    termoBuscaInput.placeholder = 'Comece a sua busca por aqui...';
+                    if (!filtroBuscaSelect.value) { // Se nenhum filtro estiver ativo, reseta o ícone
+                        atualizarInterfaceDeBusca();
+                    }
+                }
+            }, 150);
+        }
+
+        function renderizarSugestoes(sugestoes) {
+            autocompleteList.innerHTML = '';
+            if (sugestoes.length === 0) {
+                autocompleteList.classList.remove('active');
+                return;
+            }
+
+            sugestoes.forEach(sugestao => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+
+                const icon = document.createElement('i');
+                let iconClass = 'fa-book-open'; // Ícone padrão para título
+                switch (sugestao.tipo) {
+                    case 'autor': iconClass = 'fa-user'; break;
+                    case 'isbn': iconClass = 'fa-barcode'; break;
+                    case 'categoria': iconClass = 'fa-tags'; break;
+                    case 'estante': iconClass = 'fa-box-archive'; break;
+                }
+                icon.className = `fa-solid ${iconClass}`;
+
+
+                const text = document.createElement('span');
+                text.textContent = sugestao.valor;
+
+                item.appendChild(icon);
+                item.appendChild(text);
+
+                item.addEventListener('click', () => {
+                    isSelectingSuggestion = true;
+                    termoBuscaInput.value = sugestao.valor;
+                    buscarLivros(); // Realiza a busca imediatamente
+                });
+                autocompleteList.appendChild(item);
+            });
+            autocompleteList.classList.add('active');
         }
 
         // --- FUNÇÕES DO MODAL E FORMULÁRIO ---
@@ -251,9 +451,11 @@
             anoPublicacaoInput.value = livro.anoPublicacao;
             edicaoInput.value = livro.edicao;
             capaUrlInput.value = livro.capaUrl;
-            // Defende contra casos onde categoria/estante podem ser nulas
-            categoriaSelect.value = livro.categoria ? livro.categoria.id : '';
-            estanteSelect.value = livro.estante ? livro.estante.id : '';
+            // Usa os IDs do DTO
+            categoriaSelect.value = livro.categoriaId || '';
+            estanteSelect.value = livro.estanteId || '';
+            // Limpa o campo de busca se estiver visível (em caso de erro anterior)
+            termoBuscaInput.value = '';
             modal.style.display = 'flex';
         }
 
@@ -264,6 +466,7 @@
         function resetForm() {
             livroForm.reset();
             livroIdInput.value = '';
+            clearFormErrors();
         }
 
         // Event Listeners dos botões do modal
@@ -276,50 +479,91 @@
             }
         });
 
-        livroForm.addEventListener('submit', async function (event) {
+        livroForm.addEventListener('submit', async function(event) {
             event.preventDefault();
+            clearFormErrors();
             const id = livroIdInput.value;
-            // O payload deve ser "flat" para corresponder ao LivroDTO no backend
+
             const livroData = {
                 titulo: tituloInput.value,
                 autor: autorInput.value,
                 isbn: isbnInput.value,
                 anoPublicacao: parseInt(anoPublicacaoInput.value),
                 edicao: parseInt(edicaoInput.value) || 1,
-                capaUrl: capaUrlInput.value,
+                capaUrl: capaUrlInput.value || null, // Envia nulo se vazio
                 categoriaId: parseInt(categoriaSelect.value),
                 estanteId: parseInt(estanteSelect.value)
             };
 
             const method = id ? 'PUT' : 'POST';
             const url = id ? `${livrosApiUrl}/${id}` : livrosApiUrl;
-
             try {
                 const response = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(livroData)
                 });
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+        
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null); // Tenta ler o corpo do erro
+                    
+                    if (Array.isArray(errorData)) { // Erros de validação (@Valid)
+                        displayFormErrors(errorData);
+                        throw new Error("Foram encontrados erros de validação. Verifique os campos do formulário.");
+                    } else if (errorData && errorData.message) { // Erros padrão (StandardError)
+                        throw new Error(errorData.message);
+                    } else { // Outros erros
+                        throw new Error(`Erro ${response.status}: Ocorreu um problema no servidor.`);
+                    }
+                }
+        
                 closeModal();
                 loadLivros();
                 alert(`Livro ${id ? 'atualizado' : 'salvo'} com sucesso!`);
+
             } catch (error) {
                 console.error('Erro ao salvar livro:', error);
-                alert('Erro ao salvar livro.');
+                // Este alert agora exibirá a mensagem de erro específica do backend!
+                alert(`Erro ao salvar o livro:\n${error.message}`);
             }
         });
+        
+        function displayFormErrors(errors) {
+            errors.forEach(error => {
+                // Encontra o campo do formulário pelo atributo 'name', que corresponde ao DTO
+                const inputElement = livroForm.querySelector(`[name="${error.field}"]`);
+                if (inputElement) {
+                    // Procura o elemento de erro que é irmão do campo
+                    let errorDiv = inputElement.parentElement.querySelector('.error-message');
+                    if (errorDiv) {
+                        errorDiv.textContent = error.message;
+                    }
+                }
+            });
+        }
+
+        function clearFormErrors() {
+            document.querySelectorAll('.error-message').forEach(div => div.textContent = '');
+        }
 
         // --- FUNÇÕES DE DELEÇÃO E CARREGAMENTO DE SELECTS ---
         async function deleteLivro(id) {
             if (!confirm(`Tem certeza que deseja excluir o livro ID ${id}?`)) return;
             try {
-                await fetch(`${livrosApiUrl}/${id}`, { method: 'DELETE' });
+                const response = await fetch(`${livrosApiUrl}/${id}`, { method: 'DELETE' });
+
+                if (!response.ok) {
+                    // Extrai a mensagem de erro do backend para exibir ao usuário
+                    const errorData = await response.json().catch(() => null);
+                    const errorMessage = errorData?.message || `Erro ${response.status}: Não foi possível excluir o livro.`;
+                    throw new Error(errorMessage);
+                }
+
                 loadLivros();
                 alert('Livro excluído com sucesso!');
             } catch (error) {
                 console.error('Erro ao excluir livro:', error);
-                alert('Erro ao excluir livro.');
+                alert(`Erro ao excluir o livro:\n${error.message}`);
             }
         }
 

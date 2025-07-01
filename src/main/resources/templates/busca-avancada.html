@@ -188,28 +188,49 @@
         // Função que desenha os resultados na tela
         function renderizarResultados(livros) {
             listaResultados.innerHTML = ''; // Limpa resultados anteriores
-
+        
+            const termoTitulo = document.getElementById('titulo').value.trim();
+            const termoAutor = document.getElementById('autor').value.trim();
+            const termoIsbn = document.getElementById('isbn').value.trim();
+        
             const placeholderCapa = '/images/capa-placeholder.png';
             if (livros && livros.length > 0) {
                 livros.forEach(livro => {
                     const capaSrc = livro.capaUrl && livro.capaUrl.trim() !== '' ? livro.capaUrl : placeholderCapa;
                     const itemResultado = document.createElement('div');
                     itemResultado.className = 'item-resultado';
-
+        
+                    // Prepara o HTML para os campos, aplicando destaque se houver termo de busca
+                    let tituloHtml = livro.titulo || 'N/A';
+                    if (termoTitulo) {
+                        // A sintaxe '<b>$&</b>' insere o texto encontrado dentro das tags <b>
+                        tituloHtml = tituloHtml.replace(new RegExp(termoTitulo, 'gi'), '<b>$&</b>');
+                    }
+        
+                    let autorHtml = livro.autor || 'N/A';
+                    if (termoAutor) {
+                        autorHtml = autorHtml.replace(new RegExp(termoAutor, 'gi'), '<b>$&</b>');
+                    }
+        
+                    let isbnHtml = livro.isbn || 'N/A';
+                    if (termoIsbn) {
+                        isbnHtml = isbnHtml.replace(new RegExp(termoIsbn, 'gi'), '<b>$&</b>');
+                    }
+        
                     // Usamos o mesmo HTML do seu design para os resultados
                     itemResultado.innerHTML = `
                         <div class="info-detalhada">
                             <div class="linha-info">
                                 <i class="fa-solid fa-copyright" title="Autor"></i> 
-                                <p>${livro.autor || 'N/A'}</p>
+                                <p>${autorHtml}</p> 
                             </div>
                             <div class="linha-info">
                                 <i class="fa-solid fa-book" title="Título"></i>
-                                <p><strong>${livro.titulo || 'N/A'}</strong></p>
+                                <p><strong>${tituloHtml}</strong></p>
                             </div>
                             <div class="linha-info">
                                 <i class="fa-solid fa-barcode" title="ISBN"></i>
-                                <p>${livro.isbn || 'N/A'}</p>
+                                <p>${isbnHtml}</p>
                             </div>
                             <div class="linha-info">
                                 <i class="fa-solid fa-tags" title="Categoria"></i>
@@ -226,7 +247,7 @@
                     `;
                     listaResultados.appendChild(itemResultado);
                 });
-                secaoResultados.style.display = 'flex'; // 'flex' para manter o layout do .cartao
+                secaoResultados.style.display = 'flex';
                 secaoSemResultados.style.display = 'none';
             } else {
                 secaoResultados.style.display = 'none';

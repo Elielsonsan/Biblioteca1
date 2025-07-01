@@ -204,10 +204,21 @@
 
         async function deleteCategoria(id) {
             if (!confirm(`Tem certeza que deseja excluir a categoria ID ${id}?`)) return;
-            
-            await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-            loadCategorias();
-            alert('Categoria excluída com sucesso!');
+
+            try {
+                const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    // Tenta extrair uma mensagem de erro do corpo da resposta da API
+                    const errorData = await response.json().catch(() => ({ message: `Erro HTTP: ${response.status}` }));
+                    throw new Error(errorData.message || 'Não foi possível excluir o recurso.');
+                }
+                loadCategorias();
+                alert('Categoria excluída com sucesso!');
+            } catch (error) {
+                console.error(`Erro ao excluir categoria ${id}:`, error);
+                // Exibe a mensagem de erro específica para o usuário
+                alert(`Erro ao excluir categoria: ${error.message}`);
+            }
         }
 
         function resetForm() {

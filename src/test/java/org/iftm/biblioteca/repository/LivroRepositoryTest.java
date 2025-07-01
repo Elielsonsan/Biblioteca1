@@ -32,7 +32,7 @@ class LivroRepositoryTest {
 
     // O JUnit usa este método via reflexão, o aviso da IDE pode ser ignorado ou configurado.
     @BeforeEach // metodo setUp() é chamado antes de cada teste
-    void setUp() {
+    protected void setUp() {
         // Criar e persistir categorias e estantes antes de cada teste usando
         // TestEntityManager
         catFantasia = new Categoria(null, "Fantasia");

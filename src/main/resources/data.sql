@@ -1,29 +1,29 @@
 -- Inserindo Categorias
-INSERT INTO tb_categoria (id, nome) VALUES (1, 'Ficção Científica');
-INSERT INTO tb_categoria (id, nome) VALUES (2, 'Fantasia');
-INSERT INTO tb_categoria (id, nome) VALUES (3, 'Romance');
-INSERT INTO tb_categoria (id, nome) VALUES (4, 'Técnico');
-INSERT INTO tb_categoria (id, nome) VALUES (5, 'História');
-INSERT INTO tb_categoria (id, nome) VALUES (6, 'Suspense');
-INSERT INTO tb_categoria (id, nome) VALUES (7, 'Biografia');
-INSERT INTO tb_categoria (id, nome) VALUES (8, 'Poesia');
-INSERT INTO tb_categoria (id, nome) VALUES (9, 'Infantojuvenil');
-INSERT INTO tb_categoria (id, nome) VALUES (10, 'Autoajuda');
+INSERT INTO tb_categoria (nome) VALUES ('Ficção Científica');
+INSERT INTO tb_categoria (nome) VALUES ('Fantasia');
+INSERT INTO tb_categoria (nome) VALUES ('Romance');
+INSERT INTO tb_categoria (nome) VALUES ('Técnico');
+INSERT INTO tb_categoria (nome) VALUES ('História');
+INSERT INTO tb_categoria (nome) VALUES ('Suspense');
+INSERT INTO tb_categoria (nome) VALUES ('Biografia');
+INSERT INTO tb_categoria (nome) VALUES ('Poesia');
+INSERT INTO tb_categoria (nome) VALUES ('Infantojuvenil');
+INSERT INTO tb_categoria (nome) VALUES ('Autoajuda');
 
 -- Inserindo Estantes
-INSERT INTO tb_estante (id, nome) VALUES (1, 'Corredor A - Ficção Científica');
-INSERT INTO tb_estante (id, nome) VALUES (2, 'Corredor B - Fantasia');
-INSERT INTO tb_estante (id, nome) VALUES (3, 'Corredor C - Romance');
-INSERT INTO tb_estante (id, nome) VALUES (4, 'Seção Especial - Técnico');
-INSERT INTO tb_estante (id, nome) VALUES (5, 'Corredor D - História');
-INSERT INTO tb_estante (id, nome) VALUES (6, 'Corredor E - Suspense');
-INSERT INTO tb_estante (id, nome) VALUES (7, 'Corredor F - Biografias');
-INSERT INTO tb_estante (id, nome) VALUES (8, 'Seção Poesia');
-INSERT INTO tb_estante (id, nome) VALUES (9, 'Seção Infantojuvenil');
-INSERT INTO tb_estante (id, nome) VALUES (10, 'Seção Autoajuda');
+INSERT INTO tb_estante (nome) VALUES ('Corredor A - Ficção Científica');
+INSERT INTO tb_estante (nome) VALUES ('Corredor B - Fantasia');
+INSERT INTO tb_estante (nome) VALUES ('Corredor C - Romance');
+INSERT INTO tb_estante (nome) VALUES ('Seção Especial - Técnico');
+INSERT INTO tb_estante (nome) VALUES ('Corredor D - História');
+INSERT INTO tb_estante (nome) VALUES ('Corredor E - Suspense');
+INSERT INTO tb_estante (nome) VALUES ('Corredor F - Biografias');
+INSERT INTO tb_estante (nome) VALUES ('Seção Poesia');
+INSERT INTO tb_estante (nome) VALUES ('Seção Infantojuvenil');
+INSERT INTO tb_estante (nome) VALUES ('Seção Autoajuda');
 
 -- Inserindo Clientes
--- (id, name, email, cpf, income, birth_date, children_count, street, city, state, zip_code, category_id)
+-- A tabela de clientes pode manter os IDs se for necessário para alguma lógica específica, mas o ideal seria remover também.
 INSERT INTO tb_client (id, name, email, cpf, income, birth_date, children_count, street, city, state, zip_code, category_id) VALUES (1, 'Ana Silva', 'ana.silva@example.com', '111.111.111-11', 2500.00, '1990-05-15', 0, 'Rua das Flores, 123', 'São Paulo', 'SP', '01000-001', 1);
 INSERT INTO tb_client (id, name, email, cpf, income, birth_date, children_count, street, city, state, zip_code, category_id) VALUES (2, 'Bruno Costa', 'bruno.costa@example.com', '222.222.222-22', 3200.50, '1985-11-20', 2, 'Avenida Principal, 456', 'Rio de Janeiro', 'RJ', '02000-002', 2);
 INSERT INTO tb_client (id, name, email, cpf, income, birth_date, children_count, street, city, state, zip_code, category_id) VALUES (3, 'Carla Dias', 'carla.dias@example.com', '333.333.333-33', 1800.75, '1995-02-10', 1, 'Travessa da Paz, 789', 'Belo Horizonte', 'MG', '03000-003', 1);
@@ -36,55 +36,42 @@ INSERT INTO tb_client (id, name, email, cpf, income, birth_date, children_count,
 INSERT INTO tb_client (id, name, email, cpf, income, birth_date, children_count, street, city, state, zip_code, category_id) VALUES (10, 'João Pereira', 'joao.pereira@example.com', '000.000.000-00', 2000.00, '1993-08-08', 0, 'Viela da Sorte, 707', 'Brasília', 'DF', '10000-010', 3);
 
 -- Inserindo Livros
--- (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url)
+-- Removendo a coluna 'id' para deixar o banco de dados gerar automaticamente
 
 -- Ficção Científica (Categoria ID: 1)
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (1, 'Duna', 'Frank Herbert', '978-0000000001', 1965, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (2, 'Fundação', 'Isaac Asimov', '978-0000000002', 1951, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (3, 'Neuromancer', 'William Gibson', '978-0000000003', 1984, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (4, 'O Guia do Mochileiro das Galáxias', 'Douglas Adams', '978-0000000004', 1979, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (5, '1984', 'George Orwell', '978-0000000005', 1949, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (6, 'Admirável Mundo Novo', 'Aldous Huxley', '978-0000000006', 1932, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (7, 'Fahrenheit 451', 'Ray Bradbury', '978-0000000007', 1953, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (8, 'O Homem do Castelo Alto', 'Philip K. Dick', '978-0000000008', 1962, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (9, 'A Máquina do Tempo', 'H.G. Wells', '978-0000000009', 1895, 1, 1, 1, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (10, 'Eu, Robô', 'Isaac Asimov', '978-0000000010', 1950, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Duna', 'Frank Herbert', '9788576574019', 1965, 1, 1, 1, '/images/capas/9788576574019.jpg');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Fundação', 'Isaac Asimov', '978-0000000002', 1951, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Neuromancer', 'William Gibson', '978-0000000003', 1984, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Guia do Mochileiro das Galáxias', 'Douglas Adams', '978-0000000004', 1979, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('1984', 'George Orwell', '9788535914849', 1949, 1, 1, 1, '/images/capas/9788535914849.jpg');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Admirável Mundo Novo', 'Aldous Huxley', '978-0000000006', 1932, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Fahrenheit 451', 'Ray Bradbury', '978-0000000007', 1953, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Homem do Castelo Alto', 'Philip K. Dick', '978-0000000008', 1962, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('A Máquina do Tempo', 'H.G. Wells', '978-0000000009', 1895, 1, 1, 1, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Eu, Robô', 'Isaac Asimov', '978-0000000010', 1950, 1, 1, 1, '/images/capa-placeholder.png');
 
 -- Fantasia (Categoria ID: 2)
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (11, 'O Senhor dos Anéis: A Sociedade do Anel', 'J.R.R. Tolkien', '978-0000000011', 1954, 50, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (12, 'Harry Potter e a Pedra Filosofal', 'J.K. Rowling', '978-0000000012', 1997, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (13, 'A Guerra dos Tronos', 'George R.R. Martin', '978-0000000013', 1996, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (14, 'O Hobbit', 'J.R.R. Tolkien', '978-0000000014', 1937, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (15, 'As Crônicas de Nárnia: O Leão, a Feiticeira e o Guarda-Roupa', 'C.S. Lewis', '978-0000000015', 1950, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (16, 'O Nome do Vento', 'Patrick Rothfuss', '978-0000000016', 2007, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (17, 'Eragon', 'Christopher Paolini', '978-0000000017', 2002, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (18, 'A Roda do Tempo: O Olho do Mundo', 'Robert Jordan', '978-0000000018', 1990, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (19, 'Mistborn: O Império Final', 'Brandon Sanderson', '978-0000000019', 2006, 1, 2, 2, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (20, 'O Feiticeiro de Terramar', 'Ursula K. Le Guin', '978-0000000020', 1968, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Senhor dos Anéis: A Sociedade do Anel', 'J.R.R. Tolkien', '978-0000000011', 1954, 50, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Harry Potter e a Pedra Filosofal', 'J.K. Rowling', '978-0000000012', 1997, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('A Guerra dos Tronos', 'George R.R. Martin', '978-0000000013', 1996, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Hobbit', 'J.R.R. Tolkien', '978-0000000014', 1937, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('As Crônicas de Nárnia: O Leão, a Feiticeira e o Guarda-Roupa', 'C.S. Lewis', '978-0000000015', 1950, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Nome do Vento', 'Patrick Rothfuss', '978-0000000016', 2007, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Eragon', 'Christopher Paolini', '978-0000000017', 2002, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('A Roda do Tempo: O Olho do Mundo', 'Robert Jordan', '978-0000000018', 1990, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Mistborn: O Império Final', 'Brandon Sanderson', '978-0000000019', 2006, 1, 2, 2, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Feiticeiro de Terramar', 'Ursula K. Le Guin', '978-0000000020', 1968, 1, 2, 2, '/images/capa-placeholder.png');
 
 -- Romance (Categoria ID: 3)
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (21, 'Orgulho e Preconceito', 'Jane Austen', '978-0000000021', 1813, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (22, 'O Morro dos Ventos Uivantes', 'Emily Brontë', '978-0000000022', 1847, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (23, 'Jane Eyre', 'Charlotte Brontë', '978-0000000023', 1847, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (24, 'Romeu e Julieta', 'William Shakespeare', '978-0000000024', 1597, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (25, 'O Amor nos Tempos do Cólera', 'Gabriel García Márquez', '978-0000000025', 1985, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (26, 'Anna Karenina', 'Liev Tolstói', '978-0000000026', 1877, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (27, 'O Grande Gatsby', 'F. Scott Fitzgerald', '978-0000000027', 1925, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (28, 'A Culpa é das Estrelas', 'John Green', '978-0000000028', 2012, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (29, 'Como Eu Era Antes de Você', 'Jojo Moyes', '978-0000000029', 2012, 1, 3, 3, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (30, 'Diário de uma Paixão', 'Nicholas Sparks', '978-0000000030', 1996, 1, 3, 3, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Romeu e Julieta', 'William Shakespeare', '978-0000000024', 1597, 1, 3, 3, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Amor nos Tempos do Cólera', 'Gabriel García Márquez', '978-0000000025', 1985, 1, 3, 3, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Anna Karenina', 'Liev Tolstói', '978-0000000026', 1877, 1, 3, 3, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('O Grande Gatsby', 'F. Scott Fitzgerald', '978-0000000027', 1925, 1, 3, 3, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('A Culpa é das Estrelas', 'John Green', '978-0000000028', 2012, 1, 3, 3, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Como Eu Era Antes de Você', 'Jojo Moyes', '978-0000000029', 2012, 1, 3, 3, '/images/capa-placeholder.png');
+INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES ('Diário de uma Paixão', 'Nicholas Sparks', '978-0000000030', 1996, 1, 3, 3, '/images/capa-placeholder.png');
 
 -- Técnico (Categoria ID: 4)
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (31, 'Código Limpo', 'Robert C. Martin', '978-0000000031', 2008, 1, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (32, 'Arquitetura Limpa', 'Robert C. Martin', '978-0000000032', 2017, 1, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (33, 'Java Efetivo', 'Joshua Bloch', '978-0000000033', 2018, 3, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (34, 'O Programador Pragmático', 'Andrew Hunt', '978-0000000034', 1999, 1, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (35, 'Padrões de Projetos', 'Erich Gamma', '978-0000000035', 1994, 1, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (36, 'Introdução à Teoria da Computação', 'Michael Sipser', '978-0000000036', 2012, 3, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (37, 'Algoritmos: Teoria e Prática', 'Thomas H. Cormen', '978-0000000037', 2009, 3, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (38, 'Redes de Computadores', 'Andrew S. Tanenbaum', '978-0000000038', 2010, 5, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (39, 'Sistemas Operacionais Modernos', 'Andrew S. Tanenbaum', '978-0000000039', 2014, 4, 4, 4, '/images/capa-placeholder.png');
-INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (40, 'Inteligência Artificial', 'Stuart Russell', '978-0000000040', 2016, 3, 4, 4, '/images/capa-placeholder.png');
 
 -- História (Categoria ID: 5)
 INSERT INTO tb_livro (id, titulo, autor, isbn, ano_publicacao, edicao, categoria_id, estante_id, capa_url) VALUES (41, 'Sapiens: Uma Breve História da Humanidade', 'Yuval Noah Harari', '978-0000000041', 2011, 1, 5, 5, '/images/capa-placeholder.png');

@@ -6,68 +6,55 @@ import java.util.Optional;
 import org.iftm.biblioteca.entities.Categoria;
 import org.iftm.biblioteca.entities.Estante;
 import org.iftm.biblioteca.entities.Livro;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository; // Adicionar este import
+import org.springframework.stereotype.Repository;
 
-@Repository // Opcional, mas boa prática
+@Repository
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
-    Optional<Livro> findByTitulo(String titulo);
-    // Método para buscar livros por título, ignorando maiúsculas/minúsculas
-    // Exemplo: livroRepository.findByTituloContainingIgnoreCase("algum título")
-    // Isso permite buscar livros que contenham a string "algum título" em qualquer
-    // parte do título
-
-    List<Livro> findByTituloContainingIgnoreCase(String keyword);
-    // JpaRepository já fornece métodos como findAll(), findById(), save(),
-    // deleteById()
-    // Você pode adicionar métodos de consulta personalizados aqui se precisar
-    // Ex: List<Livro> findByTitulo(String titulo);
-
-    List<Livro> findByCategoriaNome(String nomeCategoria);
-
-    List<Livro> findByAutor(String autor);
-
+    // --- Métodos para validação e regras de negócio ---
     Optional<Livro> findByIsbn(String isbn);
-
-    List<Livro> findByCategoria(Categoria categoria);
-
-    List<Livro> findByAnoPublicacaoGreaterThanEqual(Integer anoMinimo);
-
-    int countByCategoria(Categoria categoria);
-
-    // Métodos relacionados à Estante
-    List<Livro> findByEstante(Estante estante);
-
-    List<Livro> findByEstanteNome(String nomeEstante);
-
-    int countByEstante(Estante estante);
-
+    long countByCategoria(Categoria categoria);
+    long countByEstante(Estante estante);
+    
+    // --- Métodos de busca não paginados (podem ser usados em outras partes do sistema) ---
     List<Livro> findByAnoPublicacaoGreaterThan(Integer ano);
-
-    // Método para busca geral por título, autor ou ISBN, com EAGER fetching para
-    // categoria e estante
-    @Query("SELECT l FROM Livro l LEFT JOIN FETCH l.categoria c LEFT JOIN FETCH l.estante e WHERE " +
-            "LOWER(l.titulo) LIKE LOWER(concat('%', :termo, '%')) OR " +
-            "LOWER(l.autor) LIKE LOWER(concat('%', :termo, '%')) OR " +
-            "LOWER(l.isbn) LIKE LOWER(concat('%', :termo, '%')) OR " +
-            "LOWER(c.nome) LIKE LOWER(concat('%', :termo, '%')) OR " +
-            "LOWER(e.nome) LIKE LOWER(concat('%', :termo, '%'))")
-    List<Livro> searchByTermoGeral(@Param("termo") String termo);
-
+    List<Livro> findByCategoria(Categoria categoria);
+    List<Livro> findByAutor(String autor); // Usado no Teste
+    List<Livro> findByCategoriaNome(String nomeCategoria); // Usado no Teste
+    List<Livro> findByTituloContainingIgnoreCase(String trechoTitulo);
+    List<Livro> findByAutorContainingIgnoreCase(String autor);
+    List<Livro> findByIsbnContainingIgnoreCase(String isbn);
+    List<Livro> findByCategoriaNomeContainingIgnoreCase(String nomeCategoria);
     List<Livro> findByEstanteNomeContainingIgnoreCase(String nomeEstante);
 
-    List<Livro> findByCategoriaNomeContainingIgnoreCase(String nomeCategoria);
+    // --- Métodos de busca paginados para o novo endpoint de search ---
+    Page<Livro> findByTituloContainingIgnoreCase(String titulo, Pageable pageable);
+    Page<Livro> findByAutorContainingIgnoreCase(String autor, Pageable pageable);
+    Page<Livro> findByIsbnContainingIgnoreCase(String isbn, Pageable pageable);
+    Page<Livro> findByCategoriaNomeContainingIgnoreCase(String nomeCategoria, Pageable pageable);
+    Page<Livro> findByEstanteNomeContainingIgnoreCase(String nomeEstante, Pageable pageable);
 
-    List<Livro> findByAutorContainingIgnoreCase(String autor);
+    // --- Busca Geral (Termo) ---
+    // Query para busca geral, usada tanto para Page quanto para List.
+    // Nota: A busca por categoria/estante na busca geral foi removida para simplificar e evitar joins complexos.
+    // A busca por categoria/estante agora é feita pelo filtro específico.
+    String SEARCH_QUERY = "SELECT l FROM Livro l WHERE " +
+            "LOWER(l.titulo) LIKE LOWER(concat('%', :termo, '%')) OR " +
+            "LOWER(l.autor) LIKE LOWER(concat('%', :termo, '%')) OR " +
+            "LOWER(l.isbn) LIKE LOWER(concat('%', :termo, '%'))";
 
-    List<Livro> findByIsbnContainingIgnoreCase(String isbn);
+    @Query(SEARCH_QUERY)
+    Page<Livro> searchByTermoGeral(@Param("termo") String termo, Pageable pageable);
+
+    @Query(SEARCH_QUERY)
+    List<Livro> searchByTermoGeral(@Param("termo") String termo);
 
     // --- Métodos para sugestões de autocomplete (limitados para performance) ---
-
     @Query("SELECT DISTINCT l.titulo FROM Livro l WHERE LOWER(l.titulo) LIKE LOWER(concat('%', :termo, '%')) ORDER BY l.titulo")
     List<String> findTitulosParaSugestao(@Param("termo") String termo, Pageable pageable);
 
@@ -77,7 +64,11 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     @Query("SELECT DISTINCT l.isbn FROM Livro l WHERE LOWER(l.isbn) LIKE LOWER(concat('%', :termo, '%')) ORDER BY l.isbn")
     List<String> findIsbnsParaSugestao(@Param("termo") String termo, Pageable pageable);
 
-    @Query("SELECT DISTINCT val FROM (SELECT l.titulo as val FROM Livro l WHERE LOWER(l.titulo) LIKE LOWER(concat('%', :termo, '%')) UNION SELECT a.autor as val FROM Livro a WHERE LOWER(a.autor) LIKE LOWER(concat('%', :termo, '%'))) ORDER BY val")
-    List<String> findAutoresOuTitulosParaSugestao(@Param("termo") String termo, Pageable pageable);
+    // Adicionado para buscar nomes de categorias para o autocomplete
+    @Query("SELECT DISTINCT c.nome FROM Livro l JOIN l.categoria c WHERE LOWER(c.nome) LIKE LOWER(concat('%', :termo, '%')) ORDER BY c.nome")
+    List<String> findNomesDeCategoriaParaSugestao(@Param("termo") String termo, Pageable pageable);
 
+    // Adicionado para buscar nomes de estantes para o autocomplete
+    @Query("SELECT DISTINCT e.nome FROM Livro l JOIN l.estante e WHERE LOWER(e.nome) LIKE LOWER(concat('%', :termo, '%')) ORDER BY e.nome")
+    List<String> findNomesDeEstanteParaSugestao(@Param("termo") String termo, Pageable pageable);
 }
