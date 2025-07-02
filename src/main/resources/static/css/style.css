@@ -594,7 +594,26 @@ form {
     color: var(--cor-texto-primario);
 }
 
-#livrosTable tbody tr:hover {
+/* Tabela de Estantes (mais simples que a de livros) */
+#estantesTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+#estantesTable th:nth-child(1), #estantesTable td:nth-child(1) { width: 15%; } /* ID */
+#estantesTable th:nth-child(2), #estantesTable td:nth-child(2) { width: 60%; } /* Nome */
+#estantesTable th:nth-child(3), #estantesTable td:nth-child(3) { width: 25%; text-align: center; } /* Ações */
+
+/* Estilo para a célula de nome da estante com ícone */
+#estantesTable td:nth-child(2) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: var(--cor-texto-primario);
+}
+
+#livrosTable tbody tr:hover,
+#estantesTable tbody tr:hover {
     background-color: #e9eef5;
 }
 
@@ -713,6 +732,7 @@ form {
 /* ==================================================================== */
 /* --- 6. REGRAS PARA TELAS MENORES (RESPONSIVIDADE) ---              */
 /* ==================================================================== */
+
 @media (max-width: 1024px) { /* Aumentando o breakpoint para tablets */
     .gerenciar-container {
         max-width: 100%;

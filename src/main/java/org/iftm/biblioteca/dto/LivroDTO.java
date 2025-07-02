@@ -31,7 +31,7 @@ public class LivroDTO {
     private String categoriaNome;
 
     @NotNull(message = "Estante é obrigatória.")
-    private Long estanteId;
+    private String estanteId;
     private String estanteNome;
 
     public LivroDTO() {
@@ -75,8 +75,8 @@ public class LivroDTO {
     public void setCategoriaId(Long categoriaId) { this.categoriaId = categoriaId; }
     public String getCategoriaNome() { return categoriaNome; }
     public void setCategoriaNome(String categoriaNome) { this.categoriaNome = categoriaNome; }
-    public Long getEstanteId() { return estanteId; }
-    public void setEstanteId(Long estanteId) { this.estanteId = estanteId; }
+    public String getEstanteId() { return estanteId; }
+    public void setEstanteId(String estanteId) { this.estanteId = estanteId; }
     public String getEstanteNome() { return estanteNome; }
     public void setEstanteNome(String estanteNome) { this.estanteNome = estanteNome; }
 }

@@ -1,26 +1,33 @@
 package org.iftm.biblioteca.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import java.io.Serializable;
 
-public class EstanteDTO {
+import org.iftm.biblioteca.entities.Estante;
 
-    @NotBlank(message = "Nome da estante não pode ser vazio.")
-    @Size(min = 2, max = 50, message = "Nome da estante deve ter entre 2 e 50 caracteres.")
+public class EstanteDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String id;
     private String nome;
 
     public EstanteDTO() {
     }
 
-    public EstanteDTO(String nome) {
+    public EstanteDTO(String id, String nome) {
+        this.id = id;
         this.nome = nome;
+    }
+
+    public EstanteDTO(Estante entity) {
+        this.id = entity.getId();
+        this.nome = entity.getNome();
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getNome() {
         return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 }

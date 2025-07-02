@@ -492,7 +492,7 @@
                 edicao: parseInt(edicaoInput.value) || 1,
                 capaUrl: capaUrlInput.value || null, // Envia nulo se vazio
                 categoriaId: parseInt(categoriaSelect.value),
-                estanteId: parseInt(estanteSelect.value)
+                estanteId: estanteSelect.value // O ID da estante agora é uma String (ex: "E001")
             };
 
             const method = id ? 'PUT' : 'POST';

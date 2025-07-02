@@ -1,217 +1,236 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
-    <title>Minha Estante</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Estantes - Biblioteca do IFTM</title>
 
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: 20px auto;
-        }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@700&display=swap"
+        rel="stylesheet">
 
-        h1 {
-            color: #333;
-        }
+    <!-- Usar caminho relativo para o CSS -->
+    <link rel="stylesheet" href="/css/style.css">
 
-        nav {
-            background-color: #333;
-            padding: 10px 0;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        /* Estilos para formulário e tabela */
-        .form-container,
-        .table-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="number"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        button.edit-btn {
-            background-color: #ffc107;
-        }
-
-        button.edit-btn:hover {
-            background-color: #e0a800;
-        }
-
-        button.delete-btn {
-            background-color: #dc3545;
-        }
-
-        button.delete-btn:hover {
-            background-color: #c82333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/categorias.html">Categorias</a>
-        <a href="/livros.html">Livros</a>
-        <a href="/estante.html">Estante</a>
+    <nav class="navegacao-principal">
+        <ul>
+            <!-- Links sem Thymeleaf para funcionar como arquivos estáticos -->
+            <li><a href="/">Home</a></li>
+            <li><a href="/livros.html">Livros</a></li>
+            <li><a href="/categorias.html">Categoria</a></li>
+            <li><a href="/estante.html">Estante</a></li>
+        </ul>
     </nav>
 
-    <div class="container">
-        <h1>Minha Estante Virtual</h1>
+    <main>
+        <section class="cartao cartao-apresentacao">
+            <div class="coluna-texto">
+                <h1>Gerenciar Estantes</h1>
+                <p class="slogan">Adicione, edite, busque e remova estantes do acervo.</p>
+            </div>
+            <div class="coluna-logo">
+                <img src="/images/logo-iftm.png" alt="Logo IFTM">
+            </div>
+        </section>
 
-        <div class="form-container">
-            <h2>Adicionar/Editar Estante</h2>
-            <form id="estanteForm">
-                <input type="hidden" id="estanteId">
-                <div>
-                    <label for="nomeEstante">Nome da Estante:</label>
-                    <input type="text" id="nomeEstante" required>
+        <section class="cartao cartao-busca">
+            <div class="barra-busca-container">
+                <i class="fa-solid fa-magnifying-glass icone-principal"></i>
+                <div class="input-wrapper">
+                    <input type="text" id="termoBusca" placeholder="Busque pelo nome da estante...">
                 </div>
-                <button type="submit">Salvar</button>
-                <button type="button" onclick="resetEstanteForm()">Limpar</button>
-            </form>
-        </div>
+            </div>
+            <div class="botoes-acao-container">
+                <button id="btnBuscar" class="botao-secundario" title="Realizar a busca pelo nome"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
+                <button id="btnLimparBusca" class="botao-secundario" title="Limpar o campo de busca e os resultados"><i
+                        class="fa-solid fa-broom"></i><span>Limpar</span></button>
+                <button id="btnAdicionarEstante" class="botao-principal"
+                     title="Abrir formulário para adicionar uma nova estante"><i
+                         class="fa-solid fa-plus"></i><span>Adicionar Estante</span></button>
+            </div>
+        </section>
 
-        <div class="table-container">
-            <h2>Lista de Estantes</h2>
-            <table id="estantesTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Linhas da tabela serão inseridas aqui -->
-                </tbody>
-            </table>
+        <section class="cartao cartao-gerenciar">
+            <h2><i class="fa-solid fa-list"></i> Lista de Estantes</h2>
+            <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhuma estante
+                encontrada.</div>
+            <div class="table-wrapper">
+                <table id="estantesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas da tabela serão geradas pelo JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para Adicionar/Editar Estante -->
+    <div id="formModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Adicionar Nova Estante</h2>
+                <button id="btnFecharModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="estanteForm" class="gerenciar-form">
+                    <input type="hidden" id="estanteId">
+                    <div class="form-group">
+                        <label for="nomeEstante">Nome da Estante:</label>
+                        <input type="text" id="nomeEstante" name="nome" class="form-input" required minlength="2" maxlength="100">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-principal">
+                            <i class="fa-solid fa-floppy-disk"></i><span>Salvar</span>
+                        </button>
+                        <button type="button" class="botao-secundario" id="btnLimparForm">
+                            <i class="fa-solid fa-eraser"></i><span>Limpar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-    const estantesApiUrl = 'http://localhost:8080/api/estantes'; // Corrigido para "estantes" (plural)
+        // URLs da API (usando caminho relativo para portabilidade)
+        const estantesApiUrl = '/api/estantes';
+
+        // Elementos do DOM
+        const termoBuscaInput = document.getElementById('termoBusca');
+        const estantesTableBody = document.getElementById('estantesTable').getElementsByTagName('tbody')[0];
+        const btnBuscar = document.getElementById('btnBuscar');
+        const btnLimparBusca = document.getElementById('btnLimparBusca');
+        const listaVaziaMsg = document.getElementById('listaVaziaMsg');
+
+        // Elementos do Modal e Formulário
+        const modal = document.getElementById('formModal');
+        const modalTitulo = document.getElementById('modalTitulo');
+        const btnFecharModal = document.getElementById('btnFecharModal');
+        const btnAdicionarEstante = document.getElementById('btnAdicionarEstante');
+        const btnLimparForm = document.getElementById('btnLimparForm');
 
         const estanteForm = document.getElementById('estanteForm');
         const estanteIdInput = document.getElementById('estanteId');
-        const nomeEstanteInput = document.getElementById('nomeEstante');
-        const estantesTableBody = document.getElementById('estantesTable').getElementsByTagName('tbody')[0];
+        const nomeInput = document.getElementById('nomeEstante');
 
-        document.addEventListener('DOMContentLoaded', loadEstantes);
+        // --- LÓGICA PRINCIPAL ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEstantes();
+            btnBuscar.addEventListener('click', buscarEstantes);
+            btnLimparBusca.addEventListener('click', limparBusca);
 
-        async function loadEstantes() {
+            // Listeners do Modal
+            btnAdicionarEstante.addEventListener('click', openModalForAdd);
+            btnFecharModal.addEventListener('click', closeModal);
+            btnLimparForm.addEventListener('click', resetForm);
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeModal();
+            });
+            estanteForm.addEventListener('submit', handleFormSubmit);
+        });
+
+        // --- FUNÇÕES DE BUSCA E RENDERIZAÇÃO ---
+        function buscarEstantes() {
+            const termo = termoBuscaInput.value.trim();
+            loadEstantes(termo);
+        }
+
+        function limparBusca() {
+            termoBuscaInput.value = '';
+            loadEstantes();
+        }
+
+        async function loadEstantes(nome = '') {
+            let url = estantesApiUrl;
+            if (nome) {
+                url += `?nome=${encodeURIComponent(nome)}`;
+            }
+
             try {
-                const response = await fetch(estantesApiUrl);
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Erro na requisição: ${response.status}`);
                 const estantes = await response.json();
-                estantesTableBody.innerHTML = '';
-                estantes.forEach(estante => {
-                    const row = estantesTableBody.insertRow();
-                    row.insertCell().textContent = estante.id;
-                    row.insertCell().textContent = estante.nome; // Assumindo que 'estante' tem 'nome'
-
-                    const actionsCell = row.insertCell();
-                    const editButton = document.createElement('button');
-                    editButton.textContent = 'Editar';
-                    editButton.classList.add('edit-btn');
-                    editButton.onclick = () => editEstante(estante);
-                    actionsCell.appendChild(editButton);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Excluir';
-                    deleteButton.classList.add('delete-btn');
-                    deleteButton.onclick = () => deleteEstante(estante.id);
-                    actionsCell.appendChild(deleteButton);
-                });
+                renderEstantes(estantes);
             } catch (error) {
                 console.error('Erro ao carregar estantes:', error);
-                alert('Não foi possível carregar as estantes.');
+                alert('Não foi possível carregar as estantes. Verifique o console.');
             }
         }
 
-        estanteForm.addEventListener('submit', async function (event) {
+        function renderEstantes(estantes) {
+            estantesTableBody.innerHTML = '';
+            const tableWrapper = document.querySelector('.table-wrapper');
+
+            if (!estantes || estantes.length === 0) {
+                listaVaziaMsg.style.display = 'block';
+                tableWrapper.style.display = 'none';
+            } else {
+                listaVaziaMsg.style.display = 'none';
+                tableWrapper.style.display = 'block';
+                estantes.forEach(estante => {
+                    const row = estantesTableBody.insertRow();
+                    row.insertCell().textContent = estante.id; // Célula do ID
+
+                    const nomeCell = row.insertCell(); // Célula do Nome com ícone
+                    nomeCell.innerHTML = `<i class="fa-solid fa-box-archive"></i><span>${estante.nome}</span>`;
+
+                    const actionsCell = row.insertCell();
+                    actionsCell.innerHTML = `
+                        <button class="botao-acao editar" title="Editar" onclick='openModalForEdit(${JSON.stringify(estante)})'><i class="fa-solid fa-pencil"></i></button>
+                        <button class="botao-acao excluir" title="Excluir" onclick="deleteEstante('${estante.id}')"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                });
+            }
+        }
+
+        // --- FUNÇÕES DO MODAL E FORMULÁRIO ---
+        function openModalForAdd() {
+            resetForm();
+            modalTitulo.textContent = 'Adicionar Nova Estante';
+            modal.style.display = 'flex';
+        }
+
+        function openModalForEdit(estante) {
+            resetForm();
+            modalTitulo.textContent = `Editar Estante: ${estante.nome}`;
+            estanteIdInput.value = estante.id;
+            nomeInput.value = estante.nome;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function resetForm() {
+            estanteForm.reset();
+            estanteIdInput.value = '';
+            document.querySelector('.error-message').textContent = '';
+        }
+
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const id = estanteIdInput.value;
-            const estanteData = {
-                nome: nomeEstanteInput.value
-            };
+            const estanteData = { nome: nomeInput.value };
 
-            let method = 'POST';
-            let url = estantesApiUrl;
-
-            if (id) {
-                method = 'PUT';
-                url += `/${id}`;
-                estanteData.id = parseInt(id);
-            }
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${estantesApiUrl}/${id}` : estantesApiUrl;
 
             try {
                 const response = await fetch(url, {
@@ -219,42 +238,44 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(estanteData)
                 });
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-                resetEstanteForm();
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    if (errorData && errorData.message) {
+                        throw new Error(errorData.message);
+                    }
+                    throw new Error(`Erro ${response.status}: Não foi possível salvar.`);
+                }
+
+                closeModal();
                 loadEstantes();
                 alert(`Estante ${id ? 'atualizada' : 'salva'} com sucesso!`);
+
             } catch (error) {
                 console.error('Erro ao salvar estante:', error);
-                alert('Erro ao salvar estante.');
+                alert(`Erro ao salvar a estante:\n${error.message}`);
             }
-        });
-
-        function editEstante(estante) {
-            estanteIdInput.value = estante.id;
-            nomeEstanteInput.value = estante.nome;
         }
 
+        // --- FUNÇÃO DE DELEÇÃO ---
         async function deleteEstante(id) {
             if (!confirm(`Tem certeza que deseja excluir a estante ID ${id}?`)) return;
+
             try {
                 const response = await fetch(`${estantesApiUrl}/${id}`, { method: 'DELETE' });
+
                 if (!response.ok) {
-                    // Extrai a mensagem de erro do backend para exibir ao usuário
                     const errorData = await response.json().catch(() => null);
                     const errorMessage = errorData?.message || `Erro ${response.status}: Não foi possível excluir a estante.`;
                     throw new Error(errorMessage);
                 }
+
                 loadEstantes();
                 alert('Estante excluída com sucesso!');
             } catch (error) {
-                console.error(`Erro ao excluir estante ${id}:`, error);
+                console.error('Erro ao excluir estante:', error);
                 alert(`Erro ao excluir a estante:\n${error.message}`);
             }
-        }
-
-        function resetEstanteForm() {
-            estanteForm.reset();
-            estanteIdInput.value = '';
         }
     </script>
 </body>

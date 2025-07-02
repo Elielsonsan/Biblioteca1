@@ -2,120 +2,102 @@ package org.iftm.biblioteca.service.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.iftm.biblioteca.dto.EstanteDTO;
 import org.iftm.biblioteca.entities.Estante;
 import org.iftm.biblioteca.repository.EstanteRepository;
 import org.iftm.biblioteca.repository.LivroRepository;
-import org.iftm.biblioteca.service.EstanteService;
+import org.iftm.biblioteca.service.exceptions.EstanteComLivrosException;
 import org.iftm.biblioteca.service.exceptions.NomeDuplicadoException;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
-import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
-public class EstanteServiceImpl implements EstanteService {
+public class EstanteServiceImpl { // Adapte para implementar sua interface de serviço
 
-    private final EstanteRepository estanteRepository;
-    private final LivroRepository livroRepository; // Para verificar livros associados na exclusão
+    @Autowired
+    private EstanteRepository estanteRepository;
 
-    // Injeção de dependência via construtor (melhor prática)
-    public EstanteServiceImpl(EstanteRepository estanteRepository, LivroRepository livroRepository) {
-        this.estanteRepository = estanteRepository;
-        this.livroRepository = livroRepository;
+    @Autowired
+    private LivroRepository livroRepository;
+
+    @Transactional(readOnly = true)
+    public List<EstanteDTO> findAll() {
+        return estanteRepository.findAll().stream().map(EstanteDTO::new).collect(Collectors.toList());
     }
-    
-    private void verificarNomeDuplicado(String nome, Long idAtual) {
-        Optional<Estante> estanteExistente = estanteRepository.findByNome(nome); // Assumindo que findByNome é
-                                                                                 // case-sensitive ou ajustado conforme
-                                                                                 // regra
-        if (estanteExistente.isPresent() &&
-                (idAtual == null || !estanteExistente.get().getId().equals(idAtual))) {
+
+    @Transactional(readOnly = true)
+    public List<EstanteDTO> findByNome(String nome) {
+        // Utiliza o método do repositório para uma busca eficiente no banco de dados
+        return estanteRepository.findByNomeContainingIgnoreCase(nome).stream()
+                .map(EstanteDTO::new) // Converte cada Estante encontrada para EstanteDTO
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public EstanteDTO insert(EstanteDTO dto) {
+        verificarNomeDuplicado(dto.getNome(), null);
+        Estante entity = new Estante();
+        entity.setId(gerarProximoId()); // Lógica para gerar o novo ID
+        entity.setNome(dto.getNome());
+        entity = estanteRepository.save(entity);
+        return new EstanteDTO(entity);
+    }
+
+    @Transactional
+    public EstanteDTO update(String id, EstanteDTO dto) {
+        try {
+            verificarNomeDuplicado(dto.getNome(), id);
+            Estante entity = estanteRepository.getReferenceById(id);
+            entity.setNome(dto.getNome());
+            entity = estanteRepository.save(entity);
+            return new EstanteDTO(entity);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            throw new RecursoNaoEncontradoException("Estante não encontrada com ID: " + id + " para atualização.");
+        }
+    }
+
+    @Transactional
+    public void delete(String id) {
+        // Busca a estante para garantir que ela existe antes de verificar os livros
+        Estante estante = estanteRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Estante não encontrada com ID: " + id));
+
+        // Utiliza o livroRepository para verificar se existem livros associados a esta estante
+        if (livroRepository.countByEstante(estante) > 0) {
+            throw new EstanteComLivrosException("Não é possível excluir a estante '" + estante.getNome()
+                    + "' pois ela possui livros associados.");
+        }
+
+        estanteRepository.deleteById(id); // Exclui apenas se não houver livros
+    }
+
+    private void verificarNomeDuplicado(String nome, String idAtual) {
+        Optional<Estante> estanteExistente = estanteRepository.findByNomeIgnoreCase(nome);
+        if (estanteExistente.isPresent() && !estanteExistente.get().getId().equals(idAtual)) {
             throw new NomeDuplicadoException("Já existe uma estante com o nome: " + nome);
         }
     }
 
-    @Override
-    @Transactional
-    public Estante salvarNovaEstante(EstanteDTO estanteDTO) {
-        // Validações básicas são feitas pelo @Valid no DTO.
-        verificarNomeDuplicado(estanteDTO.getNome(), null);
-
-        Estante estante = new Estante();
-        estante.setNome(estanteDTO.getNome());
-        return estanteRepository.save(estante);
-    }
-
-    // @Override // Removido pois o método está comentado na interface
-    // EstanteService
-    @Transactional
-    public List<Estante> salvarTodasEstantes(List<EstanteDTO> estanteDTOs) {
-        // Implementação de lote com DTOs requer mapeamento e validação individual.
-        // Por simplicidade, esta funcionalidade pode ser reavaliada ou implementada com
-        // mais detalhes.
-        throw new UnsupportedOperationException("Batch save from DTOs not fully implemented yet.");
-    }
-
-    @Override
-    @Transactional
-    public Estante atualizarEstante(Long id, EstanteDTO estanteDTO) {
-        return estanteRepository.findById(id).map(estanteExistente -> {
-            // Validações básicas são feitas pelo @Valid no DTO.
-            verificarNomeDuplicado(estanteDTO.getNome(), id);
-            estanteExistente.setNome(estanteDTO.getNome());
-            return estanteRepository.save(estanteExistente);
-        }).orElseThrow(() -> new RecursoNaoEncontradoException("Estante não encontrada com ID: " + id));
-    }
-
-    @Override
-    @Transactional
-    public void apagarEstantePorId(Long id) {
-        Estante estante = estanteRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException(
-                        "Estante não encontrada com ID: " + id + " para exclusão."));
-
-        if (livroRepository.countByEstante(estante) > 0) {
-            throw new RegraDeNegocioException(
-                    "Não é possível excluir a estante '" + estante.getNome() + "' pois ela possui livros associados.");
+    /**
+     * Gera o próximo ID para uma estante no formato "E001", "E002", etc.
+     * Este método é sincronizado para evitar condições de corrida em ambientes concorrentes.
+     * @return O próximo ID formatado como String.
+     */
+    private synchronized String gerarProximoId() {
+        Optional<Estante> ultimaEstante = estanteRepository.findTopByOrderByIdDesc();
+        if (ultimaEstante.isPresent()) {
+            String ultimoId = ultimaEstante.get().getId();
+            // Remove o prefixo "E" e converte o restante para número
+            int proximoNumero = Integer.parseInt(ultimoId.substring(1)) + 1;
+            // Formata de volta para "E" com 3 dígitos, preenchendo com zeros à esquerda
+            return String.format("E%03d", proximoNumero);
+        } else {
+            // Se não houver nenhuma estante no banco, começa com "E001"
+            return "E001";
         }
-        try {
-            estanteRepository.deleteById(id);
-            estanteRepository.flush(); // Força a execução do SQL para capturar a exceção aqui mesmo.
-        } catch (DataIntegrityViolationException e) {
-            // Este bloco atua como uma segunda camada de proteção caso a verificação acima falhe.
-            // Ele traduz o erro genérico do banco de dados em uma exceção de negócio clara.
-            throw new RegraDeNegocioException(
-                    "Não é possível excluir a estante '" + estante.getNome() + "' pois ela possui livros associados.");
-        }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Estante> buscarTodas() {
-        return estanteRepository.findAll();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<Estante> buscarPorId(Long id) {
-        return estanteRepository.findById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<Estante> buscarPorNomeExato(String nome) {
-        if (!StringUtils.hasText(nome)) {
-            throw new RegraDeNegocioException("Nome para busca não pode ser vazio.");
-        }
-        return estanteRepository.findByNome(nome);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public long contarEstantes() {
-        return estanteRepository.count();
     }
 }

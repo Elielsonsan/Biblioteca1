@@ -1,15 +1,15 @@
 package org.iftm.biblioteca.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.iftm.biblioteca.entities.Estante;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public interface EstanteRepository extends JpaRepository<Estante, Long> {
+public interface EstanteRepository extends JpaRepository<Estante, String> {
+    List<Estante> findByNomeContainingIgnoreCase(String nome);
 
-    Optional<Estante> findByNome(String nome);
-    // JpaRepository já fornece os métodos básicos de CRUD.
-    // Métodos personalizados podem ser adicionados aqui se necessário.
+    Optional<Estante> findByNomeIgnoreCase(String nome);
+
+    Optional<Estante> findTopByOrderByIdDesc();
 }
