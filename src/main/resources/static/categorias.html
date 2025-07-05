@@ -1,180 +1,269 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
-    <title>Categorias de Livros</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Categorias - Biblioteca do IFTM</title>
 
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: 20px auto;
-        }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@700&display=swap"
+        rel="stylesheet">
 
-        h1 {
-            color: #333;
-        }
+    <!-- Usar caminho relativo para o CSS -->
+    <link rel="stylesheet" href="/css/style.css">
 
-        nav {
-            background-color: #333;
-            padding: 10px 0;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        nav a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
-
-        /* Estilos para formulário e tabela */
-        .form-container, .table-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="number"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-        button:hover { background-color: #0056b3; }
-        button.edit-btn { background-color: #ffc107; }
-        button.edit-btn:hover { background-color: #e0a800; }
-        button.delete-btn { background-color: #dc3545; }
-        button.delete-btn:hover { background-color: #c82333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/categorias.html">Categorias</a>
-        <a href="/livros.html">Livros</a>
-        <a href="/estante.html">Estante</a>
+    <nav class="navegacao-principal">
+        <ul>
+            <!-- Links sem Thymeleaf para funcionar como arquivos estáticos -->
+            <li><a href="/">Home</a></li>
+            <li><a href="/livros.html">Livros</a></li>
+            <li><a href="/categorias.html">Categoria</a></li>
+            <li><a href="/estante.html">Estante</a></li>
+        </ul>
     </nav>
 
-    <div class="container">
-        <h1>Categorias de Livros</h1>
+    <main>
+        <section class="cartao cartao-apresentacao">
+            <div class="coluna-texto">
+                <h1>Gerenciar Categorias</h1>
+                <p class="slogan">Adicione, edite, busque e remova categorias de livros.</p>
+            </div>
+            <div class="coluna-logo">
+                <img src="/images/logo-iftm.png" alt="Logo IFTM">
+            </div>
+        </section>
 
-        <div class="form-container">
-            <h2>Adicionar/Editar Categoria</h2>
-            <form id="categoriaForm">
-                <input type="hidden" id="categoriaId">
-                <div>
-                    <label for="nomeCategoria">Nome da Categoria:</label>
-                    <input type="text" id="nomeCategoria" required minlength="3" maxlength="50">
+        <section class="cartao cartao-gerenciar">
+            <div class="gerenciar-header">
+                <h2><i class="fa-solid fa-list"></i> Lista de Categorias</h2>
+                <div class="header-botoes-acao">
+                    <button id="btnAbrirBuscaModal" class="botao-secundario" title="Buscar categoria">
+                        <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                    </button>
+                    <button id="btnAdicionarCategoria" class="botao-principal"
+                        title="Abrir formulário para adicionar uma nova categoria"><i
+                            class="fa-solid fa-plus"></i><span>Adicionar Categoria</span></button>
                 </div>
-                <button type="submit">Salvar</button>
-                <button type="button" onclick="resetForm()">Limpar</button>
-            </form>
-        </div>
+            </div>
+            <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhuma categoria
+                encontrada.</div>
+            <div class="table-wrapper">
+                <table id="categoriasTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas da tabela serão geradas pelo JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 
-        <div class="table-container">
-            <h2>Lista de Categorias</h2>
-            <table id="categoriasTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Linhas da tabela serão inseridas aqui pelo JavaScript -->
-                </tbody>
-            </table>
+    <!-- Modal para Adicionar/Editar Categoria -->
+    <div id="formModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Adicionar Nova Categoria</h2>
+                <button id="btnFecharModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoriaForm" class="gerenciar-form">
+                    <input type="hidden" id="categoriaId">
+                    <div class="form-group">
+                        <label for="nomeCategoria">Nome da Categoria:</label>
+                        <input type="text" id="nomeCategoria" name="nome" class="form-input" required minlength="2" maxlength="100">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-principal">
+                            <i class="fa-solid fa-floppy-disk"></i><span>Salvar</span>
+                        </button>
+                        <button type="button" class="botao-secundario" id="btnLimparForm">
+                            <i class="fa-solid fa-eraser"></i><span>Limpar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Busca -->
+    <div id="searchModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="searchModalTitulo">Buscar Categoria</h2>
+                <button id="btnFecharBuscaModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="searchForm" class="gerenciar-form" onsubmit="event.preventDefault(); buscarCategorias();">
+                    <div class="form-group">
+                        <label for="termoBuscaModal">Nome da Categoria:</label>
+                        <input type="text" id="termoBuscaModal" class="form-input" placeholder="Digite o nome para buscar...">
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-secundario">
+                            <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                        </button>
+                        <button type="button" class="botao-secundario" id="btnLimparBuscaModal">
+                            <i class="fa-solid fa-broom"></i><span>Limpar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-    const apiUrl = 'http://localhost:8080/api/categorias'; // Ajustado para /api/categorias
-        const form = document.getElementById('categoriaForm');
-        const categoriaIdInput = document.getElementById('categoriaId');
-        const nomeCategoriaInput = document.getElementById('nomeCategoria');
+        // URLs da API (usando caminho relativo para portabilidade)
+        const categoriasApiUrl = '/api/categorias';
+
+        // Elementos do DOM
         const categoriasTableBody = document.getElementById('categoriasTable').getElementsByTagName('tbody')[0];
+        const listaVaziaMsg = document.getElementById('listaVaziaMsg');
 
-        // Carregar categorias ao iniciar a página
-        document.addEventListener('DOMContentLoaded', loadCategorias);
+        // Elementos do Modal e Formulário
+        const modal = document.getElementById('formModal');
+        const modalTitulo = document.getElementById('modalTitulo');
+        const btnFecharModal = document.getElementById('btnFecharModal');
+        const btnAdicionarCategoria = document.getElementById('btnAdicionarCategoria');
+        const btnLimparForm = document.getElementById('btnLimparForm');
 
-        async function loadCategorias() {
+        const categoriaForm = document.getElementById('categoriaForm');
+        const categoriaIdInput = document.getElementById('categoriaId');
+        const nomeInput = document.getElementById('nomeCategoria');
+
+        // Elementos do Modal de Busca
+        const searchModal = document.getElementById('searchModal');
+        const btnAbrirBuscaModal = document.getElementById('btnAbrirBuscaModal');
+        const btnFecharBuscaModal = document.getElementById('btnFecharBuscaModal');
+        const termoBuscaModalInput = document.getElementById('termoBuscaModal');
+        const btnLimparBuscaModal = document.getElementById('btnLimparBuscaModal');
+
+        // --- LÓGICA PRINCIPAL ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategorias();
+
+            // Listeners do Modal de Adicionar/Editar
+            btnAdicionarCategoria.addEventListener('click', openModalForAdd);
+            btnFecharModal.addEventListener('click', closeModal);
+            btnLimparForm.addEventListener('click', resetForm);
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeModal();
+            });
+            categoriaForm.addEventListener('submit', handleFormSubmit);
+
+            // Listeners do Modal de Busca
+            btnAbrirBuscaModal.addEventListener('click', () => searchModal.style.display = 'flex');
+            btnFecharBuscaModal.addEventListener('click', () => searchModal.style.display = 'none');
+            searchModal.addEventListener('click', (event) => {
+                if (event.target === searchModal) searchModal.style.display = 'none';
+            });
+            btnLimparBuscaModal.addEventListener('click', limparBusca);
+        });
+
+        // --- FUNÇÕES DE BUSCA E RENDERIZAÇÃO ---
+        function buscarCategorias() {
+            const termo = termoBuscaModalInput.value.trim();
+            loadCategorias(termo);
+            searchModal.style.display = 'none'; // Fecha o modal após a busca
+        }
+
+        function limparBusca() {
+            termoBuscaModalInput.value = '';
+            loadCategorias();
+        }
+
+        async function loadCategorias(nome = '') {
+            let url = categoriasApiUrl;
+            if (nome) {
+                url += `?nome=${encodeURIComponent(nome)}`;
+            }
+
             try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Erro na requisição: ${response.status}`);
                 const categorias = await response.json();
-
-                categoriasTableBody.innerHTML = ''; // Limpa a tabela
-                categorias.forEach(cat => {
-                    const row = categoriasTableBody.insertRow();
-                    row.insertCell().textContent = cat.id;
-                    row.insertCell().textContent = cat.nome;
-
-                    const actionsCell = row.insertCell();
-                    const editButton = document.createElement('button');
-                    editButton.textContent = 'Editar';
-                    editButton.classList.add('edit-btn');
-                    editButton.onclick = () => editCategoria(cat);
-                    actionsCell.appendChild(editButton);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Excluir';
-                    deleteButton.classList.add('delete-btn');
-                    deleteButton.onclick = () => deleteCategoria(cat.id);
-                    actionsCell.appendChild(deleteButton);
-                });
+                renderCategorias(categorias);
             } catch (error) {
                 console.error('Erro ao carregar categorias:', error);
-                alert('Não foi possível carregar as categorias.');
+                alert('Não foi possível carregar as categorias. Verifique o console.');
             }
         }
 
-        form.addEventListener('submit', async function(event) {
+        function renderCategorias(categorias) {
+            categoriasTableBody.innerHTML = '';
+            const tableWrapper = document.querySelector('.table-wrapper');
+
+            if (!categorias || categorias.length === 0) {
+                listaVaziaMsg.style.display = 'block';
+                tableWrapper.style.display = 'none';
+            } else {
+                listaVaziaMsg.style.display = 'none';
+                tableWrapper.style.display = 'block';
+                categorias.forEach(categoria => {
+                    const row = categoriasTableBody.insertRow();
+                    row.insertCell().textContent = categoria.id; // Célula do ID
+
+                    const nomeCell = row.insertCell(); // Célula do Nome com ícone
+                    nomeCell.innerHTML = `<div class="nome-cell-content"><i class="fa-solid fa-tags"></i><span>${categoria.nome}</span></div>`;
+
+                    const actionsCell = row.insertCell();
+                    actionsCell.innerHTML = `
+                        <button class="botao-acao editar" title="Editar" onclick='openModalForEdit(${JSON.stringify(categoria)})'><i class="fa-solid fa-pencil"></i></button>
+                        <button class="botao-acao excluir" title="Excluir" onclick="deleteCategoria('${categoria.id}')"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                });
+            }
+        }
+
+        // --- FUNÇÕES DO MODAL E FORMULÁRIO ---
+        function openModalForAdd() {
+            resetForm();
+            modalTitulo.textContent = 'Adicionar Nova Categoria';
+            modal.style.display = 'flex';
+        }
+
+        function openModalForEdit(categoria) {
+            resetForm();
+            modalTitulo.textContent = `Editar Categoria: ${categoria.nome}`;
+            categoriaIdInput.value = categoria.id;
+            nomeInput.value = categoria.nome;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function resetForm() {
+            categoriaForm.reset();
+            categoriaIdInput.value = '';
+            const errorMessageDiv = document.querySelector('#categoriaForm .error-message');
+            if (errorMessageDiv) {
+                errorMessageDiv.textContent = '';
+            }
+        }
+
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const id = categoriaIdInput.value;
-            const nome = nomeCategoriaInput.value;
+            const categoriaData = { nome: nomeInput.value };
 
-            const categoriaData = { nome };
-            let method = 'POST';
-            let url = apiUrl;
-
-            if (id) { // Se tem ID, é uma atualização (PUT)
-                method = 'PUT';
-                url += `/${id}`;
-                categoriaData.id = parseInt(id);
-            }
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${categoriasApiUrl}/${id}` : categoriasApiUrl;
 
             try {
                 const response = await fetch(url, {
@@ -184,46 +273,42 @@
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+                    const errorData = await response.json().catch(() => null);
+                    if (errorData && errorData.message) {
+                        throw new Error(errorData.message);
+                    }
+                    throw new Error(`Erro ${response.status}: Não foi possível salvar.`);
                 }
-                
-                resetForm();
+
+                closeModal();
                 loadCategorias();
                 alert(`Categoria ${id ? 'atualizada' : 'salva'} com sucesso!`);
+
             } catch (error) {
                 console.error('Erro ao salvar categoria:', error);
-                alert(`Erro ao salvar categoria: ${error.message}`);
+                alert(`Erro ao salvar a categoria:\n${error.message}`);
             }
-        });
-
-        function editCategoria(categoria) {
-            categoriaIdInput.value = categoria.id;
-            nomeCategoriaInput.value = categoria.nome;
         }
 
+        // --- FUNÇÃO DE DELEÇÃO ---
         async function deleteCategoria(id) {
             if (!confirm(`Tem certeza que deseja excluir a categoria ID ${id}?`)) return;
 
             try {
-                const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+                const response = await fetch(`${categoriasApiUrl}/${id}`, { method: 'DELETE' });
+
                 if (!response.ok) {
-                    // Tenta extrair uma mensagem de erro do corpo da resposta da API
-                    const errorData = await response.json().catch(() => ({ message: `Erro HTTP: ${response.status}` }));
-                    throw new Error(errorData.message || 'Não foi possível excluir o recurso.');
+                    const errorData = await response.json().catch(() => null);
+                    const errorMessage = errorData?.message || `Erro ${response.status}: Não foi possível excluir a categoria.`;
+                    throw new Error(errorMessage);
                 }
+
                 loadCategorias();
                 alert('Categoria excluída com sucesso!');
             } catch (error) {
-                console.error(`Erro ao excluir categoria ${id}:`, error);
-                // Exibe a mensagem de erro específica para o usuário
-                alert(`Erro ao excluir categoria: ${error.message}`);
+                console.error('Erro ao excluir categoria:', error);
+                alert(`Erro ao excluir a categoria:\n${error.message}`);
             }
-        }
-
-        function resetForm() {
-            form.reset();
-            categoriaIdInput.value = ''; // Garante que o ID oculto seja limpo
         }
     </script>
 </body>

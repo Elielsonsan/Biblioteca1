@@ -328,25 +328,23 @@ public class LivroServiceImpl implements LivroService {
     @Transactional(readOnly = true)
     public Page<LivroDTO> search(String id, String titulo, String autor, String isbn, String categoriaNome,
             String estanteNome, String termo, Pageable pageable) {
-        Page<Livro> page;
-
+        
         if (id != null && !id.trim().isEmpty()) {
             // Valida se o ID é um número antes de tentar converter, para evitar o uso de exceção para controle de fluxo.
             // Isso resolve o aviso "Unnecessary temporary when converting from String".
             if (id.matches("\\d+")) {
                 Optional<Livro> livroOpt = livroRepository.findById(Long.valueOf(id));
-
-                if (livroOpt.isPresent()) {
-                    // Se o livro for encontrado, cria uma página com um único elemento.
-                    page = new PageImpl<>(List.of(livroOpt.get()), pageable, 1);
-                } else {
-                    page = Page.empty(pageable);
-                }
+                // Se o livro for encontrado, cria uma página com um único elemento.
+                List<Livro> result = livroOpt.map(List::of).orElse(List.of());
+                return new PageImpl<>(result.stream().map(LivroDTO::new).collect(Collectors.toList()), pageable, result.size());
             } else {
                 // Se o ID não for um número válido (contém letras, etc.), retorna uma página vazia.
-                page = Page.empty(pageable);
+                return new PageImpl<>(new ArrayList<>(), pageable, 0);
             }
-        } else if (titulo != null && !titulo.trim().isEmpty()) {
+        }
+
+        Page<Livro> page;
+        if (titulo != null && !titulo.trim().isEmpty()) {
             // AVISO: Requer `Page<Livro> findByTituloContainingIgnoreCase(String titulo, Pageable pageable);` no LivroRepository
             page = livroRepository.findByTituloContainingIgnoreCase(titulo, pageable);
         } else if (autor != null && !autor.trim().isEmpty()) {

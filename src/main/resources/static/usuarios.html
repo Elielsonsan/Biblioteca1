@@ -26,8 +26,6 @@
             <div id="user-details" class="info-cliente"></div>
             <h2 id="endereco-title" style="display: none;">Endereço</h2>
             <div id="user-address" class="info-cliente"></div>
-            <h2 id="parentes-title" style="display: none;">Parentes</h2>
-            <div id="user-relatives" class="info-cliente"></div>
         </section>
     </main>
 
@@ -39,9 +37,7 @@
             // Limpa os dados anteriores e mensagens de erro
             document.getElementById('user-details').innerHTML = "";
             document.getElementById('user-address').innerHTML = "";
-            document.getElementById('user-relatives').innerHTML = "";
             document.getElementById('endereco-title').style.display = 'none';
-            document.getElementById('parentes-title').style.display = 'none';
 
             if (!clientIdValue.trim()) {
                 alert("Por favor, digite o ID do Usuário.");
@@ -111,16 +107,6 @@
                 } else {
                     userAddress.innerHTML = "<p>Endereço não disponível.</p>";
                 }
-
-                // Exibir parentes do usuário (se tiver relacionamento ManyToMany) [13]
-                const userRelatives = document.getElementById('user-relatives');
-                // Seção de Parentes removida conforme solicitado.
-                // Se você decidir manter os parentes, o código original para exibi-los
-                // (que foi removido neste diff) pode ser usado.
-                // Atualmente, a div user-relatives permanecerá vazia ou você pode remover
-                // o elemento <h2>Parentes</h2> e <div id="user-relatives"></div> completamente do HTML.
-                document.getElementById('parentes-title').style.display = 'block';
-                userRelatives.innerHTML = "<p>Funcionalidade de parentes desativada.</p>"; // Ou remova a div
             }
 
             // Iniciar a busca dos dados [14]

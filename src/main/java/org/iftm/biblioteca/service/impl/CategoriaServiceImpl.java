@@ -163,4 +163,13 @@ public class CategoriaServiceImpl implements CategoriaService {
     public long contarCategorias() {
         return categoriaRepository.count();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoriaDTO> findByNomeContaining(String nome) {
+        // Busca as entidades no repositório ignorando maiúsculas/minúsculas
+        List<Categoria> list = categoriaRepository.findByNomeContainingIgnoreCase(nome);
+        // Converte a lista de entidades para uma lista de DTOs e a retorna
+        return list.stream().map(CategoriaDTO::new).collect(Collectors.toList());
+    }
 }

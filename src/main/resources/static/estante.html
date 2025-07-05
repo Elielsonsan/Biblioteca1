@@ -41,25 +41,18 @@
             </div>
         </section>
 
-        <section class="cartao cartao-busca">
-            <div class="barra-busca-container">
-                <i class="fa-solid fa-magnifying-glass icone-principal"></i>
-                <div class="input-wrapper">
-                    <input type="text" id="termoBusca" placeholder="Busque pelo nome da estante...">
+        <section class="cartao cartao-gerenciar">
+            <div class="gerenciar-header">
+                <h2><i class="fa-solid fa-list"></i> Lista de Estantes</h2>
+                <div class="header-botoes-acao">
+                    <button id="btnAbrirBuscaModal" class="botao-secundario" title="Buscar estante">
+                        <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                    </button>
+                    <button id="btnAdicionarEstante" class="botao-principal"
+                        title="Abrir formulário para adicionar uma nova estante"><i
+                            class="fa-solid fa-plus"></i><span>Adicionar Estante</span></button>
                 </div>
             </div>
-            <div class="botoes-acao-container">
-                <button id="btnBuscar" class="botao-secundario" title="Realizar a busca pelo nome"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
-                <button id="btnLimparBusca" class="botao-secundario" title="Limpar o campo de busca e os resultados"><i
-                        class="fa-solid fa-broom"></i><span>Limpar</span></button>
-                <button id="btnAdicionarEstante" class="botao-principal"
-                     title="Abrir formulário para adicionar uma nova estante"><i
-                         class="fa-solid fa-plus"></i><span>Adicionar Estante</span></button>
-            </div>
-        </section>
-
-        <section class="cartao cartao-gerenciar">
-            <h2><i class="fa-solid fa-list"></i> Lista de Estantes</h2>
             <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhuma estante
                 encontrada.</div>
             <div class="table-wrapper">
@@ -107,15 +100,38 @@
         </div>
     </div>
 
+    <!-- Modal de Busca -->
+    <div id="searchModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="searchModalTitulo">Buscar Estante</h2>
+                <button id="btnFecharBuscaModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="searchForm" class="gerenciar-form" onsubmit="event.preventDefault(); buscarEstantes();">
+                    <div class="form-group">
+                        <label for="termoBuscaModal">Nome da Estante:</label>
+                        <input type="text" id="termoBuscaModal" class="form-input" placeholder="Digite o nome para buscar...">
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-secundario">
+                            <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                        </button>
+                        <button type="button" class="botao-secundario" id="btnLimparBuscaModal">
+                            <i class="fa-solid fa-broom"></i><span>Limpar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         // URLs da API (usando caminho relativo para portabilidade)
         const estantesApiUrl = '/api/estantes';
 
         // Elementos do DOM
-        const termoBuscaInput = document.getElementById('termoBusca');
         const estantesTableBody = document.getElementById('estantesTable').getElementsByTagName('tbody')[0];
-        const btnBuscar = document.getElementById('btnBuscar');
-        const btnLimparBusca = document.getElementById('btnLimparBusca');
         const listaVaziaMsg = document.getElementById('listaVaziaMsg');
 
         // Elementos do Modal e Formulário
@@ -129,13 +145,18 @@
         const estanteIdInput = document.getElementById('estanteId');
         const nomeInput = document.getElementById('nomeEstante');
 
+        // Elementos do Modal de Busca
+        const searchModal = document.getElementById('searchModal');
+        const btnAbrirBuscaModal = document.getElementById('btnAbrirBuscaModal');
+        const btnFecharBuscaModal = document.getElementById('btnFecharBuscaModal');
+        const termoBuscaModalInput = document.getElementById('termoBuscaModal');
+        const btnLimparBuscaModal = document.getElementById('btnLimparBuscaModal');
+
         // --- LÓGICA PRINCIPAL ---
         document.addEventListener('DOMContentLoaded', () => {
             loadEstantes();
-            btnBuscar.addEventListener('click', buscarEstantes);
-            btnLimparBusca.addEventListener('click', limparBusca);
 
-            // Listeners do Modal
+            // Listeners do Modal de Adicionar/Editar
             btnAdicionarEstante.addEventListener('click', openModalForAdd);
             btnFecharModal.addEventListener('click', closeModal);
             btnLimparForm.addEventListener('click', resetForm);
@@ -143,16 +164,25 @@
                 if (event.target === modal) closeModal();
             });
             estanteForm.addEventListener('submit', handleFormSubmit);
+
+            // Listeners do Modal de Busca
+            btnAbrirBuscaModal.addEventListener('click', () => searchModal.style.display = 'flex');
+            btnFecharBuscaModal.addEventListener('click', () => searchModal.style.display = 'none');
+            searchModal.addEventListener('click', (event) => {
+                if (event.target === searchModal) searchModal.style.display = 'none';
+            });
+            btnLimparBuscaModal.addEventListener('click', limparBusca);
         });
 
         // --- FUNÇÕES DE BUSCA E RENDERIZAÇÃO ---
         function buscarEstantes() {
-            const termo = termoBuscaInput.value.trim();
+            const termo = termoBuscaModalInput.value.trim();
             loadEstantes(termo);
+            searchModal.style.display = 'none'; // Fecha o modal após a busca
         }
 
         function limparBusca() {
-            termoBuscaInput.value = '';
+            termoBuscaModalInput.value = '';
             loadEstantes();
         }
 
@@ -188,7 +218,7 @@
                     row.insertCell().textContent = estante.id; // Célula do ID
 
                     const nomeCell = row.insertCell(); // Célula do Nome com ícone
-                    nomeCell.innerHTML = `<i class="fa-solid fa-box-archive"></i><span>${estante.nome}</span>`;
+                    nomeCell.innerHTML = `<div class="nome-cell-content"><i class="fa-solid fa-box-archive"></i><span>${estante.nome}</span></div>`;
 
                     const actionsCell = row.insertCell();
                     actionsCell.innerHTML = `

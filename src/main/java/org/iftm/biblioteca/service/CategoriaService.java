@@ -16,6 +16,7 @@ public interface CategoriaService {
     @Valid
     CategoriaDTO update(Long id, CategoriaDTO dto);
     void delete(Long id);
+    public List<CategoriaDTO> findByNomeContaining(String nome);
 
     // Você pode manter outros métodos de consulta específicos aqui, se necessário,
     // mas os métodos CRUD acima são os que o CategoriaController (DTO based) utiliza.

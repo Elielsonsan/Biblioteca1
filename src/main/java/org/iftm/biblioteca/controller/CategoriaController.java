@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -29,8 +30,15 @@ public class CategoriaController {
 
     // Endpoint para buscar todas as categorias (GET /api/categorias)
     @GetMapping
-    public ResponseEntity<List<CategoriaDTO>> findAll() {
-        List<CategoriaDTO> list = categoriaService.findAll();
+    public ResponseEntity<List<CategoriaDTO>> findAll(@RequestParam(value = "nome", defaultValue = "") String nome) {
+        List<CategoriaDTO> list;
+        // Se o parâmetro 'nome' estiver vazio, busca todas.
+        if (nome.trim().isEmpty()) {
+            list = categoriaService.findAll();
+        } else {
+            // Se houver um nome, chama o novo método de busca.
+            list = categoriaService.findByNomeContaining(nome);
+        }
         return ResponseEntity.ok().body(list);
     }
 

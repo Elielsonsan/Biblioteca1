@@ -25,7 +25,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3rem; /* Adiciona espaçamento consistente entre os cartões */
+    gap: 2rem; /* Espaçamento reduzido para uma interface mais compacta */
 }
 
 form {
@@ -71,6 +71,23 @@ form {
     color: var(--cor-texto-primario);
 }
 
+/* Botão especial para ações na barra de navegação (ex: Buscar) */
+.botao-nav-acao {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-secundario);
+    box-shadow: 5px 5px 10px var(--cor-sombra-escura), -5px -5px 10px var(--cor-sombra-clara);
+    transition: all 0.2s ease-in-out;
+}
+
 /* --- Estilo Genérico de Cartão --- */
 .cartao {
     width: 100%;
@@ -89,7 +106,14 @@ form {
     gap: 1.5rem;
 }
 
-.botoes-acao-container > button,
+/* Container para os botões no cabeçalho das seções de gerenciamento */
+.header-botoes-acao {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.header-botoes-acao > button,
+.botoes-acao-container > button, 
 .botoes-acao-container > a {
     display: flex;
     align-items: center;
@@ -141,6 +165,10 @@ form {
     flex: 0 0 75%;
     padding-right: 2rem;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centraliza o conteúdo verticalmente */
+    gap: 1rem; /* Espaçamento ajustado para melhor separação entre título e slogan */
 }
 
 .cartao-apresentacao .coluna-logo {
@@ -157,17 +185,17 @@ form {
 
 .cartao-apresentacao .coluna-texto h1 {
     font-family: 'Kanit', sans-serif;
-    font-size: 3rem;
+    font-size: 2.5rem; /* Tamanho reduzido para um cabeçalho mais compacto */
     font-weight: 700;
     color: var(--cor-verde-iftm);
-    margin-bottom: 0.5rem;
+    margin: 0; /* Reseta a margem para um controle mais preciso */
 }
 
 .cartao-apresentacao .slogan {
-    font-size: 1.25rem;
+    font-size: 1.1rem; /* Tamanho reduzido */
     font-weight: 500;
     color: var(--cor-verde-iftm);
-    margin-bottom: 1rem;
+    margin: 0; /* Reseta a margem */
 }
 
 .cartao-apresentacao p {
@@ -440,23 +468,22 @@ form {
 
 .cartao-gerenciar h2 {
     font-family: 'Kanit', sans-serif;
-    color: var(--cor-texto-primario);
+    color: var(--cor-verde-iftm); /* Cor do título e ícone alterada para verde */
     font-size: 1.5rem;
     margin: 0;
-    width: 100%;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-    /* Ajustes para centralização com ícone à esquerda */
-    position: relative; /* Contexto para o ícone */
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.75rem; /* Adiciona um espaçamento entre o ícone e o texto do título */
 }
 
-/* Posiciona o ícone à esquerda, fora do fluxo de centralização do texto */
-.cartao-gerenciar h2 > i {
-    position: absolute;
-    left: 0;
+/* Container para o cabeçalho da seção de gerenciamento (título + botão) */
+.gerenciar-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 2.5rem; /* Aumentado para igualar ao padding superior do cartão, criando simetria */
+    border-bottom: 1px solid #e2e8f0; /* A borda agora pertence ao container */
 }
 
 /* Formulário de Gerenciamento */
@@ -539,20 +566,36 @@ form {
     table-layout: fixed; /* Força o respeito às larguras das colunas */
 }
 
-#livrosTable th, #livrosTable td {
+/* Estilo para as células de dados (TD) da tabela de livros */
+#livrosTable td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
-    /* Permite que o texto quebre para a próxima linha, evitando que a tabela estoure a tela */
     white-space: normal;
     word-wrap: break-word; /* Garante a quebra de palavras muito longas sem espaços */
 }
 
-#livrosTable th {
+/* Estilo unificado para todos os cabeçalhos de tabela (TH) */
+.table-wrapper th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    /* Efeito de vidro embaçado */
+    background-color: rgba(241, 245, 249, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    /* Estilo do texto e espaçamento */
+    padding: 1.5rem 1rem; /* Aumenta o padding vertical para criar mais espaço e manter a simetria */
     font-weight: 600;
     font-size: 0.9rem;
     text-transform: uppercase;
     color: var(--cor-texto-secundario);
+    text-align: center; /* Garante a centralização horizontal */
+
+    /* Linha de separação inferior, idêntica à do cabeçalho da seção */
+    border-bottom: 1px solid #e2e8f0;
 }
 
 /* Define a largura das colunas para um layout consistente */
@@ -594,27 +637,44 @@ form {
     color: var(--cor-texto-primario);
 }
 
-/* Tabela de Estantes (mais simples que a de livros) */
-#estantesTable {
+/* Estilos unificados para as tabelas de Estantes e Categorias */
+#estantesTable,
+#categoriasTable {
     width: 100%;
     border-collapse: collapse;
 }
-#estantesTable th:nth-child(1), #estantesTable td:nth-child(1) { width: 15%; } /* ID */
-#estantesTable th:nth-child(2), #estantesTable td:nth-child(2) { width: 60%; } /* Nome */
-#estantesTable th:nth-child(3), #estantesTable td:nth-child(3) { width: 25%; text-align: center; } /* Ações */
 
-/* Estilo para a célula de nome da estante com ícone */
-#estantesTable td:nth-child(2) {
+/* Alinhamento e padding padrão para as células de dados */
+#estantesTable td,
+#categoriasTable td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center; /* Centraliza o conteúdo por padrão */
+}
+
+/* Largura das colunas */
+#estantesTable th:nth-child(1), #estantesTable td:nth-child(1),
+#categoriasTable th:nth-child(1), #categoriasTable td:nth-child(1) { width: 15%; } /* ID */
+#estantesTable th:nth-child(2), #estantesTable td:nth-child(2),
+#categoriasTable th:nth-child(2), #categoriasTable td:nth-child(2) { width: 60%; } /* Nome */
+#estantesTable th:nth-child(3), #estantesTable td:nth-child(3),
+#categoriasTable th:nth-child(3), #categoriasTable td:nth-child(3) { width: 25%; } /* Ações */
+
+/* Estilo para a célula de nome com ícone (centralizando o conteúdo flex) */
+/* Alinha a célula "Nome" à esquerda. As outras continuam centralizadas pela regra geral. */
+#estantesTable td:nth-child(2),
+#categoriasTable td:nth-child(2) {
+    text-align: left;
+}
+
+/* O novo container .nome-cell-content (adicionado via JS) agora controla o layout flexível. */
+/* Isso corrige o problema da borda inferior da tabela. */
+.nome-cell-content {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     font-weight: 600;
     color: var(--cor-texto-primario);
-}
-
-#livrosTable tbody tr:hover,
-#estantesTable tbody tr:hover {
-    background-color: #e9eef5;
 }
 
 .botao-acao {
@@ -830,4 +890,26 @@ form {
     .form-group.grid-span-2 {
         grid-column: span 1;
     }
+}
+
+/* =============================================== */
+/* === MELHORIAS PARA TABELAS DE GERENCIAMENTO === */
+/* =============================================== */
+
+/* Efeito de hover em todas as tabelas de gerenciamento */
+/* A classe .table-wrapper é o contêiner comum */
+.table-wrapper tbody tr:hover {
+    background-color: #f8f9fa; /* Um cinza bem claro, padrão em muitas UIs */
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Garante que o conteúdo das células da tabela (ícones e texto) fique bem alinhado verticalmente */
+.table-wrapper td {
+    vertical-align: middle;
+}
+
+/* Adiciona um espaçamento padrão entre ícones e o texto que os segue dentro de uma célula */
+/* Aplica-se a tabelas de livros, estantes e categorias */
+.table-wrapper td .fa-solid + span {
+    margin-left: 0.75rem;
 }

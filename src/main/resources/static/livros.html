@@ -103,7 +103,7 @@
                             <input type="text" id="autorLivro" name="autor" class="form-input" required minlength="2" maxlength="100">
                             <div class="error-message"></div>
                         </div>
-                        <div class="form-group grid-span-2">
+                        <div class="form-group">
                             <label for="isbnLivro">ISBN:</label>
                             <input type="text" id="isbnLivro" name="isbn" class="form-input" required title="Digite um ISBN-10 ou ISBN-13 válido.">
                             <small class="form-hint">Digite um ISBN-10 ou ISBN-13 válido. Hifens são opcionais.</small>
@@ -121,16 +121,16 @@
                             <div class="error-message"></div>
                         </div>
                         <div class="form-group">
+                            <label for="estanteLivro">Estante:</label>
+                            <select id="estanteLivro" name="estanteId" class="form-input" required><option value="">Selecione...</option></select>
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
                             <label for="edicaoLivro">Edição:</label>
                             <input type="number" id="edicaoLivro" name="edicao" class="form-input" min="1" value="1">
                             <div class="error-message"></div>
                         </div>
                         <div class="form-group">
-                            <label for="estanteLivro">Estante:</label>
-                            <select id="estanteLivro" name="estanteId" class="form-input" required><option value="">Selecione...</option></select>
-                            <div class="error-message"></div>
-                        </div>
-                        <div class="form-group grid-span-2">
                             <label for="capaUrlLivro">URL da Capa:</label>
                             <input type="text" id="capaUrlLivro" name="capaUrl" class="form-input" placeholder="https://exemplo.com/capa.png ou /images/capa.png">
                             <div class="error-message"></div>
