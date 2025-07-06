@@ -3,6 +3,7 @@ package org.iftm.biblioteca.service.impl;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.iftm.biblioteca.service.EstanteService; // Importar a nova interface
 
 import org.iftm.biblioteca.dto.EstanteDTO;
 import org.iftm.biblioteca.entities.Estante;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class EstanteServiceImpl { // Adapte para implementar sua interface de serviço
+public class EstanteServiceImpl implements EstanteService { // Implementa a interface
 
     @Autowired
     private EstanteRepository estanteRepository;
@@ -99,5 +100,47 @@ public class EstanteServiceImpl { // Adapte para implementar sua interface de se
             // Se não houver nenhuma estante no banco, começa com "E001"
             return "E001";
         }
+    }
+
+    @Override
+    public Estante salvarNovaEstante(EstanteDTO estanteDTO) {
+        
+        throw new UnsupportedOperationException("Unimplemented method 'salvarNovaEstante'");
+    }
+
+    @Override
+    public Estante atualizarEstante(Long id, EstanteDTO estanteDTO) {
+       
+        throw new UnsupportedOperationException("Unimplemented method 'atualizarEstante'");
+    }
+
+    @Override
+    public void apagarEstantePorId(Long id) {
+       
+        throw new UnsupportedOperationException("Unimplemented method 'apagarEstantePorId'");
+    }
+
+    @Override
+    public List<Estante> buscarTodas() {
+        
+        throw new UnsupportedOperationException("Unimplemented method 'buscarTodas'");
+    }
+
+    @Override
+    public Optional<Estante> buscarPorId(Long id) {
+       
+        throw new UnsupportedOperationException("Unimplemented method 'buscarPorId'");
+    }
+
+    @Override
+    public Optional<Estante> buscarPorNomeExato(String nome) {
+       
+        throw new UnsupportedOperationException("Unimplemented method 'buscarPorNomeExato'");
+    }
+
+    @Override
+    public long contarEstantes() {
+        
+        throw new UnsupportedOperationException("Unimplemented method 'contarEstantes'");
     }
 }

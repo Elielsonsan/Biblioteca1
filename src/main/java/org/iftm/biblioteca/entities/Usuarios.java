@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_client") // Opcional, mas bom para padronização com outras tabelas
-public class Client implements Serializable {
+public class Usuarios implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -52,11 +52,11 @@ public class Client implements Serializable {
     private Categoria category;
 
 
-    public Client() {
+    public Usuarios() {
     }
 
     // Construtor atualizado com os novos campos
-    public Client(Long id, String name, String email, String cpf, BigDecimal income, LocalDate birthDate, Integer childrenCount, String street, String city, String state, String zipCode, Categoria category) {
+    public Usuarios(Long id, String name, String email, String cpf, BigDecimal income, LocalDate birthDate, Integer childrenCount, String street, String city, String state, String zipCode, Categoria category) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -173,7 +173,7 @@ public class Client implements Serializable {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        Client client = (Client) o;
+        Usuarios client = (Usuarios) o;
         return Objects.equals(id, client.id);
     }
 

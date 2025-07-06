@@ -10,12 +10,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.iftm.biblioteca.entities.Categoria;
-import org.iftm.biblioteca.entities.Client;
-import org.iftm.biblioteca.entities.Estante; // Adicionar import para Client
+import org.iftm.biblioteca.entities.Usuarios;
+import org.iftm.biblioteca.entities.Estante;
 import org.iftm.biblioteca.entities.Livro;
 import org.iftm.biblioteca.repository.CategoriaRepository;
-import org.iftm.biblioteca.repository.ClientRepository; // Opcional, mas bom para operações múltiplas
-import org.iftm.biblioteca.repository.EstanteRepository; // Adicionar import para ClientRepository
+import org.iftm.biblioteca.repository.UsuariosRepository;
+import org.iftm.biblioteca.repository.EstanteRepository;
 import org.iftm.biblioteca.repository.LivroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -34,8 +34,8 @@ public class DataLoader implements CommandLineRunner {
         private EstanteRepository estanteRepository;
         @Autowired
         private LivroRepository livroRepository;
-        @Autowired // Injetar o ClientRepository
-        private ClientRepository clientRepository;
+        @Autowired
+        private UsuariosRepository usuarioRepository;
 
         @PersistenceContext
         private EntityManager entityManager;
@@ -47,7 +47,7 @@ public class DataLoader implements CommandLineRunner {
 
                 // Limpa o banco antes de inserir (útil para H2 em memória, opcional)
                 livroRepository.deleteAll();
-                clientRepository.deleteAll(); // Deletar Clientes antes de Categorias
+                usuarioRepository.deleteAll(); // Deletar Usuários antes de Categorias
                 categoriaRepository.deleteAll();
                 estanteRepository.deleteAll();
                 entityManager.flush(); // Força a execução dos deletes no banco de dados
@@ -132,27 +132,27 @@ public class DataLoader implements CommandLineRunner {
                 // Certifique-se de que as categorias referenciadas (ficcaoSalva, romanceSalvo)
                 // existem
                 if (ficcaoSalva != null && romanceSalvo != null) {
-                        Client cliente1 = new Client(null, "Carlos Alberto", "carlos.alberto@example.com",
+                        Usuarios usuario1 = new Usuarios(null, "Carlos Alberto", "carlos.alberto@example.com",
                                         "123.456.789-00",
                                         new BigDecimal("3500.00"), LocalDate.of(1985, 5, 20), 2,
                                         "Rua Teste, 100", "Uberlândia", "MG", "38400-000", ficcaoSalva);
 
-                        Client cliente2 = new Client(null, "Fernanda Lima", "fernanda.lima@example.com",
+                        Usuarios usuario2 = new Usuarios(null, "Fernanda Lima", "fernanda.lima@example.com",
                                         "987.654.321-00",
                                         new BigDecimal("4200.50"), LocalDate.of(1992, 10, 15), 0,
                                         "Avenida Brasil, 500", "Araguari", "MG", "38440-000", romanceSalvo);
 
-                        Client cliente3 = new Client(null, "Usuario Teste Sem Categoria", "teste.semcat@example.com",
+                        Usuarios usuario3 = new Usuarios(null, "Usuario Teste Sem Categoria", "teste.semcat@example.com",
                                         "111.222.333-44",
                                         new BigDecimal("2000.00"), LocalDate.of(1990, 1, 1), 1,
-                                        "Rua dos Exemplos, 123", "Ituiutaba", "MG", "38300-000", null); // Cliente sem
+                                        "Rua dos Exemplos, 123", "Ituiutaba", "MG", "38300-000", null); // Usuario sem
                                                                                                         // categoria
                                                                                                         // associada
 
-                        clientRepository.saveAll(Arrays.asList(cliente1, cliente2, cliente3));
-                        System.out.println(">>> Clientes carregados com sucesso!");
+                        usuarioRepository.saveAll(Arrays.asList(usuario1, usuario2, usuario3));
+                        System.out.println(">>> Usuários carregados com sucesso!");
                 } else {
-                        System.out.println(">>> Erro: Categorias necessárias para clientes não foram carregadas.");
+                        System.out.println(">>> Erro: Categorias necessárias para usuários não foram carregadas.");
                 }
 
         }

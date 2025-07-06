@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários - Biblioteca do IFTM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <nav class="navegacao-principal">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/livros.html">Livros</a></li>
+            <li><a href="/categorias.html">Categoria</a></li>
+            <li><a href="/estante.html">Estante</a></li>
+            <li><a href="/usuario.html">Usuário</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="cartao cartao-apresentacao">
+            <div class="coluna-texto">
+                <h1>Gerenciar Usuários</h1>
+                <p class="slogan">Adicione, edite, busque e remova usuários do sistema.</p>
+            </div>
+            <div class="coluna-logo">
+                <img src="/images/logo-iftm.png" alt="Logo IFTM">
+            </div>
+        </section>
+
+        <section class="cartao cartao-busca">
+            <div class="barra-busca-container">
+                <i class="fa-solid fa-magnifying-glass icone-principal"></i>
+                <div class="input-wrapper">
+                    <input type="text" id="termoBusca" placeholder="Busque por nome do usuário...">
+                </div>
+            </div>
+            <div class="botoes-acao-container">
+                <button id="btnBuscar" class="botao-secundario" title="Realizar a busca"><i
+                        class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
+                <button id="btnLimparBusca" class="botao-secundario" title="Limpar o campo de busca e os resultados"><i
+                        class="fa-solid fa-broom"></i><span>Limpar</span></button>
+                <button id="btnAdicionarUsuario" class="botao-principal"
+                    title="Abrir formulário para adicionar um novo usuário"><i
+                        class="fa-solid fa-plus"></i><span>Adicionar Usuário</span></button>
+            </div>
+        </section>
+
+        <section class="cartao cartao-gerenciar">
+            <h2><i class="fa-solid fa-users"></i> Lista de Usuários</h2>
+            <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum
+                usuário encontrado.</div>
+            <div class="table-wrapper">
+                <table id="usuariosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome & Email</th>
+                            <th>CPF & Categoria</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="paginacao-container" id="paginacao-container"></div>
+        </section>
+    </main>
+
+    <div id="formModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Adicionar Novo Usuário</h2>
+                <button id="btnFecharModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="usuarioForm" class="gerenciar-form">
+                    <input type="hidden" id="usuarioId">
+                    <div class="form-grid">
+                        <div class="form-group grid-span-2">
+                            <label for="nomeUsuario">Nome Completo:</label>
+                            <input type="text" id="nomeUsuario" name="name" class="form-input" required minlength="2"
+                                maxlength="100">
+                        </div>
+                        <div class="form-group grid-span-2">
+                            <label for="emailUsuario">Email:</label>
+                            <input type="email" id="emailUsuario" name="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cpfUsuario">CPF:</label>
+                            <input type="text" id="cpfUsuario" name="cpf" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="nascimentoUsuario">Data de Nascimento:</label>
+                            <input type="date" id="nascimentoUsuario" name="birthDate" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="rendaUsuario">Renda (R$):</label>
+                            <input type="number" id="rendaUsuario" name="income" class="form-input" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="filhosUsuario">Nº de Filhos:</label>
+                            <input type="number" id="filhosUsuario" name="childrenCount" class="form-input" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="categoriaUsuario">Categoria:</label>
+                            <select id="categoriaUsuario" name="categoriaId" class="form-input">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-principal"><i
+                                class="fa-solid fa-floppy-disk"></i><span>Salvar</span></button>
+                        <button type="button" class="botao-secundario" id="btnLimparForm"><i
+                                class="fa-solid fa-eraser"></i><span>Limpar</span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const usuariosApiUrl = '/api/usuarios';
+        const categoriasApiUrl = '/api/categorias';
+
+        const termoBuscaInput = document.getElementById('termoBusca');
+        const usuariosTableBody = document.getElementById('usuariosTable').getElementsByTagName('tbody')[0];
+        const btnBuscar = document.getElementById('btnBuscar');
+        const btnLimparBusca = document.getElementById('btnLimparBusca');
+        const listaVaziaMsg = document.getElementById('listaVaziaMsg');
+
+        let currentPage = 0;
+        const paginacaoContainer = document.getElementById('paginacao-container');
+
+        const modal = document.getElementById('formModal');
+        const modalTitulo = document.getElementById('modalTitulo');
+        const btnFecharModal = document.getElementById('btnFecharModal');
+        const btnAdicionarUsuario = document.getElementById('btnAdicionarUsuario');
+        const btnLimparForm = document.getElementById('btnLimparForm');
+        const usuarioForm = document.getElementById('usuarioForm');
+        const usuarioIdInput = document.getElementById('usuarioId');
+        const categoriaSelect = document.getElementById('categoriaUsuario');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategoriasParaSelect();
+            loadUsuarios();
+
+            btnBuscar.addEventListener('click', buscarUsuarios);
+            btnLimparBusca.addEventListener('click', limparBusca);
+            termoBuscaInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') buscarUsuarios();
+            });
+
+            btnAdicionarUsuario.addEventListener('click', openModalForAdd);
+            btnFecharModal.addEventListener('click', closeModal);
+            btnLimparForm.addEventListener('click', resetForm);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            usuarioForm.addEventListener('submit', handleFormSubmit);
+        });
+
+        function buscarUsuarios() {
+            currentPage = 0;
+            loadUsuarios(termoBuscaInput.value.trim(), currentPage);
+        }
+
+        function limparBusca() {
+            termoBuscaInput.value = '';
+            currentPage = 0;
+            loadUsuarios('', currentPage);
+        }
+
+        async function loadUsuarios(termo = '', page = 0, append = false) {
+            const params = new URLSearchParams({
+                page: page,
+                size: 10,
+                sort: 'name,asc'
+            });
+            if (termo) {
+                params.append('name', termo);
+            }
+
+            try {
+                const response = await fetch(`${usuariosApiUrl}?${params.toString()}`);
+                if (!response.ok) throw new Error(`Erro na requisição: ${response.status}`);
+                const pageData = await response.json();
+                renderUsuarios(pageData, append);
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                alert('Não foi possível buscar os usuários. Verifique o console.');
+            }
+        }
+
+        function renderUsuarios(pageData, append = false) {
+            const usuarios = pageData.content;
+            if (!append) {
+                usuariosTableBody.innerHTML = '';
+            }
+
+            if (!usuarios || usuarios.length === 0) {
+                if (!append) {
+                    listaVaziaMsg.style.display = 'block';
+                    document.querySelector('.table-wrapper').style.display = 'none';
+                }
+            } else {
+                listaVaziaMsg.style.display = 'none';
+                document.querySelector('.table-wrapper').style.display = 'block';
+                usuarios.forEach(usuario => {
+                    const row = usuariosTableBody.insertRow();
+                    row.insertCell().textContent = usuario.id;
+
+                    const nomeEmailCell = row.insertCell();
+                    nomeEmailCell.innerHTML = `
+                        <div class="info-cell"><i class="fa-solid fa-user" title="Nome"></i><span>${usuario.name || 'N/A'}</span></div>
+                        <div class="info-cell"><i class="fa-solid fa-envelope" title="Email"></i><span>${usuario.email || 'N/A'}</span></div>
+                    `;
+
+                    const cpfCategoriaCell = row.insertCell();
+                    cpfCategoriaCell.innerHTML = `
+                        <div class="info-cell"><i class="fa-solid fa-id-card" title="CPF"></i><span>${usuario.cpf || 'N/A'}</span></div>
+                        <div class="info-cell"><i class="fa-solid fa-tags" title="Categoria"></i><span>${usuario.categoriaNome || 'N/A'}</span></div>
+                    `;
+
+                    const actionsCell = row.insertCell();
+                    actionsCell.innerHTML = `
+                        <button class="botao-acao editar" title="Editar" onclick='openModalForEdit(${JSON.stringify(usuario)})'><i class="fa-solid fa-pencil"></i></button>
+                        <button class="botao-acao excluir" title="Excluir" onclick="deleteUsuario(${usuario.id})"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                });
+            }
+            renderPaginacao(pageData);
+        }
+
+        function renderPaginacao(pageData) {
+            paginacaoContainer.innerHTML = '';
+            if (!pageData.last) {
+                const mostrarMaisBtn = document.createElement('button');
+                mostrarMaisBtn.innerHTML = '<i class="fa-solid fa-angles-down"></i><span>Carregar mais usuários</span>';
+                mostrarMaisBtn.className = 'paginacao-btn';
+                mostrarMaisBtn.onclick = () => {
+                    currentPage = pageData.number + 1;
+                    loadUsuarios(termoBuscaInput.value.trim(), currentPage, true);
+                };
+                paginacaoContainer.appendChild(mostrarMaisBtn);
+                paginacaoContainer.style.display = 'flex';
+            } else {
+                paginacaoContainer.style.display = 'none';
+            }
+        }
+
+        function openModalForAdd() {
+            resetForm();
+            modalTitulo.textContent = 'Adicionar Novo Usuário';
+            modal.style.display = 'flex';
+        }
+
+        function openModalForEdit(usuario) {
+            resetForm();
+            modalTitulo.textContent = `Editar Usuário: ${usuario.name}`;
+            usuarioIdInput.value = usuario.id;
+            document.getElementById('nomeUsuario').value = usuario.name;
+            document.getElementById('emailUsuario').value = usuario.email;
+            document.getElementById('cpfUsuario').value = usuario.cpf || '';
+            document.getElementById('nascimentoUsuario').value = usuario.birthDate || '';
+            document.getElementById('rendaUsuario').value = usuario.income || '';
+            document.getElementById('filhosUsuario').value = usuario.childrenCount || '';
+            categoriaSelect.value = usuario.categoriaId || '';
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function resetForm() {
+            usuarioForm.reset();
+            usuarioIdInput.value = '';
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const id = usuarioIdInput.value;
+            const usuarioData = {
+                name: document.getElementById('nomeUsuario').value,
+                email: document.getElementById('emailUsuario').value,
+                cpf: document.getElementById('cpfUsuario').value,
+                birthDate: document.getElementById('nascimentoUsuario').value || null,
+                income: document.getElementById('rendaUsuario').value || null,
+                childrenCount: document.getElementById('filhosUsuario').value || null,
+                categoriaId: document.getElementById('categoriaUsuario').value || null
+            };
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${usuariosApiUrl}/${id}` : usuariosApiUrl;
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(usuarioData)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+                    throw new Error(errorData.message || 'Não foi possível salvar o usuário.');
+                }
+                closeModal();
+                limparBusca();
+                alert(`Usuário ${id ? 'atualizado' : 'salvo'} com sucesso!`);
+            } catch (error) {
+                console.error('Erro ao salvar usuário:', error);
+                alert(`Erro ao salvar usuário:\n${error.message}`);
+            }
+        }
+
+        async function deleteUsuario(id) {
+            if (!confirm(`Tem certeza que deseja excluir o usuário ID ${id}?`)) return;
+            try {
+                const response = await fetch(`${usuariosApiUrl}/${id}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+                    throw new Error(errorData.message || 'Não foi possível excluir o usuário.');
+                }
+                limparBusca();
+                alert('Usuário excluído com sucesso!');
+            } catch (error) {
+                console.error('Erro ao excluir usuário:', error);
+                alert(`Erro ao excluir usuário:\n${error.message}`);
+            }
+        }
+
+        async function loadCategoriasParaSelect() {
+            try {
+                const response = await fetch(categoriasApiUrl);
+                const categorias = await response.json();
+                categorias.forEach(cat => {
+                    const option = new Option(cat.nome, cat.id);
+                    categoriaSelect.add(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
