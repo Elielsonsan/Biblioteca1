@@ -1,5 +1,5 @@
 /* ==================================================================== */
-/* --- 1. CONFIGURAÇÕES GLOBAIS E VARIÁVEIS ---                       */
+/* --- 1. CONFIGURAÇÕES GLOBAIS E VARIÁVEIS ---                         */
 /* ==================================================================== */
 :root {
     --cor-fundo: #f1f5f9;
@@ -8,6 +8,8 @@
     --cor-verde-iftm: #2E9D41;
     --cor-sombra-escura: #c9d9e8;
     --cor-sombra-clara: #ffffff;
+    --cor-sucesso: #22c55e; /* Verde para status 'Disponível' */
+    --cor-erro: #ef4444;    /* Vermelho para status 'Indisponível' */
 }
 
 body {
@@ -148,7 +150,18 @@ form {
 }
 
 .botao-principal:hover {
+    /* Usa um verde um pouco mais escuro para o fundo e sombras baseadas no verde para um relevo mais visível */
     background-color: #298a3a;
+    box-shadow: inset 2px 2px 5px #1e642a, inset -2px -2px 5px #3acc50;
+}
+
+/* Adicionado para fazer os botões de busca na home terem o mesmo tamanho */
+.cartao-busca .botoes-acao-container {
+    width: 100%; /* Garante que o container ocupe toda a largura do cartão */
+}
+.cartao-busca .botoes-acao-container > button {
+    flex: 1; /* Faz com que todos os botões cresçam igualmente para preencher o espaço */
+    justify-content: center; /* Centraliza o conteúdo (ícone + texto) dentro do botão */
 }
 
 
@@ -203,6 +216,7 @@ form {
     line-height: 1.6;
     max-width: 70ch;
     margin: 0 auto;
+    color: var(--cor-verde-iftm);
 }
 
 .cartao-busca {
@@ -554,6 +568,20 @@ form {
     justify-content: flex-start;
 }
 
+/* Estilos para o divisor no formulário de busca avançada */
+.form-divider {
+    grid-column: span 2;
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 1rem 0;
+}
+.form-divider-text {
+    grid-column: span 2;
+    text-align: center;
+    font-weight: 600;
+    color: var(--cor-texto-secundario);
+}
+
 /* Tabela de Livros */
 .table-wrapper {
     width: 100%;
@@ -598,13 +626,14 @@ form {
     border-bottom: 1px solid #e2e8f0;
 }
 
-/* Define a largura das colunas para um layout consistente */
-/* A ordem agora é: ID, Título, Autor & ISBN, Categoria & Estante, Ações */
-#livrosTable th:nth-child(1), #livrosTable td:nth-child(1) { width: 5%; }   /* ID */
-#livrosTable th:nth-child(2), #livrosTable td:nth-child(2) { width: 30%; }  /* Título */
-#livrosTable th:nth-child(3), #livrosTable td:nth-child(3) { width: 25%; }  /* Autor & ISBN */
-#livrosTable th:nth-child(4), #livrosTable td:nth-child(4) { width: 25%; }  /* Categoria & Estante */
-#livrosTable th:nth-child(5), #livrosTable td:nth-child(5) { width: 15%; text-align: center; } /* Ações */
+/* Classes genéricas para largura de colunas em todas as tabelas de gerenciamento */
+.col-id      { width: 10%; }
+.col-nome    { width: 65%; text-align: left; } /* Nome, Título, etc. */
+.col-info    { width: 30%; } /* Células com múltiplas informações */
+.col-titulo  { width: 35%; text-align: left; }
+.col-acoes   { width: 15%; text-align: center; }
+.col-datas   { width: 25%; }
+.col-usuario { width: 30%; text-align: left; }
 
 /* Deixa o título do livro em negrito para destaque */
 #livrosTable td:nth-child(2) {
@@ -639,31 +668,26 @@ form {
 
 /* Estilos unificados para as tabelas de Estantes e Categorias */
 #estantesTable,
-#categoriasTable {
+#categoriasTable,
+#usuariosTable {
     width: 100%;
     border-collapse: collapse;
 }
 
 /* Alinhamento e padding padrão para as células de dados */
 #estantesTable td,
-#categoriasTable td {
+#categoriasTable td,
+#usuariosTable td {
     padding: 1rem;
     border-bottom: 1px solid #e2e8f0;
     text-align: center; /* Centraliza o conteúdo por padrão */
 }
 
-/* Largura das colunas */
-#estantesTable th:nth-child(1), #estantesTable td:nth-child(1),
-#categoriasTable th:nth-child(1), #categoriasTable td:nth-child(1) { width: 15%; } /* ID */
-#estantesTable th:nth-child(2), #estantesTable td:nth-child(2),
-#categoriasTable th:nth-child(2), #categoriasTable td:nth-child(2) { width: 60%; } /* Nome */
-#estantesTable th:nth-child(3), #estantesTable td:nth-child(3),
-#categoriasTable th:nth-child(3), #categoriasTable td:nth-child(3) { width: 25%; } /* Ações */
-
 /* Estilo para a célula de nome com ícone (centralizando o conteúdo flex) */
 /* Alinha a célula "Nome" à esquerda. As outras continuam centralizadas pela regra geral. */
 #estantesTable td:nth-child(2),
-#categoriasTable td:nth-child(2) {
+#categoriasTable td:nth-child(2),
+#usuariosTable td:nth-child(2) {
     text-align: left;
 }
 
@@ -689,6 +713,8 @@ form {
     height: 36px;
     transition: all 0.2s ease-in-out;
 }
+.botao-acao.emprestar { color: #22c55e; } /* Verde para emprestar */
+.botao-acao.devolver { color: #3b82f6; } /* Azul para devolver */
 .botao-acao.editar { color: #f97316; } /* Laranja para destaque */
 .botao-acao.excluir { color: #ef4444; }
 .botao-acao:hover { background-color: var(--cor-sombra-escura); }
@@ -782,9 +808,15 @@ form {
 /* ==================================================================== */
 /* --- 5. EFEITO DE CLIQUE E ESTADOS ATIVOS ---                       */
 /* ==================================================================== */
+/* Efeito de clique para o botão principal (verde) */
+.botao-principal:active {
+    background-color: #247a33; /* Tom de verde um pouco mais escuro */
+    box-shadow: inset 3px 3px 6px #1e642a; /* Sombra interna para efeito de "pressionado" */
+}
+
 .navegacao-principal a:active,
 .icones-filtro button:active,
-.botoes-acao-container > *:active,
+.botao-secundario:active,
 .botao-acao:active {
     color: var(--cor-verde-iftm);
 }
@@ -912,4 +944,70 @@ form {
 /* Aplica-se a tabelas de livros, estantes e categorias */
 .table-wrapper td .fa-solid + span {
     margin-left: 0.75rem;
+}
+
+/* Ações dentro do item de resultado da lista de livros */
+.acoes-livro {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0; /* Adiciona um separador visual */
+}
+
+.botoes-acao-container-item {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Botão com texto para ações dentro de um item de lista (ex: Emprestar) */
+.botao-acao-texto {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-secundario);
+    box-shadow: 3px 3px 6px var(--cor-sombra-escura), -3px -3px 6px var(--cor-sombra-clara);
+}
+.botao-acao-texto:hover {
+    box-shadow: inset 2px 2px 4px var(--cor-sombra-escura), inset -2px -2px 4px var(--cor-sombra-clara);
+    color: var(--cor-verde-iftm);
+}
+
+/* =============================================== */
+/* === ESTILOS DE STATUS (DO ANTIGO STATUS.CSS) === */
+/* =============================================== */
+
+/* Estilos para o status de disponibilidade do livro */
+/* Aumentando a especificidade para garantir que a cor seja aplicada sobre as regras gerais */
+.linha-info.status-disponivel p,
+.linha-info.status-disponivel i {
+    color: var(--cor-sucesso); /* Verde */
+    font-weight: 600;
+}
+
+.linha-info.status-indisponivel p,
+.linha-info.status-indisponivel i {
+    color: var(--cor-erro); /* Vermelho */
+    font-weight: 600;
+}
+
+.status-info { font-size: 0.85rem; color: var(--cor-texto-secundario); }
+
+/* Estilos para empréstimos atrasados na tabela */
+.emprestimo-atrasado {
+    background-color: #fff1f2; /* Um vermelho bem claro, quase rosa */
+    border-left: 4px solid var(--cor-erro);
+}
+
+/* Destaca o texto da linha atrasada para melhor legibilidade */
+.emprestimo-atrasado td {
+    font-weight: 500;
+    color: #9f1239; /* Um vermelho mais escuro para o texto */
 }

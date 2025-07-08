@@ -1,27 +1,18 @@
 package org.iftm.biblioteca.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.iftm.biblioteca.dto.EstanteDTO;
-import org.iftm.biblioteca.entities.Estante;
 
 public interface EstanteService {
 
-    Estante salvarNovaEstante(EstanteDTO estanteDTO);
+    List<EstanteDTO> findAll();
 
-    // List<Estante> salvarTodasEstantes(List<EstanteDTO> estanteDTOs); // Avaliar
-    // necessidade
+    List<EstanteDTO> findByNome(String nome);
 
-    Estante atualizarEstante(Long id, EstanteDTO estanteDTO);
+    EstanteDTO insert(EstanteDTO dto);
 
-    void apagarEstantePorId(Long id);
+    EstanteDTO update(String id, EstanteDTO dto);
 
-    List<Estante> buscarTodas();
-
-    Optional<Estante> buscarPorId(Long id);
-
-    Optional<Estante> buscarPorNomeExato(String nome);
-
-    long contarEstantes();
+    void delete(String id);
 }

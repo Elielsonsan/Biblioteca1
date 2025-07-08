@@ -1,5 +1,5 @@
 -- =================================================================================
--- INSERIR 10 CATEGORIAS
+-- LISTAS 10 CATEGORIAS
 -- =================================================================================
 -- IDs de 1 a 10
 INSERT INTO tb_categoria (nome) VALUES ('Tecnologia e Ciência da Computação'); -- ID 1
@@ -14,7 +14,7 @@ INSERT INTO tb_categoria (nome) VALUES ('Romance'); -- ID 9
 INSERT INTO tb_categoria (nome) VALUES ('Arte e Fotografia'); -- ID 10
 
 -- =================================================================================
--- INSERIR 10 ESTANTES
+-- LISTA COM 10 ESTANTES
 -- =================================================================================
 INSERT INTO tb_estante (id, nome) VALUES ('E_T', 'Corredor T - Tecnologia');
 INSERT INTO tb_estante (id, nome) VALUES ('E_FC', 'Corredor FC - Ficção Científica');
@@ -28,7 +28,7 @@ INSERT INTO tb_estante (id, nome) VALUES ('E_A', 'Corredor A - Arte');
 INSERT INTO tb_estante (id, nome) VALUES ('E_G', 'Corredor G - Geral');
 
 -- =================================================================================
--- INSERIR 100 LIVROS (10 POR CATEGORIA)
+-- LISTA COM 100 LIVROS (10 POR CATEGORIA)
 -- =================================================================================
 
 -- Categoria 1: Tecnologia e Ciência da Computação
@@ -102,3 +102,27 @@ INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, capa_url, cat
 INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, capa_url, categoria_id, estante_id) VALUES ('O Homem e Seus Símbolos', 'Carl G. Jung', '9780440336352', 1964, 1, '/images/capa-placeholder.png', 6, 'E_P');
 INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, capa_url, categoria_id, estante_id) VALUES ('Os 7 Hábitos das Pessoas Altamente Eficazes', 'Stephen R. Covey', '9780743269513', 1989, 1, '/images/capa-placeholder.png', 6, 'E_P');
 INSERT INTO tb_livro (titulo, autor, isbn, ano_publicacao, edicao, capa_url, categoria_id, estante_id) VALUES ('A Interpretação dos Sonhos', 'Sigmund Freud', '9780486419232', 1899, 1, '/images/capa-placeholder.png', 6, 'E_P');
+
+-- =================================================================================
+-- LISTA DE 20 USUÁRIOS
+-- =================================================================================
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Ana Clara Souza', 'ana.souza@example.com', '111.222.333-01', 3200.50, '1990-03-15', 1, 'Rua das Flores, 123', 'Uberlândia', 'MG', '38400-100');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Bruno Costa', 'bruno.costa@example.com', '222.333.444-02', 4500.00, '1985-07-22', 2, 'Avenida Brasil, 456', 'Araguari', 'MG', '38440-200');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Carla Dias', 'carla.dias@example.com', '333.444.555-03', 2800.75, '1995-11-30', 0, 'Praça da Matriz, 789', 'Ituiutaba', 'MG', '38300-300');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Daniel Martins', 'daniel.martins@example.com', '444.555.666-04', 5500.00, '1982-01-10', 3, 'Rua dos Coqueiros, 101', 'Uberaba', 'MG', '38010-400');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Eduarda Ferreira', 'eduarda.ferreira@example.com', '555.666.777-05', 6100.20, '1998-09-05', 0, 'Avenida Getúlio Vargas, 202', 'Patos de Minas', 'MG', '38700-500');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Fábio Gonçalves', 'fabio.goncalves@example.com', '666.777.888-06', 3900.00, '1993-06-18', 1, 'Rua Sete de Setembro, 303', 'Monte Carmelo', 'MG', '38500-600');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Gabriela Lima', 'gabriela.lima@example.com', '777.888.999-07', 7200.80, '1980-04-25', 2, 'Travessa da Liberdade, 404', 'Patrocínio', 'MG', '38740-700');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Heitor Pereira', 'heitor.pereira@example.com', '888.999.000-08', 4100.00, '2000-02-20', 0, 'Rua das Orquídeas, 505', 'Coromandel', 'MG', '38550-800');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Isabela Ribeiro', 'isabela.ribeiro@example.com', '999.000.111-09', 3500.90, '1997-08-12', 1, 'Avenida dos Bandeirantes, 606', 'Tupaciguara', 'MG', '38480-900');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('João Santos', 'joao.santos@example.com', '000.111.222-10', 8000.00, '1975-12-01', 2, 'Rua do Comércio, 707', 'Centralina', 'MG', '38390-110');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Larissa Almeida', 'larissa.almeida@example.com', '112.223.334-11', 2950.00, '2002-05-28', 0, 'Rua da Paz, 808', 'Canápolis', 'MG', '38380-120');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Marcos Oliveira', 'marcos.oliveira@example.com', '223.334.445-12', 5100.50, '1988-10-03', 1, 'Avenida das Acácias, 909', 'Capinópolis', 'MG', '38360-130');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Natália Rodrigues', 'natalia.rodrigues@example.com', '334.445.556-13', 4800.00, '1991-07-14', 2, 'Rua dos Pinheiros, 111', 'Goiânia', 'GO', '74000-140');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Otávio Barbosa', 'otavio.barbosa@example.com', '445.556.667-14', 3300.25, '1994-04-09', 0, 'Avenida Anhanguera, 222', 'Anápolis', 'GO', '75000-150');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Patrícia Azevedo', 'patricia.azevedo@example.com', '556.667.778-15', 6500.00, '1986-02-17', 1, 'Rua 24 de Outubro, 333', 'Rio Verde', 'GO', '75900-160');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Rafael Castro', 'rafael.castro@example.com', '667.778.889-16', 4200.60, '1999-01-21', 0, 'Avenida Castelo Branco, 444', 'Jataí', 'GO', '75800-170');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Sofia Mendes', 'sofia.mendes@example.com', '778.889.990-17', 5800.00, '1983-08-08', 2, 'Rua das Gaivotas, 555', 'Catalão', 'GO', '75700-180');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Thiago Nogueira', 'thiago.nogueira@example.com', '889.990.001-18', 3750.00, '1996-06-26', 1, 'Avenida Goiás, 666', 'Itumbiara', 'GO', '75500-190');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('Vanessa Rocha', 'vanessa.rocha@example.com', '990.001.112-19', 7500.40, '1989-09-19', 0, 'Rua da Consolação, 777', 'São Paulo', 'SP', '01301-200');
+INSERT INTO tb_usuario (name, email, cpf, income, birth_date, children_count, street, city, state, zip_code) VALUES ('William Teixeira', 'william.teixeira@example.com', '001.112.223-20', 9200.00, '1981-05-05', 3, 'Avenida Paulista, 888', 'São Paulo', 'SP', '01310-300');

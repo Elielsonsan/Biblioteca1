@@ -1,16 +1,21 @@
 package org.iftm.biblioteca.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.iftm.biblioteca.dto.SugestaoDTO;
 import org.iftm.biblioteca.dto.UsuariosDTO;
 import org.iftm.biblioteca.entities.Usuarios;
-import org.iftm.biblioteca.repository.CategoriaRepository;
 import org.iftm.biblioteca.repository.UsuariosRepository;
 import org.iftm.biblioteca.service.UsuariosService;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
 import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +26,6 @@ public class UsuariosServiceImpl implements UsuariosService {
 
     @Autowired
     private UsuariosRepository usuarioRepository;
-
-    @Autowired
-    private CategoriaRepository categoriaRepository; // Necessário para associar a categoria
 
     @Override
     @Transactional(readOnly = true)
@@ -83,9 +85,38 @@ public class UsuariosServiceImpl implements UsuariosService {
     @Override
     @Transactional(readOnly = true)
     public Page<UsuariosDTO> findByNameContaining(String name, Pageable pageable) {
-        // Utiliza o método do repositório que já ignora maiúsculas/minúsculas
-        Page<Usuarios> page = usuarioRepository.findByNameContainingIgnoreCase(name, pageable);
+        // O parâmetro 'name' do controller é nosso termo de busca genérico (ID, Nome ou CPF)
+        String termo = name;
+
+        // Tenta buscar por ID se o termo for um número
+        if (termo.matches("\\d+")) {
+            try {
+                Long id = Long.parseLong(termo);
+                Optional<Usuarios> usuarioOpt = usuarioRepository.findById(id);
+                if (usuarioOpt.isPresent()) {
+                    // Se encontrou, retorna uma página com um único resultado
+                    List<UsuariosDTO> resultList = List.of(new UsuariosDTO(usuarioOpt.get()));
+                    return new PageImpl<>(resultList, pageable, 1);
+                }
+            } catch (NumberFormatException e) {
+                // Não é um Long válido, ignora e prossegue para a busca por texto
+            }
+        }
+        // Se não encontrou por ID ou não é um número, busca por nome ou CPF
+        Page<Usuarios> page = usuarioRepository.searchByNameOrCpf(termo, pageable);
         return page.map(UsuariosDTO::new);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SugestaoDTO> buscarSugestoesDeNomes(String termo) {
+        if (termo == null || termo.trim().length() < 2) {
+            return new ArrayList<>();
+        }
+        Pageable limit = PageRequest.of(0, 10); // Limita a 10 sugestões
+        return usuarioRepository.findNomesParaSugestao(termo, limit).stream()
+                .map(nome -> new SugestaoDTO(nome, "usuario")) // 'usuario' como tipo
+                .collect(Collectors.toList());
     }
 
     private void validarUsuarioEmailUnico(String email, Long idExistente) {
@@ -112,11 +143,5 @@ public class UsuariosServiceImpl implements UsuariosService {
         entity.setCity(dto.getCity());
         entity.setState(dto.getState());
         entity.setZipCode(dto.getZipCode());
-
-        if (dto.getCategoriaId() != null) {
-            var categoria = categoriaRepository.findById(dto.getCategoriaId())
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com ID: " + dto.getCategoriaId()));
-            entity.setCategory(categoria);
-        }
     }
 }

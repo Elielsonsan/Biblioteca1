@@ -50,15 +50,12 @@ public class EstanteServiceImpl implements EstanteService { // Implementa a inte
 
     @Transactional
     public EstanteDTO update(String id, EstanteDTO dto) {
-        try {
-            verificarNomeDuplicado(dto.getNome(), id);
-            Estante entity = estanteRepository.getReferenceById(id);
-            entity.setNome(dto.getNome());
-            entity = estanteRepository.save(entity);
-            return new EstanteDTO(entity);
-        } catch (jakarta.persistence.EntityNotFoundException e) {
-            throw new RecursoNaoEncontradoException("Estante não encontrada com ID: " + id + " para atualização.");
-        }
+        Estante entity = estanteRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Estante não encontrada com ID: " + id));
+        verificarNomeDuplicado(dto.getNome(), id);
+        entity.setNome(dto.getNome());
+        entity = estanteRepository.save(entity);
+        return new EstanteDTO(entity);
     }
 
     @Transactional
@@ -100,47 +97,5 @@ public class EstanteServiceImpl implements EstanteService { // Implementa a inte
             // Se não houver nenhuma estante no banco, começa com "E001"
             return "E001";
         }
-    }
-
-    @Override
-    public Estante salvarNovaEstante(EstanteDTO estanteDTO) {
-        
-        throw new UnsupportedOperationException("Unimplemented method 'salvarNovaEstante'");
-    }
-
-    @Override
-    public Estante atualizarEstante(Long id, EstanteDTO estanteDTO) {
-       
-        throw new UnsupportedOperationException("Unimplemented method 'atualizarEstante'");
-    }
-
-    @Override
-    public void apagarEstantePorId(Long id) {
-       
-        throw new UnsupportedOperationException("Unimplemented method 'apagarEstantePorId'");
-    }
-
-    @Override
-    public List<Estante> buscarTodas() {
-        
-        throw new UnsupportedOperationException("Unimplemented method 'buscarTodas'");
-    }
-
-    @Override
-    public Optional<Estante> buscarPorId(Long id) {
-       
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorId'");
-    }
-
-    @Override
-    public Optional<Estante> buscarPorNomeExato(String nome) {
-       
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorNomeExato'");
-    }
-
-    @Override
-    public long contarEstantes() {
-        
-        throw new UnsupportedOperationException("Unimplemented method 'contarEstantes'");
     }
 }

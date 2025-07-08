@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Empréstimos - Biblioteca do IFTM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <nav class="navegacao-principal">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/livros.html">Livros</a></li>
+            <li><a href="/categorias.html">Categoria</a></li>
+            <li><a href="/estante.html">Estante</a></li>
+            <li><a href="/usuario.html">Usuário</a></li>
+            <li><a href="/emprestimos.html">Empréstimos</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="cartao cartao-apresentacao">
+            <div class="coluna-texto">
+                <h1>Gerenciar Empréstimos</h1>
+                <p class="slogan">Registre e acompanhe os empréstimos de livros.</p>
+            </div>
+            <div class="coluna-logo">
+                <img src="/images/logo-iftm.png" alt="Logo IFTM">
+            </div>
+        </section>
+
+        <section class="cartao cartao-gerenciar">
+            <div class="gerenciar-header">
+                <h2><i class="fa-solid fa-book-bookmark"></i> Histórico de Empréstimos</h2>
+                <div class="header-botoes-acao">
+                    <button id="btnAdicionarEmprestimo" class="botao-principal"
+                        title="Abrir formulário para registrar um novo empréstimo">
+                        <i class="fa-solid fa-plus"></i><span>Registrar Empréstimo</span>
+                    </button>
+                </div>
+            </div>
+            <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum
+                empréstimo registrado.</div>
+            <div class="table-wrapper">
+                <table id="emprestimosTable">
+                    <thead>
+                        <tr>
+                            <th class="col-id">ID</th>
+                            <th class="col-titulo">Livro Emprestado</th>
+                            <th class="col-usuario">Usuário</th>
+                            <th class="col-datas">Datas</th>
+                            <th class="col-acoes">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="paginacao-container" id="paginacao-container"></div>
+        </section>
+    </main>
+
+    <div id="formModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Registrar Novo Empréstimo</h2>
+                <button id="btnFecharModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="emprestimoForm" class="gerenciar-form">
+                    <div class="form-grid">
+                        <!-- Campo de busca de usuário -->
+                        <div class="form-group grid-span-2">
+                            <label for="usuarioSearchInput">Buscar Usuário (Nome, CPF ou ID):</label>
+                            <div id="usuarioSearchWrapper" class="autocomplete-wrapper">
+                                <input type="text" id="usuarioSearchInput" class="form-input" placeholder="Digite para buscar...">
+                                <div id="usuarioSearchResults" class="search-results-list"></div>
+                            </div>
+                            <div id="selectedUsuarioDisplay" style="display:none;" class="selected-item-display">
+                                <i class="fa-solid fa-user-check"></i>
+                                <strong id="selectedUsuarioName"></strong>
+                                <button type="button" id="clearUsuarioSelectionBtn" class="clear-selection-btn" title="Limpar seleção">&times;</button>
+                            </div>
+                            <!-- Input oculto para armazenar o ID do usuário selecionado -->
+                            <input type="hidden" id="usuarioId" name="usuarioId" required>
+                        </div>
+                        <!-- Campo de busca de livro -->
+                        <div class="form-group grid-span-2">
+                            <label for="livroSearchInput">Buscar Livro Disponível (Título, Autor ou ISBN):</label>
+                            <div id="livroSearchWrapper" class="autocomplete-wrapper">
+                                <input type="text" id="livroSearchInput" class="form-input" placeholder="Digite para buscar...">
+                                <div id="livroSearchResults" class="search-results-list"></div>
+                            </div>
+                            <div id="selectedLivroDisplay" style="display:none;" class="selected-item-display">
+                                <i class="fa-solid fa-book-open-reader"></i>
+                                <strong id="selectedLivroTitulo"></strong>
+                                <button type="button" id="clearLivroSelectionBtn" class="clear-selection-btn" title="Limpar seleção">&times;</button>
+                            </div>
+                            <!-- Input oculto para armazenar o ID do livro selecionado -->
+                            <input type="hidden" id="livroId" name="livroId" required>
+                        </div>
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-principal"><i
+                                class="fa-solid fa-floppy-disk"></i><span>Salvar</span></button>
+                        <button type="button" class="botao-secundario" id="btnLimparForm"><i
+                                class="fa-solid fa-eraser"></i><span>Limpar</span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const emprestimosApiUrl = '/api/emprestimos';
+        const usuariosApiUrl = '/api/usuarios';
+        const livrosApiUrl = '/api/livros';
+
+        const emprestimosTableBody = document.getElementById('emprestimosTable').getElementsByTagName('tbody')[0];
+        const listaVaziaMsg = document.getElementById('listaVaziaMsg');
+        let currentPage = 0;
+        const paginacaoContainer = document.getElementById('paginacao-container');
+
+        const modal = document.getElementById('formModal');
+        const btnFecharModal = document.getElementById('btnFecharModal');
+        const btnAdicionarEmprestimo = document.getElementById('btnAdicionarEmprestimo');
+        const btnLimparForm = document.getElementById('btnLimparForm');
+        const emprestimoForm = document.getElementById('emprestimoForm');
+
+        // Elementos da busca de usuário
+        const usuarioSearchWrapper = document.getElementById('usuarioSearchWrapper');
+        const usuarioSearchInput = document.getElementById('usuarioSearchInput');
+        const usuarioSearchResults = document.getElementById('usuarioSearchResults');
+        const selectedUsuarioDisplay = document.getElementById('selectedUsuarioDisplay');
+        const selectedUsuarioName = document.getElementById('selectedUsuarioName');
+        const clearUsuarioSelectionBtn = document.getElementById('clearUsuarioSelectionBtn');
+        const usuarioIdInput = document.getElementById('usuarioId');
+
+        // Elementos da busca de livro
+        const livroSearchWrapper = document.getElementById('livroSearchWrapper');
+        const livroSearchInput = document.getElementById('livroSearchInput');
+        const livroSearchResults = document.getElementById('livroSearchResults');
+        const selectedLivroDisplay = document.getElementById('selectedLivroDisplay');
+        const selectedLivroTitulo = document.getElementById('selectedLivroTitulo');
+        const clearLivroSelectionBtn = document.getElementById('clearLivroSelectionBtn');
+        const livroIdInput = document.getElementById('livroId');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEmprestimos();
+
+            btnAdicionarEmprestimo.addEventListener('click', openModal);
+            btnFecharModal.addEventListener('click', closeModal);
+            btnLimparForm.addEventListener('click', () => {
+                resetForm();
+            });
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            emprestimoForm.addEventListener('submit', handleFormSubmit);
+
+            // Verifica se a página foi aberta com parâmetros de um livro específico
+            handleDirectLoanLink();
+        });
+
+        /**
+         * Verifica se a URL contém parâmetros para um empréstimo direto (livroId e livroTitulo).
+         * Se existirem, abre o modal e pré-seleciona o livro.
+         */
+        function handleDirectLoanLink() {
+            const params = new URLSearchParams(window.location.search);
+            const livroId = params.get('livroId');
+            const livroTitulo = params.get('livroTitulo');
+
+            if (livroId && livroTitulo) {
+                openModal();
+                selectLivro({ id: livroId, titulo: livroTitulo });
+            }
+        }
+
+        async function loadEmprestimos(page = 0, append = false) {
+            const params = new URLSearchParams({
+                page: page,
+                size: 10,
+                sort: 'dataEmprestimo,desc'
+            });
+
+            try {
+                const response = await fetch(`${emprestimosApiUrl}?${params.toString()}`);
+                if (!response.ok) throw new Error(`Erro na requisição: ${response.status}`);
+                const pageData = await response.json();
+                renderEmprestimos(pageData, append);
+            } catch (error) {
+                console.error('Erro ao carregar empréstimos:', error);
+                alert('Não foi possível buscar os empréstimos.');
+            }
+        }
+
+        function renderEmprestimos(pageData, append = false) {
+            const emprestimos = pageData.content;
+            if (!append) {
+                emprestimosTableBody.innerHTML = '';
+            }
+
+            if (!emprestimos || emprestimos.length === 0) {
+                if (!append) {
+                    listaVaziaMsg.style.display = 'block';
+                    document.querySelector('.table-wrapper').style.display = 'none';
+                }
+            } else {
+                listaVaziaMsg.style.display = 'none';
+                document.querySelector('.table-wrapper').style.display = 'block';
+                emprestimos.forEach(item => {
+                    const row = emprestimosTableBody.insertRow();
+                    // Adiciona a classe de destaque se o empréstimo estiver atrasado
+                    if (item.atrasado) {
+                        row.classList.add('emprestimo-atrasado');
+                    }
+
+                    row.insertCell().textContent = item.id;
+                    row.insertCell().innerHTML = `<div class="info-cell"><i class="fa-solid fa-book"></i><span>${item.livroTitulo || 'N/A'}</span></div>`;
+                    row.insertCell().innerHTML = `<div class="info-cell"><i class="fa-solid fa-user"></i><span>${item.usuarioNome || 'N/A'}</span></div>`;
+
+                    const dataCell = row.insertCell();
+                    const dataEmprestimo = new Date(item.dataEmprestimo).toLocaleString('pt-BR');
+                    const dataDevolucao = item.dataDevolucao ? new Date(item.dataDevolucao).toLocaleString('pt-BR') : 'Pendente';
+                    dataCell.innerHTML = `
+                        <div class="info-cell"><i class="fa-solid fa-calendar-plus" title="Data do Empréstimo"></i><span>${dataEmprestimo}</span></div>
+                        <div class="info-cell"><i class="fa-solid fa-calendar-check" title="Data da Devolução"></i><span>${dataDevolucao}</span></div>
+                    `;
+
+                    const actionsCell = row.insertCell();
+                    if (!item.dataDevolucao) {
+                        actionsCell.innerHTML = `<button class="botao-acao devolver" title="Registrar Devolução" onclick="registrarDevolucao(${item.id})"><i class="fa-solid fa-right-from-bracket"></i></button>`;
+                    } else {
+                        actionsCell.innerHTML = `<span class="status-devolvido"><i class="fa-solid fa-check"></i> Devolvido</span>`;
+                    }
+                });
+            }
+            renderPaginacao(pageData);
+        }
+
+        function renderPaginacao(pageData) {
+            paginacaoContainer.innerHTML = '';
+            if (!pageData.last) {
+                const mostrarMaisBtn = document.createElement('button');
+                mostrarMaisBtn.innerHTML = '<i class="fa-solid fa-angles-down"></i><span>Carregar mais</span>';
+                mostrarMaisBtn.className = 'paginacao-btn';
+                mostrarMaisBtn.onclick = () => {
+                    currentPage = pageData.number + 1;
+                    loadEmprestimos(currentPage, true);
+                };
+                paginacaoContainer.appendChild(mostrarMaisBtn);
+                paginacaoContainer.style.display = 'flex';
+            } else {
+                paginacaoContainer.style.display = 'none';
+            }
+        }
+
+        function openModal() {
+            resetForm();
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function resetForm() {
+            emprestimoForm.reset();
+            // Limpa a seleção de usuário e livro
+            clearUsuarioSelection();
+            clearLivroSelection();
+            // Garante que os campos de busca fiquem visíveis
+            usuarioSearchWrapper.style.display = 'block';
+            livroSearchWrapper.style.display = 'block';
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const emprestimoData = {
+                usuarioId: usuarioIdInput.value,
+                livroId: livroIdInput.value
+            };
+
+            try {
+                const response = await fetch(emprestimosApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emprestimoData)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+                    throw new Error(errorData.message || 'Não foi possível registrar o empréstimo.');
+                }
+                closeModal();
+                loadEmprestimos(0, false); // Recarrega a lista do início, mantendo o filtro atual
+                alert('Empréstimo registrado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao registrar empréstimo:', error);
+                alert(`Erro ao registrar empréstimo:\n${error.message}`);
+            }
+        }
+
+        async function registrarDevolucao(id) {
+            if (!confirm(`Tem certeza que deseja registrar a devolução para o empréstimo ID ${id}?`)) return;
+            try {
+                const response = await fetch(`${emprestimosApiUrl}/${id}/devolucao`, { method: 'PATCH' });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+                    throw new Error(errorData.message || 'Não foi possível registrar a devolução.');
+                }
+                loadEmprestimos(0, false); // Recarrega a lista do início, mantendo o filtro atual
+                alert('Devolução registrada com sucesso!');
+            } catch (error) {
+                console.error('Erro ao registrar devolução:', error);
+                alert(`Erro ao registrar devolução:\n${error.message}`);
+            }
+        }
+
+        // --- LÓGICA DA BUSCA DE USUÁRIO ---
+
+        // Adiciona listeners para a busca de usuário
+        usuarioSearchInput.addEventListener('input', handleUsuarioSearchInput);
+        clearUsuarioSelectionBtn.addEventListener('click', clearUsuarioSelection);
+        // Adiciona listeners de foco e blur para gerenciar a visibilidade da lista
+        usuarioSearchInput.addEventListener('focus', () => {
+            livroSearchResults.classList.remove('active'); // Garante que a outra lista feche
+            handleUsuarioSearchInput(); // Permite reabrir a lista se já houver texto
+        });
+        usuarioSearchInput.addEventListener('blur', () => {
+            // Delay para permitir o clique em um item da lista antes que ela desapareça
+            setTimeout(() => usuarioSearchResults.classList.remove('active'), 200);
+        });
+
+        // Função para lidar com a digitação no campo de busca
+        async function handleUsuarioSearchInput() {
+            const termo = usuarioSearchInput.value.trim();
+            if (termo.length < 2) {
+                usuarioSearchResults.innerHTML = '';
+                usuarioSearchResults.classList.remove('active');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${usuariosApiUrl}?name=${encodeURIComponent(termo)}&size=5`); // Limita a 5 resultados
+                if (!response.ok) {
+                    console.error(`Erro na API de usuários: ${response.status}`);
+                    return;
+                }
+                if (!response.ok) return;
+                const pageData = await response.json();
+                renderUsuarioResults(pageData.content);
+            } catch (error) {
+                console.error('Erro ao buscar usuários:', error);
+            }
+        }
+
+        // Renderiza os resultados da busca de usuário
+        function renderUsuarioResults(usuarios) {
+            usuarioSearchResults.innerHTML = '';
+            if (usuarios.length === 0) {
+                usuarioSearchResults.innerHTML = '<div class="autocomplete-item">Nenhum usuário encontrado.</div>';
+            } else {
+                usuarios.forEach(usuario => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = `<i class="fa-solid fa-user"></i><span>${usuario.name} (CPF: ${usuario.cpf || 'N/A'})</span>`;
+                    item.addEventListener('mousedown', () => selectUsuario(usuario));
+                    usuarioSearchResults.appendChild(item);
+                });
+            }
+            usuarioSearchResults.classList.add('active');
+        }
+
+        // Função chamada ao selecionar um usuário
+        function selectUsuario(usuario) {
+            usuarioIdInput.value = usuario.id;
+            selectedUsuarioName.textContent = `${usuario.name} (ID: ${usuario.id})`;
+
+            usuarioSearchWrapper.style.display = 'none';
+            selectedUsuarioDisplay.style.display = 'flex';
+            usuarioSearchResults.classList.remove('active');
+            usuarioSearchResults.innerHTML = '';
+        }
+
+        // Função para limpar a seleção do usuário
+        function clearUsuarioSelection() {
+            usuarioIdInput.value = '';
+            usuarioSearchInput.value = '';
+            selectedUsuarioName.textContent = '';
+
+            usuarioSearchWrapper.style.display = 'block';
+            selectedUsuarioDisplay.style.display = 'none';
+            usuarioSearchInput.focus();
+        }
+
+        // --- LÓGICA DA BUSCA DE LIVRO ---
+
+        // Adiciona listeners para a busca de livro
+        livroSearchInput.addEventListener('input', handleLivroSearchInput);
+        clearLivroSelectionBtn.addEventListener('click', clearLivroSelection);
+        // Adiciona listeners de foco e blur
+        livroSearchInput.addEventListener('focus', () => {
+            usuarioSearchResults.classList.remove('active'); // Garante que a outra lista feche
+            handleLivroSearchInput(); // Permite reabrir a lista se já houver texto
+        });
+        livroSearchInput.addEventListener('blur', () => {
+            setTimeout(() => livroSearchResults.classList.remove('active'), 200);
+        });
+
+        async function handleLivroSearchInput() {
+            const termo = livroSearchInput.value.trim();
+            if (termo.length < 2) {
+                livroSearchResults.innerHTML = '';
+                livroSearchResults.classList.remove('active');
+                return;
+            }
+
+            try {
+                // Usa o endpoint de livros disponíveis com o parâmetro de busca
+                const response = await fetch(`${livrosApiUrl}/disponiveis?termo=${encodeURIComponent(termo)}&size=5`); // Limita a 5 resultados
+                if (!response.ok) {
+                    console.error(`Erro na API de livros: ${response.status}`);
+                    return;
+                }
+                if (!response.ok) return;
+                const pageData = await response.json();
+                renderLivroResults(pageData.content);
+            } catch (error) {
+                console.error('Erro ao buscar livros:', error);
+            }
+        }
+
+        function renderLivroResults(livros) {
+            livroSearchResults.innerHTML = '';
+            if (livros.length === 0) {
+                livroSearchResults.innerHTML = '<div class="autocomplete-item">Nenhum livro disponível encontrado.</div>';
+            } else {
+                livros.forEach(livro => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = `<i class="fa-solid fa-book"></i><span>${livro.titulo} (Autor: ${livro.autor || 'N/A'})</span>`;
+                    item.addEventListener('mousedown', () => selectLivro(livro));
+                    livroSearchResults.appendChild(item);
+                });
+            }
+            livroSearchResults.classList.add('active');
+        }
+
+        function selectLivro(livro) {
+            livroIdInput.value = livro.id;
+            selectedLivroTitulo.textContent = `${livro.titulo} (ID: ${livro.id})`;
+
+            livroSearchWrapper.style.display = 'none';
+            selectedLivroDisplay.style.display = 'flex';
+            livroSearchResults.classList.remove('active');
+            livroSearchResults.innerHTML = '';
+        }
+
+        function clearLivroSelection() {
+            livroIdInput.value = '';
+            livroSearchInput.value = '';
+            selectedLivroTitulo.textContent = '';
+
+            livroSearchWrapper.style.display = 'block';
+            selectedLivroDisplay.style.display = 'none';
+            livroSearchInput.focus();
+        }
+
+    </script>
+</body>
+
+</html>

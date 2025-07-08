@@ -1,7 +1,9 @@
 package org.iftm.biblioteca.controller;
 
 import java.net.URI;
+import java.util.List;
 
+import org.iftm.biblioteca.dto.SugestaoDTO;
 import org.iftm.biblioteca.service.UsuariosService; // A importação já deve ser da interface
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -71,5 +73,11 @@ public class UsuariosController {
             page = usuariosService.findByNameContaining(name, pageable);
         }
         return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/sugestoes")
+    public ResponseEntity<List<SugestaoDTO>> getSugestoes(@RequestParam(defaultValue = "") String termo) {
+        List<SugestaoDTO> sugestoes = usuariosService.buscarSugestoesDeNomes(termo);
+        return ResponseEntity.ok(sugestoes);
     }
 }

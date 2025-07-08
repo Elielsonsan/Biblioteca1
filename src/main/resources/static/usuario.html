@@ -23,6 +23,7 @@
             <li><a href="/categorias.html">Categoria</a></li>
             <li><a href="/estante.html">Estante</a></li>
             <li><a href="/usuario.html">Usuário</a></li>
+            <li><a href="/emprestimos.html">Empréstimos</a></li>
         </ul>
     </nav>
 
@@ -37,36 +38,30 @@
             </div>
         </section>
 
-        <section class="cartao cartao-busca">
-            <div class="barra-busca-container">
-                <i class="fa-solid fa-magnifying-glass icone-principal"></i>
-                <div class="input-wrapper">
-                    <input type="text" id="termoBusca" placeholder="Busque por nome do usuário...">
+        <section class="cartao cartao-gerenciar">
+            <div class="gerenciar-header">
+                <h2><i class="fa-solid fa-users"></i> Lista de Usuários</h2>
+                <div class="header-botoes-acao">
+                    <button id="btnAbrirBuscaModal" class="botao-secundario" title="Buscar usuário">
+                        <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                    </button>
+                    <button id="btnLimparFiltro" class="botao-secundario" title="Limpar filtro de busca" style="display: none;">
+                        <i class="fa-solid fa-broom"></i><span>Limpar Busca</span>
+                    </button>
+                    <button id="btnAdicionarUsuario" class="botao-principal"
+                        title="Abrir formulário para adicionar um novo usuário"><i
+                            class="fa-solid fa-plus"></i><span>Adicionar Usuário</span></button>
                 </div>
             </div>
-            <div class="botoes-acao-container">
-                <button id="btnBuscar" class="botao-secundario" title="Realizar a busca"><i
-                        class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
-                <button id="btnLimparBusca" class="botao-secundario" title="Limpar o campo de busca e os resultados"><i
-                        class="fa-solid fa-broom"></i><span>Limpar</span></button>
-                <button id="btnAdicionarUsuario" class="botao-principal"
-                    title="Abrir formulário para adicionar um novo usuário"><i
-                        class="fa-solid fa-plus"></i><span>Adicionar Usuário</span></button>
-            </div>
-        </section>
-
-        <section class="cartao cartao-gerenciar">
-            <h2><i class="fa-solid fa-users"></i> Lista de Usuários</h2>
             <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum
                 usuário encontrado.</div>
             <div class="table-wrapper">
                 <table id="usuariosTable">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Nome & Email</th>
-                            <th>CPF & Categoria</th>
-                            <th>Ações</th>
+                            <th class="col-id">ID</th>
+                            <th class="col-usuario">Usuário</th>
+                            <th class="col-acoes">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -112,12 +107,6 @@
                             <label for="filhosUsuario">Nº de Filhos:</label>
                             <input type="number" id="filhosUsuario" name="childrenCount" class="form-input" min="0">
                         </div>
-                        <div class="form-group">
-                            <label for="categoriaUsuario">Categoria:</label>
-                            <select id="categoriaUsuario" name="categoriaId" class="form-input">
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="botoes-acao-container form-buttons">
                         <button type="submit" class="botao-principal"><i
@@ -130,14 +119,39 @@
         </div>
     </div>
 
+    <!-- Modal de Busca -->
+    <div id="searchModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="searchModalTitulo">Buscar Usuário</h2>
+                <button id="btnFecharBuscaModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="searchForm" class="gerenciar-form" onsubmit="event.preventDefault(); buscarUsuarios();">
+                    <div class="form-group">
+                        <label for="termoBuscaModal">Nome do Usuário:</label>
+                        <div class="autocomplete-wrapper">
+                            <input type="text" id="termoBuscaModal" class="form-input" placeholder="Digite o nome para buscar...">
+                            <div id="autocomplete-list-usuarios" class="autocomplete-list"></div>
+                        </div>
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-secundario">
+                            <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                        </button>
+                        <button type="button" class="botao-secundario" id="btnLimparBuscaModal">
+                            <i class="fa-solid fa-broom"></i><span>Limpar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         const usuariosApiUrl = '/api/usuarios';
         const categoriasApiUrl = '/api/categorias';
-
-        const termoBuscaInput = document.getElementById('termoBusca');
         const usuariosTableBody = document.getElementById('usuariosTable').getElementsByTagName('tbody')[0];
-        const btnBuscar = document.getElementById('btnBuscar');
-        const btnLimparBusca = document.getElementById('btnLimparBusca');
         const listaVaziaMsg = document.getElementById('listaVaziaMsg');
 
         let currentPage = 0;
@@ -150,41 +164,74 @@
         const btnLimparForm = document.getElementById('btnLimparForm');
         const usuarioForm = document.getElementById('usuarioForm');
         const usuarioIdInput = document.getElementById('usuarioId');
-        const categoriaSelect = document.getElementById('categoriaUsuario');
+
+        // Elementos do Modal de Busca
+        const searchModal = document.getElementById('searchModal');
+        const btnAbrirBuscaModal = document.getElementById('btnAbrirBuscaModal');
+        const btnFecharBuscaModal = document.getElementById('btnFecharBuscaModal');
+        const termoBuscaModalInput = document.getElementById('termoBuscaModal');
+        const btnLimparBuscaModal = document.getElementById('btnLimparBuscaModal');
+        const autocompleteListUsuarios = document.getElementById('autocomplete-list-usuarios');
+        const btnLimparFiltro = document.getElementById('btnLimparFiltro');
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadCategoriasParaSelect();
             loadUsuarios();
-
-            btnBuscar.addEventListener('click', buscarUsuarios);
-            btnLimparBusca.addEventListener('click', limparBusca);
-            termoBuscaInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') buscarUsuarios();
-            });
 
             btnAdicionarUsuario.addEventListener('click', openModalForAdd);
             btnFecharModal.addEventListener('click', closeModal);
             btnLimparForm.addEventListener('click', resetForm);
             modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
             usuarioForm.addEventListener('submit', handleFormSubmit);
+
+            // Listeners do Modal de Busca
+            btnAbrirBuscaModal.addEventListener('click', () => searchModal.style.display = 'flex');
+            btnFecharBuscaModal.addEventListener('click', () => searchModal.style.display = 'none');
+            searchModal.addEventListener('click', (event) => {
+                if (event.target === searchModal) searchModal.style.display = 'none';
+            });
+            btnLimparBuscaModal.addEventListener('click', limparBusca);
+            btnLimparFiltro.addEventListener('click', limparBusca);
+
+            // Listeners do Autocomplete
+            termoBuscaModalInput.addEventListener('input', handleUserInput);
+            termoBuscaModalInput.addEventListener('blur', () => {
+                setTimeout(() => autocompleteListUsuarios.classList.remove('active'), 200);
+            });
         });
 
         function buscarUsuarios() {
             currentPage = 0;
-            loadUsuarios(termoBuscaInput.value.trim(), currentPage);
+            const termo = termoBuscaModalInput.value.trim();
+            loadUsuarios(termo, currentPage);
+            searchModal.style.display = 'none'; // Fecha o modal após a busca
+            // Mostra ou esconde o botão de limpar filtro principal
+            if (termo) {
+                btnLimparFiltro.style.display = 'flex';
+            } else {
+                btnLimparFiltro.style.display = 'none';
+            }
         }
 
         function limparBusca() {
-            termoBuscaInput.value = '';
+            termoBuscaModalInput.value = '';
             currentPage = 0;
             loadUsuarios('', currentPage);
+            btnLimparFiltro.style.display = 'none'; // Esconde o botão de limpar filtro principal
+        }
+
+        function recarregarBuscaAtual() {
+            // Esta função garante que, ao salvar ou excluir, a busca atual seja
+            // recarregada, preservando o filtro que o usuário aplicou.
+            currentPage = 0; // Volta para a primeira página
+            // Carrega os usuários mantendo o termo de busca atual, sem adicionar à lista existente (append = false)
+            loadUsuarios(termoBuscaModalInput.value.trim(), currentPage, false);
         }
 
         async function loadUsuarios(termo = '', page = 0, append = false) {
             const params = new URLSearchParams({
                 page: page,
                 size: 10,
-                sort: 'name,asc'
+                sort: 'id,asc' // Altera a ordenação para o ID, garantindo uma paginação estável.
             });
             if (termo) {
                 params.append('name', termo);
@@ -219,17 +266,15 @@
                     const row = usuariosTableBody.insertRow();
                     row.insertCell().textContent = usuario.id;
 
-                    const nomeEmailCell = row.insertCell();
-                    nomeEmailCell.innerHTML = `
-                        <div class="info-cell"><i class="fa-solid fa-user" title="Nome"></i><span>${usuario.name || 'N/A'}</span></div>
-                        <div class="info-cell"><i class="fa-solid fa-envelope" title="Email"></i><span>${usuario.email || 'N/A'}</span></div>
-                    `;
-
-                    const cpfCategoriaCell = row.insertCell();
-                    cpfCategoriaCell.innerHTML = `
-                        <div class="info-cell"><i class="fa-solid fa-id-card" title="CPF"></i><span>${usuario.cpf || 'N/A'}</span></div>
-                        <div class="info-cell"><i class="fa-solid fa-tags" title="Categoria"></i><span>${usuario.categoriaNome || 'N/A'}</span></div>
-                    `;
+                    const usuarioCell = row.insertCell();
+                    usuarioCell.innerHTML = `
+                        <div class="nome-cell-content">
+                            <i class="fa-solid fa-user"></i>
+                            <div>
+                                <span>${usuario.name || 'N/A'}</span>
+                                <small style="display: block; color: var(--cor-texto-secundario); font-weight: 400;">${usuario.email || 'N/A'}</small>
+                            </div>
+                        </div>`;
 
                     const actionsCell = row.insertCell();
                     actionsCell.innerHTML = `
@@ -247,10 +292,14 @@
                 const mostrarMaisBtn = document.createElement('button');
                 mostrarMaisBtn.innerHTML = '<i class="fa-solid fa-angles-down"></i><span>Carregar mais usuários</span>';
                 mostrarMaisBtn.className = 'paginacao-btn';
-                mostrarMaisBtn.onclick = () => {
-                    currentPage = pageData.number + 1;
-                    loadUsuarios(termoBuscaInput.value.trim(), currentPage, true);
-                };
+
+                // Captura o termo de busca e o número da próxima página no momento em que o botão é criado.
+                // Isso torna o botão independente do estado atual do campo de busca.
+                const termoAtual = termoBuscaModalInput.value.trim();
+                const nextPage = pageData.number + 1;
+                // A função de clique agora usa as variáveis capturadas 'termoAtual' e 'nextPage'.
+                mostrarMaisBtn.onclick = () => loadUsuarios(termoAtual, nextPage, true);
+
                 paginacaoContainer.appendChild(mostrarMaisBtn);
                 paginacaoContainer.style.display = 'flex';
             } else {
@@ -274,7 +323,6 @@
             document.getElementById('nascimentoUsuario').value = usuario.birthDate || '';
             document.getElementById('rendaUsuario').value = usuario.income || '';
             document.getElementById('filhosUsuario').value = usuario.childrenCount || '';
-            categoriaSelect.value = usuario.categoriaId || '';
             modal.style.display = 'flex';
         }
 
@@ -296,8 +344,7 @@
                 cpf: document.getElementById('cpfUsuario').value,
                 birthDate: document.getElementById('nascimentoUsuario').value || null,
                 income: document.getElementById('rendaUsuario').value || null,
-                childrenCount: document.getElementById('filhosUsuario').value || null,
-                categoriaId: document.getElementById('categoriaUsuario').value || null
+                childrenCount: document.getElementById('filhosUsuario').value || null
             };
 
             const method = id ? 'PUT' : 'POST';
@@ -314,7 +361,7 @@
                     throw new Error(errorData.message || 'Não foi possível salvar o usuário.');
                 }
                 closeModal();
-                limparBusca();
+                recarregarBuscaAtual(); // Usa a nova função para recarregar mantendo o filtro
                 alert(`Usuário ${id ? 'atualizado' : 'salvo'} com sucesso!`);
             } catch (error) {
                 console.error('Erro ao salvar usuário:', error);
@@ -330,7 +377,7 @@
                     const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
                     throw new Error(errorData.message || 'Não foi possível excluir o usuário.');
                 }
-                limparBusca();
+                recarregarBuscaAtual(); // Usa a nova função para recarregar mantendo o filtro
                 alert('Usuário excluído com sucesso!');
             } catch (error) {
                 console.error('Erro ao excluir usuário:', error);
@@ -338,17 +385,43 @@
             }
         }
 
-        async function loadCategoriasParaSelect() {
-            try {
-                const response = await fetch(categoriasApiUrl);
-                const categorias = await response.json();
-                categorias.forEach(cat => {
-                    const option = new Option(cat.nome, cat.id);
-                    categoriaSelect.add(option);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar categorias:', error);
+        // --- FUNÇÕES DE AUTOCOMPLETE ---
+
+        async function handleUserInput() {
+            const termo = termoBuscaModalInput.value.trim();
+            if (termo.length < 2) {
+                autocompleteListUsuarios.classList.remove('active');
+                return;
             }
+
+            try {
+                const response = await fetch(`${usuariosApiUrl}/sugestoes?termo=${encodeURIComponent(termo)}`);
+                if (!response.ok) return;
+                const sugestoes = await response.json();
+                renderSugestoes(sugestoes);
+            } catch (error) {
+                console.error('Erro ao buscar sugestões de usuários:', error);
+            }
+        }
+
+        function renderSugestoes(sugestoes) {
+            autocompleteListUsuarios.innerHTML = '';
+            if (sugestoes.length === 0) {
+                autocompleteListUsuarios.classList.remove('active');
+                return;
+            }
+
+            sugestoes.forEach(sugestao => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = `<i class="fa-solid fa-user"></i><span>${sugestao.valor}</span>`;
+                item.addEventListener('mousedown', () => {
+                    termoBuscaModalInput.value = sugestao.valor;
+                    buscarUsuarios();
+                });
+                autocompleteListUsuarios.appendChild(item);
+            });
+            autocompleteListUsuarios.classList.add('active');
         }
     </script>
 </body>

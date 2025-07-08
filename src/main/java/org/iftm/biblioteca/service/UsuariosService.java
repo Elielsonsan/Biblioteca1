@@ -1,7 +1,9 @@
 package org.iftm.biblioteca.service;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.iftm.biblioteca.dto.SugestaoDTO;
 import org.iftm.biblioteca.dto.UsuariosDTO;
 import org.iftm.biblioteca.entities.Usuarios;
 import org.springframework.data.domain.Page;
@@ -22,4 +24,6 @@ public interface UsuariosService {
     Page<UsuariosDTO> findByNameContaining(String name, Pageable pageable);
 
     Optional<Usuarios> findByEmail(String email); // Exemplo de método adicional
+
+    List<SugestaoDTO> buscarSugestoesDeNomes(String termo);
 }

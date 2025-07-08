@@ -15,6 +15,7 @@ import org.iftm.biblioteca.entities.Estante;
 import org.iftm.biblioteca.entities.Livro;
 import org.iftm.biblioteca.repository.CategoriaRepository;
 import org.iftm.biblioteca.repository.UsuariosRepository;
+import org.iftm.biblioteca.repository.EmprestimoRepository;
 import org.iftm.biblioteca.repository.EstanteRepository;
 import org.iftm.biblioteca.repository.LivroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-// @Component // Desativado temporariamente para usar o data.sql
+//@Component // Desativado para usar o data.sql para popular o banco de dados.
 public class DataLoader implements CommandLineRunner {
 
         // --- Declara os repositórios como membros da classe ---
@@ -36,6 +37,8 @@ public class DataLoader implements CommandLineRunner {
         private LivroRepository livroRepository;
         @Autowired
         private UsuariosRepository usuarioRepository;
+        @Autowired
+        private EmprestimoRepository emprestimoRepository;
 
         @PersistenceContext
         private EntityManager entityManager;
@@ -45,7 +48,8 @@ public class DataLoader implements CommandLineRunner {
         @Transactional // Garante que tudo execute em uma única transação (opcional, mas recomendado)
         public void run(String... args) throws Exception {
 
-                // Limpa o banco antes de inserir (útil para H2 em memória, opcional)
+                // Limpa o banco antes de inserir para garantir um estado consistente
+                emprestimoRepository.deleteAll();
                 livroRepository.deleteAll();
                 usuarioRepository.deleteAll(); // Deletar Usuários antes de Categorias
                 categoriaRepository.deleteAll();
@@ -128,32 +132,34 @@ public class DataLoader implements CommandLineRunner {
                         System.out.println(">>> Erro ao carregar categorias ou estantes salvas.");
                 }
 
-                // 4. Criar e Salvar Clientes
-                // Certifique-se de que as categorias referenciadas (ficcaoSalva, romanceSalvo)
-                // existem
-                if (ficcaoSalva != null && romanceSalvo != null) {
-                        Usuarios usuario1 = new Usuarios(null, "Carlos Alberto", "carlos.alberto@example.com",
-                                        "123.456.789-00",
-                                        new BigDecimal("3500.00"), LocalDate.of(1985, 5, 20), 2,
-                                        "Rua Teste, 100", "Uberlândia", "MG", "38400-000", ficcaoSalva);
+                // 4. Criar e Salvar Usuários
+                System.out.println(">>> Carregando usuários...");
+                Usuarios usuario1 = new Usuarios(null, "Carlos Alberto", "carlos.alberto@example.com",
+                                "123.456.789-00",
+                                new BigDecimal("3500.00"), LocalDate.of(1985, 5, 20), 2,
+                                "Rua das Flores, 100", "Uberlândia", "MG", "38400-123");
 
-                        Usuarios usuario2 = new Usuarios(null, "Fernanda Lima", "fernanda.lima@example.com",
-                                        "987.654.321-00",
-                                        new BigDecimal("4200.50"), LocalDate.of(1992, 10, 15), 0,
-                                        "Avenida Brasil, 500", "Araguari", "MG", "38440-000", romanceSalvo);
+                Usuarios usuario2 = new Usuarios(null, "Fernanda Lima", "fernanda.lima@example.com",
+                                "987.654.321-00",
+                                new BigDecimal("4200.50"), LocalDate.of(1992, 10, 15), 0,
+                                "Avenida Brasil, 500", "Araguari", "MG", "38440-000");
 
-                        Usuarios usuario3 = new Usuarios(null, "Usuario Teste Sem Categoria", "teste.semcat@example.com",
-                                        "111.222.333-44",
-                                        new BigDecimal("2000.00"), LocalDate.of(1990, 1, 1), 1,
-                                        "Rua dos Exemplos, 123", "Ituiutaba", "MG", "38300-000", null); // Usuario sem
-                                                                                                        // categoria
-                                                                                                        // associada
+                Usuarios usuario3 = new Usuarios(null, "Bruno Marques", "bruno.marques@example.com",
+                                "111.222.333-44",
+                                new BigDecimal("2800.00"), LocalDate.of(1990, 1, 1), 1,
+                                "Rua dos Exemplos, 123", "Ituiutaba", "MG", "38300-000");
 
-                        usuarioRepository.saveAll(Arrays.asList(usuario1, usuario2, usuario3));
-                        System.out.println(">>> Usuários carregados com sucesso!");
-                } else {
-                        System.out.println(">>> Erro: Categorias necessárias para usuários não foram carregadas.");
-                }
+                Usuarios usuario4 = new Usuarios(null, "Juliana Paes", "juliana.paes@example.com",
+                                "222.333.444-55",
+                                new BigDecimal("6000.00"), LocalDate.of(1988, 3, 25), 0,
+                                "Rua das Palmeiras, 45", "Uberaba", "MG", "38010-010");
 
+                Usuarios usuario5 = new Usuarios(null, "Ricardo Souza", "ricardo.souza@example.com",
+                                "333.444.555-66",
+                                new BigDecimal("1950.75"), LocalDate.of(2001, 8, 10), 0,
+                                "Avenida Afonso Pena, 2000", "Belo Horizonte", "MG", "30130-005");
+
+                usuarioRepository.saveAll(Arrays.asList(usuario1, usuario2, usuario3, usuario4, usuario5));
+                System.out.println(">>> Usuários carregados com sucesso!");
         }
 }

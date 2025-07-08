@@ -1,5 +1,6 @@
 package org.iftm.biblioteca.dto;
 
+import java.time.Instant;
 import org.iftm.biblioteca.entities.Livro;
 
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +34,10 @@ public class LivroDTO {
     @NotNull(message = "Estante é obrigatória.")
     private String estanteId;
     private String estanteNome;
+
+    // Novos campos para status de disponibilidade
+    private String statusDisponibilidade;
+    private Instant dataPrevistaDevolucao;
 
     public LivroDTO() {
     }
@@ -79,4 +84,20 @@ public class LivroDTO {
     public void setEstanteId(String estanteId) { this.estanteId = estanteId; }
     public String getEstanteNome() { return estanteNome; }
     public void setEstanteNome(String estanteNome) { this.estanteNome = estanteNome; }
+
+    public String getStatusDisponibilidade() {
+        return statusDisponibilidade;
+    }
+
+    public void setStatusDisponibilidade(String statusDisponibilidade) {
+        this.statusDisponibilidade = statusDisponibilidade;
+    }
+
+    public Instant getDataPrevistaDevolucao() {
+        return dataPrevistaDevolucao;
+    }
+
+    public void setDataPrevistaDevolucao(Instant dataPrevistaDevolucao) {
+        this.dataPrevistaDevolucao = dataPrevistaDevolucao;
+    }
 }

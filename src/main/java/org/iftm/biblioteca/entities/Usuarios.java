@@ -4,19 +4,20 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tb_client") // Opcional, mas bom para padronização com outras tabelas
+@Table(name = "tb_usuario") // Padronizado com as outras tabelas do sistema
 public class Usuarios implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -47,16 +48,15 @@ public class Usuarios implements Serializable {
     private String state;
     private String zipCode;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id") // Esta coluna deve existir no data.sql para tb_client
-    private Categoria category;
+    @OneToMany(mappedBy = "usuario")
+    private Set<Emprestimo> emprestimos = new HashSet<>();
 
 
     public Usuarios() {
     }
 
     // Construtor atualizado com os novos campos
-    public Usuarios(Long id, String name, String email, String cpf, BigDecimal income, LocalDate birthDate, Integer childrenCount, String street, String city, String state, String zipCode, Categoria category) {
+    public Usuarios(Long id, String name, String email, String cpf, BigDecimal income, LocalDate birthDate, Integer childrenCount, String street, String city, String state, String zipCode) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -68,7 +68,6 @@ public class Usuarios implements Serializable {
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
-        this.category = category;
     }
 
     public Long getId() {
@@ -159,12 +158,8 @@ public class Usuarios implements Serializable {
         this.zipCode = zipCode;
     }
 
-    public Categoria getCategory() {
-        return category;
-    }
-
-    public void setCategory(Categoria category) {
-        this.category = category;
+    public Set<Emprestimo> getEmprestimos() {
+        return emprestimos;
     }
 
     @Override
@@ -173,8 +168,8 @@ public class Usuarios implements Serializable {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        Usuarios client = (Usuarios) o;
-        return Objects.equals(id, client.id);
+        Usuarios usuario = (Usuarios) o;
+        return Objects.equals(id, usuario.id);
     }
 
     @Override

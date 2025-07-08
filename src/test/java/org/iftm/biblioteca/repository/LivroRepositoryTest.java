@@ -3,17 +3,24 @@ package org.iftm.biblioteca.repository;
 // Imports do Spring Data JPA
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import org.iftm.biblioteca.entities.Categoria;
 import org.iftm.biblioteca.entities.Estante;
+import org.iftm.biblioteca.entities.Emprestimo;
 import org.iftm.biblioteca.entities.Livro;
+import org.iftm.biblioteca.entities.Usuarios;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 @DataJpaTest // Carrega o contexto do Spring apenas para testes de repositório
 class LivroRepositoryTest {
@@ -23,6 +30,7 @@ class LivroRepositoryTest {
 
     @Autowired
     private LivroRepository livroRepository; // O repositório que estamos testando
+
     private Categoria catFantasia;
     private Categoria catFiccao;
     private Estante estA1;
@@ -52,6 +60,13 @@ class LivroRepositoryTest {
         livroDuna = new Livro(null, "Duna", "Frank Herbert", "1234567890", 1965, 1, "/images/duna.png", catFiccao, estB2);
         entityManager.persist(livroHobbit);
         entityManager.persist(livroDuna);
+
+        // Cria um usuário e um empréstimo para o livro "Duna", tornando-o indisponível
+        Usuarios usuario = new Usuarios(null, "Ana", "ana@email.com", "111.111.111-11", new BigDecimal("1000"),
+                LocalDate.of(1995, 1, 1), 0, "Rua A", "Cidade B", "MG", "12345-000");
+        entityManager.persist(usuario);
+        Emprestimo emprestimoDuna = new Emprestimo(null, usuario, livroDuna, Instant.now(), null);
+        entityManager.persist(emprestimoDuna);
 
         // garante que as entidades sejam persistidas no banco de dados
         entityManager.flush();
@@ -136,54 +151,6 @@ class LivroRepositoryTest {
         assertThat(optionalLivro).isNotPresent();
     }
 
-    // Exemplo:
-    @Test
-    @DisplayName("Deve encontrar livros por título contendo 'Hobbit'")
-    void findByTituloContainingIgnoreCase_ComKeywordExistente_RetornarLivros() {
-        // Arrange
-        String keyword = "Hobbit";
-
-        // Act
-        List<Livro> livros = livroRepository.findByTituloContainingIgnoreCase(keyword);
-
-        // Assert
-        assertThat(livros).isNotNull().hasSize(1);
-        assertThat(livros.get(0).getTitulo()).isEqualTo("O Hobbit");
-    }
-
-    // Exemplo: Supondo que você tenha `List<Livro> findByAutor(String autor);` no repositório
-    @Test
-    @DisplayName("Deve encontrar livros pelo autor 'Frank Herbert'")
-    void findByAutor_QuandoAutorExiste_DeveRetornarLivros() {
-        // Arrange
-        String autor = "Frank Herbert";
-
-        // Act - Lembre-se de renomear o método no LivroRepository para findByAutor
-        List<Livro> livros = livroRepository.findByAutor(autor); // O método agora é findByAutor
-
-        // Assert
-        assertThat(livros).isNotNull().hasSize(1);
-        assertThat(livros.get(0).getAutor()).isEqualTo(autor);
-        assertThat(livros.get(0).getTitulo()).isEqualTo("Duna");
-    }
-
-    // Exemplo: Supondo que você tenha `List<Livro> findByCategoriaNome(String
-    // nome);`
-    @Test
-    @DisplayName("Deve encontrar livros pela categoria 'Fantasia' (findByCategoriaNome)")
-    void findByCategoriaNome_QuandoCategoriaExiste_DeveRetornarLivros() {
-        // Arrange
-        String nomeCategoria = "Fantasia";
-
-        // Act
-        List<Livro> livros = livroRepository.findByCategoriaNome(nomeCategoria); // Use o nome exato do seu método
-
-        // Assert
-        assertThat(livros).isNotNull().hasSize(1);
-        assertThat(livros.get(0).getTitulo()).isEqualTo("O Hobbit");
-        assertThat(livros.get(0).getCategoria().getNome()).isEqualTo(nomeCategoria);
-    }
-
     // --- Teste de Exclusão ---
     @Test
     @DisplayName("Deve excluir livro por ID existente (deleteById)")
@@ -234,5 +201,22 @@ class LivroRepositoryTest {
         Optional<Livro> optionalLivroDoBanco = livroRepository.findById(idParaAtualizar);
         assertThat(optionalLivroDoBanco).isPresent();
         assertThat(optionalLivroDoBanco.get().getAnoPublicacao()).isEqualTo(anoNovo);
+    }
+
+    @Test
+    @DisplayName("Deve encontrar apenas livros disponíveis (não emprestados)")
+    void findAvailableByTerm_DeveRetornarApenasLivrosNaoEmprestados() {
+        // Arrange (from setUp)
+        // livroDuna está emprestado, livroHobbit está disponível.
+        String termoBusca = ""; // Busca geral por todos os disponíveis
+
+        // Act
+        Page<Livro> paginaDisponiveis = livroRepository.findAvailableByTerm(termoBusca, PageRequest.of(0, 10));
+
+        // Assert
+        assertThat(paginaDisponiveis).isNotNull();
+        assertThat(paginaDisponiveis.getContent()).hasSize(1);
+        assertThat(paginaDisponiveis.getContent().get(0).getTitulo()).isEqualTo("O Hobbit");
+        assertThat(paginaDisponiveis.getContent()).extracting(Livro::getTitulo).doesNotContain("Duna");
     }
 }

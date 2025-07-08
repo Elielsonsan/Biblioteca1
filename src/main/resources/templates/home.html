@@ -23,6 +23,7 @@
             <li><a th:href="@{/categorias.html}">Categoria</a></li>
             <li><a th:href="@{/estante.html}">Estante</a></li>
             <li><a th:href="@{/usuario.html}">Usuário</a></li>
+            <li><a th:href="@{/emprestimos.html}">Empréstimos</a></li>
         </ul>
     </nav>
 
@@ -55,7 +56,7 @@
                 </div>
                 <div id="autocomplete-list" class="autocomplete-list"></div>
                 <div class="botoes-acao-container">
-                    <button type="submit" class="botao-secundario">
+                    <button type="submit" class="botao-principal">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <span>Buscar</span>
                     </button>
@@ -63,11 +64,10 @@
                         <i class="fa-solid fa-broom"></i>
                         <span>Limpar</span>
                     </button>
-                    <!-- O botão de busca avançada levar a outra página -->
-                    <a th:href="@{/busca-avancada}" class="botao-secundario" style="text-decoration: none;">
-                        <i class="fa-solid fa-list-check"></i>
-                        <span>Busca avançada</span>
-                    </a>
+                    <button type="button" id="btnAbrirBuscaAvancada" class="botao-secundario">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Busca Avançada</span>
+                    </button>
                 </div>
             </section>
         </form>
@@ -87,7 +87,32 @@
 
     </main>
 
+    <!-- Modal de Busca Avançada -->
+    <div id="searchModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="searchModalTitulo">Busca Avançada</h2>
+                <button id="btnFecharBuscaModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Incluindo o fragmento do formulário de busca avançada -->
+                <!-- O ID do formulário aqui dentro é 'buscaAvancadaForm' -->
+                <div th:replace="~{fragments/busca-avancada-form :: form}"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ===================================================================================
+        // SCRIPT DA PÁGINA INICIAL (HOME)
+        // -----------------------------------------------------------------------------------
+        // Este script gerencia todas as interações da página principal, incluindo:
+        // 1. Busca simples com filtros (autor, título, ISBN).
+        // 2. Sistema de autocompletar/sugestões de busca.
+        // 3. Abertura e gerenciamento do modal de Busca Avançada.
+        // 4. Renderização dinâmica dos resultados da busca na página.
+        // ===================================================================================
+
         const form = document.getElementById('homeSearchForm');
         const termoBuscaInput = document.getElementById('termoBusca');
         const autocompleteList = document.getElementById('autocomplete-list');
@@ -99,13 +124,24 @@
         const limparBuscaBtn = document.getElementById('limparBuscaBtn');
         const mainSearchIcon = document.querySelector('.icone-principal');
         const tituloResultados = document.getElementById('tituloResultados');
-
         const filterButtons = document.querySelectorAll('.icones-filtro .filtro-btn');
-        let activeFilter = 'termo'; // Filtro padrão é a busca geral pelo name do input
-        let isSelectingSuggestion = false; // Flag para controlar o evento de input ao clicar na sugestão
 
+        // Elementos do Modal de Busca Avançada
+        const searchModal = document.getElementById('searchModal');
+        const btnAbrirBuscaAvancada = document.getElementById('btnAbrirBuscaAvancada');
+        const btnFecharBuscaModal = document.getElementById('btnFecharBuscaModal');
+
+        // --- URLs das APIs ---
         const livrosApiUrl = '/api/livros';
         const sugestoesApiUrl = '/api/livros/sugestoes';
+        const categoriasApiUrl = '/api/categorias';
+        const estantesApiUrl = '/api/estantes';
+
+        // --- Variáveis de Estado ---
+        // Guarda o filtro ativo ('termo', 'autor', 'titulo', 'isbn')
+        let activeFilter = 'termo';
+        // Flag para evitar que o evento 'input' dispare a busca por sugestões quando um item é clicado
+        let isSelectingSuggestion = false;
 
         // Objeto para gerenciar os placeholders e títulos dinâmicos
         const placeholders = {
@@ -115,111 +151,182 @@
             isbn: { text: 'Digite os 13 dígitos do ISBN (só números)', title: 'Buscar por ISBN' }
         };
 
-        // Listener para o novo botão de limpar
-        limparBuscaBtn.addEventListener('click', () => {
-            resetarEstadoDaBusca();
-            limparApenasListaDeResultados();
-        });
-
-        // Adiciona listeners para os botões de filtro
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const filterType = button.dataset.filter;
-
-                // Se o botão clicado já está ativo, desativa todos (volta para busca geral)
-                if (button.classList.contains('active')) {
-                    button.classList.remove('active');
-                    activeFilter = 'termo'; // Volta para o filtro geral
-                } else {
-                    // Remove a classe 'active' de todos os botões
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    // Adiciona a classe 'active' apenas ao botão clicado
-                    button.classList.add('active');
-                    activeFilter = filterType;
-                }
-                atualizarEstadoDaBarraDeBusca();
-                termoBuscaInput.focus(); // Foca no input para o usuário continuar digitando
-            });
-        });
-
-        function atualizarEstadoDaBarraDeBusca() {
-            const config = placeholders[activeFilter];
-            termoBuscaInput.placeholder = config.text;
-            termoBuscaInput.title = config.title;
-
-            const activeButton = document.querySelector('.filtro-btn.active');
-            mainSearchIcon.className = activeButton 
-                ? activeButton.querySelector('i').className + ' icone-principal' 
-                : 'fa-solid fa-magnifying-glass icone-principal';
-        }
-
-        form.addEventListener('submit', (event) => {
-            event.preventDefault(); // Impede o recarregamento da página
-            const termo = termoBuscaInput.value.trim();
-            if (termo) { 
-                autocompleteList.classList.remove('active'); // Esconde a lista ao submeter
-                // Passa o filtro ativo para a função de busca
-                realizarBusca(termo, activeFilter);
-            } else {
-                // Se a busca for submetida vazia, reseta tudo
+        // ===================================================================================
+        // PONTO DE ENTRADA PRINCIPAL
+        // ===================================================================================
+        /**
+         * Adiciona todos os event listeners necessários após o carregamento completo do DOM,
+         * garantindo que todos os elementos HTML estejam disponíveis.
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Lógica da Busca Simples (Página Principal) ---
+            limparBuscaBtn.addEventListener('click', () => {
                 resetarEstadoDaBusca();
                 limparApenasListaDeResultados();
-            }
-        });
+            });
 
-        // Listener para o input de busca para acionar o autocomplete
-        termoBuscaInput.addEventListener('input', async () => {
-            // Se o evento de input foi acionado por um clique na sugestão,
-            // reseta a flag e ignora esta execução para não reabrir a lista.
-            if (isSelectingSuggestion) {
-                isSelectingSuggestion = false;
-                return;
-            }
+            // Adiciona listeners aos botões de filtro (ícones de usuário, livro, etc.)
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const filterType = button.dataset.filter;
+                    if (button.classList.contains('active')) {
+                        button.classList.remove('active');
+                        activeFilter = 'termo';
+                    } else {
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        activeFilter = filterType;
+                    }
+                    atualizarEstadoDaBarraDeBusca();
+                    termoBuscaInput.focus();
+                });
+            });
 
-            const termo = termoBuscaInput.value.trim();
+            // Listener para o envio do formulário de busca principal
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const termo = termoBuscaInput.value.trim();
+                if (termo) {
+                    autocompleteList.classList.remove('active');
+                    realizarBusca(termo, activeFilter);
+                } else {
+                    resetarEstadoDaBusca();
+                    limparApenasListaDeResultados();
+                }
+            });
 
-            // Controla a animação de expansão da pílula
-            if (termo.length > 0) {
-                buscaContainer.classList.add('focused');
-            } else {
-                buscaContainer.classList.remove('focused');
-            }
-
-            if (termo.length < 2) { // Só busca sugestões com 2+ caracteres
-                autocompleteList.classList.remove('active');
-                return;
-            }
-
-            try {
-                const url = `${sugestoesApiUrl}?termo=${encodeURIComponent(termo)}&filtro=${activeFilter}`;
-                const response = await fetch(url);
-                if (!response.ok) return;
-                const sugestoes = await response.json();
-                renderizarSugestoes(sugestoes);
-            } catch (error) {
-                console.error('Erro ao buscar sugestões:', error);
-                autocompleteList.classList.remove('active');
-            }
-        });
-
-        // Adiciona a classe 'focused' quando o input ganha foco, mas apenas se já houver texto
-        termoBuscaInput.addEventListener('focus', () => {
-            if (termoBuscaInput.value.trim().length > 0) {
-                buscaContainer.classList.add('focused');
-            }
-        });
-
-        // Remove a classe 'focused' e esconde a lista quando o foco é perdido
-        termoBuscaInput.addEventListener('blur', () => {
-            // Usa um pequeno delay para permitir que cliques em itens da lista ou filtros sejam processados
-            setTimeout(() => {
-                if (!buscaContainer.contains(document.activeElement)) {
+            // Listener para o input de busca, responsável por acionar o autocompletar
+            termoBuscaInput.addEventListener('input', async () => {
+                if (isSelectingSuggestion) {
+                    isSelectingSuggestion = false;
+                    return;
+                }
+                const termo = termoBuscaInput.value.trim();
+                if (termo.length > 0) {
+                    buscaContainer.classList.add('focused');
+                } else {
                     buscaContainer.classList.remove('focused');
+                }
+                if (termo.length < 2) {
+                    autocompleteList.classList.remove('active');
+                    return;
+                }
+                try {
+                    const url = `${sugestoesApiUrl}?termo=${encodeURIComponent(termo)}&filtro=${activeFilter}`;
+                    const response = await fetch(url);
+                    if (!response.ok) return;
+                    const sugestoes = await response.json();
+                    renderizarSugestoes(sugestoes);
+                } catch (error) {
+                    console.error('Erro ao buscar sugestões:', error);
                     autocompleteList.classList.remove('active');
                 }
-            }, 150); // 150ms é um tempo seguro
+            });
+
+            // Adiciona classe 'focused' para expandir a lista de autocomplete
+            termoBuscaInput.addEventListener('focus', () => {
+                if (termoBuscaInput.value.trim().length > 0) {
+                    buscaContainer.classList.add('focused');
+                }
+            });
+
+            // Remove a classe 'focused' e esconde a lista de autocomplete ao perder o foco
+            termoBuscaInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    if (!buscaContainer.contains(document.activeElement)) {
+                        buscaContainer.classList.remove('focused');
+                        autocompleteList.classList.remove('active');
+                    }
+                }, 150);
+            });
+
+            // --- Lógica do Modal de Busca Avançada ---
+            const buscaAvancadaForm = document.getElementById('buscaAvancadaForm');
+            const btnLimparBuscaAvancada = document.getElementById('btnLimparBuscaAvancada');
+
+            // Abre o modal
+            btnAbrirBuscaAvancada.addEventListener('click', () => {
+                searchModal.style.display = 'flex';
+            });
+
+            // Fecha o modal pelo botão 'X'
+            btnFecharBuscaModal.addEventListener('click', () => {
+                searchModal.style.display = 'none';
+            });
+
+            // Fecha o modal ao clicar fora da área de conteúdo
+            searchModal.addEventListener('click', (event) => {
+                if (event.target === searchModal) {
+                    searchModal.style.display = 'none';
+                }
+            });
+
+            // Limpa o formulário do modal
+            btnLimparBuscaAvancada.addEventListener('click', () => {
+                buscaAvancadaForm.reset();
+            });
+
+            // Listener para o envio do formulário de busca avançada
+            buscaAvancadaForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(buscaAvancadaForm);
+                const params = new URLSearchParams();
+
+                for (const [key, value] of formData.entries()) {
+                    if (value) {
+                        params.append(key, value);
+                    }
+                }
+
+                searchModal.style.display = 'none';
+                autocompleteList.classList.remove('active');
+
+                const url = `${livrosApiUrl}?${params.toString()}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Erro na busca: ${response.status}`);
+                    const pageData = await response.json();
+                    renderizarResultados(pageData.content, null, 'avancada');
+                } catch (error) {
+                    console.error('Erro ao realizar busca avançada:', error);
+                    alert('Ocorreu um erro ao buscar os livros.');
+                }
+            });
+
+            // Popula os selects de Categoria e Estante no modal de busca avançada
+            loadSelectOptions(categoriasApiUrl, buscaAvancadaForm.querySelector('[name="categoriaId"]'));
+            loadSelectOptions(estantesApiUrl, buscaAvancadaForm.querySelector('[name="estanteId"]'));
         });
 
+        // ===================================================================================
+        // FUNÇÕES DE CARREGAMENTO E RENDERIZAÇÃO
+        // ===================================================================================
+
+        /**
+         * Carrega dinamicamente as opções para um elemento <select> a partir de uma API.
+         * @param {string} apiUrl - A URL da API que retorna a lista de itens.
+         * @param {HTMLElement} selectElement - O elemento <select> a ser populado.
+         */
+        async function loadSelectOptions(apiUrl, selectElement) {
+            try {
+                const response = await fetch(apiUrl);
+                const items = await response.json();
+                items.forEach(item => {
+                    const option = new Option(item.nome, item.id);
+                    selectElement.add(option);
+                });
+            } catch (error) {
+                console.error(`Erro ao carregar opções de ${apiUrl}:`, error);
+            }
+        }
+
+        /**
+         * Renderiza a lista de sugestões de autocomplete abaixo da barra de busca.
+         * @param {Array<Object>} sugestoes - Um array de objetos de sugestão, cada um com 'tipo' e 'valor'.
+         * @param {string} sugestoes[].tipo - O tipo de sugestão ('autor', 'titulo', 'isbn').
+         * @param {string} sugestoes[].valor - O texto da sugestão.
+         */
         function renderizarSugestoes(sugestoes) {
             autocompleteList.innerHTML = '';
             if (sugestoes.length === 0) {
@@ -262,12 +369,35 @@
             autocompleteList.classList.add('active'); // Ativa a lista para mostrar com animação
         }
 
+        // ===================================================================================
+        // FUNÇÕES DE MANIPULAÇÃO DA UI E ESTADO
+        // ===================================================================================
+        /**
+         * Atualiza o placeholder e o ícone da barra de busca com base no filtro ativo.
+         */
+        function atualizarEstadoDaBarraDeBusca() {
+            const config = placeholders[activeFilter];
+            termoBuscaInput.placeholder = config.text;
+            termoBuscaInput.title = config.title;
+
+            const activeButton = document.querySelector('.filtro-btn.active');
+            mainSearchIcon.className = activeButton
+                ? activeButton.querySelector('i').className + ' icone-principal'
+                : 'fa-solid fa-magnifying-glass icone-principal';
+        }
+
+        /**
+         * Limpa apenas a seção de resultados, mantendo o termo de busca e filtros.
+         */
         function limparApenasListaDeResultados() {
             listaResultados.innerHTML = '';
             secaoResultados.style.display = 'none';
             secaoSemResultados.style.display = 'none';
         }
 
+        /**
+         * Reseta completamente o estado da busca para o padrão inicial.
+         */
         function resetarEstadoDaBusca() {
             filterButtons.forEach(btn => btn.classList.remove('active'));
             autocompleteList.classList.remove('active');
@@ -277,6 +407,15 @@
             atualizarEstadoDaBarraDeBusca();
         }
 
+        // ===================================================================================
+        // FUNÇÕES DE LÓGICA DE BUSCA (API)
+        // ===================================================================================
+
+        /**
+         * Executa a busca simples na API com base no termo e filtro fornecidos.
+         * @param {string} termo - O termo a ser buscado.
+         * @param {string} filtro - O tipo de filtro a ser aplicado ('termo', 'autor', 'titulo', 'isbn').
+         */
         async function realizarBusca(termo, filtro) {
             // Garante que a lista de sugestões seja fechada ao iniciar uma busca
             autocompleteList.classList.remove('active');
@@ -297,16 +436,25 @@
             }
         }
 
+        /**
+         * Renderiza a lista de livros encontrados na seção de resultados.
+         * @param {Array<Object>} livros - A lista de objetos de livro retornada pela API.
+         * @param {string|null} termo - O termo de busca original, para destacar nos resultados.
+         * @param {string} filtro - O filtro usado na busca ('termo', 'autor', 'titulo', 'isbn', 'avancada').
+         */
         function renderizarResultados(livros, termo, filtro) {
             limparApenasListaDeResultados();
 
             if (livros && livros.length > 0) {
-                let tipoBusca = "termo geral";
-                if (filtro === 'autor') tipoBusca = 'autor';
-                if (filtro === 'titulo') tipoBusca = 'título';
-                if (filtro === 'isbn') tipoBusca = 'ISBN';
-
-                tituloResultados.textContent = `Resultados para ${tipoBusca} "${termo}"`;
+                if (filtro === 'avancada') {
+                    tituloResultados.textContent = 'Resultados da Busca Avançada';
+                } else {
+                    let tipoBusca = "termo geral";
+                    if (filtro === 'autor') tipoBusca = 'autor';
+                    if (filtro === 'titulo') tipoBusca = 'título';
+                    if (filtro === 'isbn') tipoBusca = 'ISBN';
+                    tituloResultados.textContent = `Resultados para ${tipoBusca} "${termo}"`;
+                }
 
                 const placeholderCapa = '/images/capa-placeholder.png';
                 livros.forEach(livro => {
@@ -324,15 +472,58 @@
                     } else if (filtro === 'isbn') {
                         isbnHtml = `<strong>${isbnHtml}</strong>`;
                     } else if (filtro === 'termo') {
-                        // Para busca geral (autocomplete), verifica se o termo corresponde ao autor ou ISBN.
-                        if (autorHtml.toLowerCase() === termo.toLowerCase()) {
-                            autorHtml = `<strong>${autorHtml}</strong>`;
-                        } else if (isbnHtml.toLowerCase() === termo.toLowerCase()) {
-                            isbnHtml = `<strong>${isbnHtml}</strong>`;
+                        // Para busca geral, destaca o termo em qualquer um dos campos
+                        const regex = new RegExp(termo, 'gi');
+                        tituloHtml = tituloHtml.replace(regex, '<b>$&</b>');
+                        autorHtml = autorHtml.replace(regex, '<b>$&</b>');
+                        isbnHtml = isbnHtml.replace(regex, '<b>$&</b>');
+                    }
+
+                    // --- Lógica para renderizar o status de disponibilidade ---
+                    let statusHtml = '';
+                    let acoesHtml = ''; // Variável para as ações, como o botão de emprestar
+
+                    if (livro.statusDisponibilidade === 'Disponível') {
+                        statusHtml = `
+                            <div class="linha-info status-disponivel">
+                                <i class="fa-solid fa-circle-check" title="Status"></i>
+                                <p>${livro.statusDisponibilidade}</p>
+                            </div>
+                        `;
+                        // Se o livro está disponível, adiciona o botão para emprestar
+                        acoesHtml = `
+                            <div class="acoes-livro">
+                                <a href="/emprestimos.html?livroId=${livro.id}&livroTitulo=${encodeURIComponent(livro.titulo)}" class="botao-acao-texto" title="Emprestar este livro">
+                                    <i class="fa-solid fa-handshake-angle"></i>
+                                    <span>Emprestar Livro</span>
+                                </a>
+                            </div>
+                        `;
+                    } else { // Indisponível
+                        statusHtml = `
+                            <div class="linha-info status-indisponivel">
+                                <i class="fa-solid fa-circle-xmark" title="Status"></i>
+                                <p>${livro.statusDisponibilidade}</p>
+                            </div>
+                        `;
+                        if (livro.dataPrevistaDevolucao) {
+                            const dataFormatada = new Date(livro.dataPrevistaDevolucao).toLocaleDateString('pt-BR');
+                            statusHtml += `
+                                <div class="linha-info status-info">
+                                    <i class="fa-solid fa-hourglass-half" title="Previsão de Devolução"></i>
+                                    <p>Disponível a partir de: ${dataFormatada}</p>
+                                </div>
+                            `;
                         }
-                        else { // Fallback para busca parcial ou por título.
-                            tituloHtml = `<strong>${tituloHtml}</strong>`;
-                        }
+                        // Se o livro está indisponível, adiciona um link para ver os empréstimos
+                        acoesHtml = `
+                            <div class="acoes-livro">
+                                <a href="/emprestimos.html" class="botao-acao-texto" title="Ver histórico de empréstimos">
+                                    <i class="fa-solid fa-book-bookmark"></i>
+                                    <span>Ver Empréstimos</span>
+                                </a>
+                            </div>
+                        `;
                     }
 
                     const itemResultado = document.createElement('div');
@@ -344,6 +535,8 @@
                             <div class="linha-info"><i class="fa-solid fa-barcode" title="ISBN"></i><p>${isbnHtml}</p></div>
                             <div class="linha-info"><i class="fa-solid fa-tags" title="Categoria"></i><p>${livro.categoriaNome || (livro.categoria ? livro.categoria.nome : 'N/A')}</p></div>
                             <div class="linha-info"><i class="fa-solid fa-box-archive" title="Estante"></i><p>${livro.estanteNome || (livro.estante ? livro.estante.nome : 'N/A')}</p></div>
+                            ${statusHtml}
+                            ${acoesHtml}
                         </div>
                         <div class="capa-livro"><img src="${capaSrc}" alt="Capa do Livro ${livro.titulo}" onerror="this.onerror=null;this.src='${placeholderCapa}';"></div>
                     `;

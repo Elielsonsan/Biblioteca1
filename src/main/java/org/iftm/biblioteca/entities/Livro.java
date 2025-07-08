@@ -2,6 +2,8 @@ package org.iftm.biblioteca.entities;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
+import java.util.HashSet;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -33,6 +36,9 @@ public class Livro implements Serializable {
     @ManyToOne
     @JoinColumn(name = "estante_id")
     private Estante estante;
+
+    @OneToMany(mappedBy = "livro")
+    private Set<Emprestimo> emprestimos = new HashSet<>();
 
     public Livro() {
     }
@@ -68,6 +74,10 @@ public class Livro implements Serializable {
     public void setCategoria(Categoria categoria) { this.categoria = categoria; }
     public Estante getEstante() { return estante; }
     public void setEstante(Estante estante) { this.estante = estante; }
+
+    public Set<Emprestimo> getEmprestimos() {
+        return emprestimos;
+    }
 
     @Override
     public int hashCode() {

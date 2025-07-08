@@ -38,48 +38,8 @@
 
         <section class="cartao">
             <h2>Opções de Busca</h2>
-            <form id="buscaAvancadaForm">
-                <div class="form-group-busca">
-                    <label for="titulo">Título:</label>
-                    <input type="text" id="titulo" name="titulo" placeholder="Título do livro">
-                </div>
-                <div class="form-group-busca">
-                    <label for="autor">Autor:</label>
-                    <input type="text" id="autor" name="autor" placeholder="Nome do autor">
-                </div>
-                <div class="form-group-busca">
-                    <label for="isbn">ISBN:</label>
-                    <input type="text" id="isbn" name="isbn" placeholder="ISBN do livro">
-                </div>
-                <div class="form-group-busca">
-                    <label for="categoria">Categoria:</label>
-                    <select id="categoria" name="categoriaId">
-                        <option value="">Todas as Categorias</option>
-                        <!-- Opções de categoria podem ser carregadas dinamicamente via Thymeleaf ou JS -->
-                    </select>
-                </div>
-                <div class="form-group-busca">
-                    <label for="estante">Estante:</label>
-                    <select id="estante" name="estanteId">
-                        <option value="">Todas as Estantes</option>
-                        <!-- Opções de estante serão carregadas dinamicamente via JS -->
-                    </select>
-                </div>
-                <div class="form-group-busca">
-                    <label for="anoPublicacao">Ano de Publicação (a partir de):</label>
-                    <input type="number" id="anoPublicacao" name="anoPublicacao" min="1400" max="2099" placeholder="Ex: 2000">
-                </div>
-                <div class="botoes-acao-container">
-                    <button type="submit" class="botao-secundario">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <span>Buscar Avançado</span>
-                    </button>
-                    <button type="button" id="btnLimpar" class="botao-secundario">
-                        <i class="fa-solid fa-broom"></i>
-                        <span>Limpar Campos</span>
-                    </button>
-                </div>
-            </form>
+            <!-- Substituindo o formulário antigo pela inclusão do fragmento reutilizável -->
+            <div th:replace="~{fragments/busca-avancada-form :: form}"></div>
         </section>
 
         <!-- Seção para exibir resultados da busca avançada, controlada por JS -->
@@ -97,22 +57,40 @@
     </main>
 
     <script>
+        // ===================================================================================
+        // SCRIPT DA PÁGINA DE BUSCA AVANÇADA
+        // -----------------------------------------------------------------------------------
+        // Este script é dedicado a gerenciar a página de busca avançada.
+        // 1. Popula os filtros de Categoria e Estante ao carregar a página.
+        // 2. Captura o envio do formulário de busca.
+        // 3. Constrói a requisição para a API com base nos filtros preenchidos.
+        // 4. Renderiza os resultados da busca ou uma mensagem de "nenhum resultado".
+        // ===================================================================================
+
+        // --- Elementos do DOM ---
         const form = document.getElementById('buscaAvancadaForm');
-        const btnLimpar = document.getElementById('btnLimpar');
+        const btnLimpar = document.getElementById('btnLimparBuscaAvancada'); // ID atualizado para corresponder ao fragmento
 
         const secaoResultados = document.getElementById('secaoResultados');
         const listaResultados = document.getElementById('listaResultados');
         const secaoSemResultados = document.getElementById('secaoSemResultados');
 
+        // Elementos <select> do formulário
         const categoriaSelect = document.getElementById('categoria');
         const estanteSelect = document.getElementById('estante');
 
-        // URLs das suas APIs
+        // --- URLs das APIs ---
         const livrosApiUrl = '/api/livros';
         const categoriasApiUrl = '/api/categorias';
         const estantesApiUrl = '/api/estantes';
 
-        // Carrega as opções dos selects quando a página é carregada
+        // ===================================================================================
+        // PONTO DE ENTRADA PRINCIPAL
+        // ===================================================================================
+        /**
+         * Adiciona os event listeners e carrega os dados iniciais (opções dos selects)
+         * após o carregamento completo do DOM.
+         */
         document.addEventListener('DOMContentLoaded', () => {
             loadOptions(categoriasApiUrl, categoriaSelect, 'Todas as Categorias'); // O texto é usado como placeholder
             loadOptions(estantesApiUrl, estanteSelect, 'Todas as Estantes');
@@ -132,7 +110,16 @@
             listaResultados.innerHTML = '';
         });
 
-        // Função genérica para carregar opções em um <select>
+        // ===================================================================================
+        // FUNÇÕES DE LÓGICA DE BUSCA E RENDERIZAÇÃO
+        // ===================================================================================
+
+        /**
+         * Função genérica para carregar e popular as opções de um elemento <select> a partir de uma API.
+         * @param {string} apiUrl - A URL da API que retorna a lista de itens.
+         * @param {HTMLElement} selectElement - O elemento <select> a ser populado.
+         * @param {string} defaultOptionText - O texto para a primeira opção (placeholder).
+         */
         async function loadOptions(apiUrl, selectElement, defaultOptionText) {
             try {
                 const response = await fetch(apiUrl);
@@ -158,7 +145,10 @@
             }
         }
 
-        // Função principal que realiza a busca
+        /**
+         * Função principal que é acionada pelo submit do formulário.
+         * Ela coleta os dados, monta a URL da API e chama a função de renderização.
+         */
         async function realizarBusca() {
             const formData = new FormData(form);
             const params = new URLSearchParams();
@@ -177,15 +167,19 @@
             try {
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Erro na busca: ${response.status}`);
-                const livros = await response.json();
-                renderizarResultados(livros);
+                const pageData = await response.json(); // A API retorna um objeto Page
+                renderizarResultados(pageData.content); // Extrai a lista de livros do 'content'
             } catch (error) {
                 console.error('Erro ao realizar busca avançada:', error);
                 alert('Ocorreu um erro ao buscar os livros.');
             }
         }
 
-        // Função que desenha os resultados na tela
+        /**
+         * Renderiza a lista de livros encontrados na seção de resultados.
+         * Também destaca os termos de busca nos campos correspondentes.
+         * @param {Array<object>} livros - A lista de objetos de livro retornada pela API.
+         */
         function renderizarResultados(livros) {
             listaResultados.innerHTML = ''; // Limpa resultados anteriores
         
@@ -200,11 +194,11 @@
                     const itemResultado = document.createElement('div');
                     itemResultado.className = 'item-resultado';
         
-                    // Prepara o HTML para os campos, aplicando destaque se houver termo de busca
+                    // Prepara o HTML para os campos, aplicando destaque (negrito) se houver termo de busca
                     let tituloHtml = livro.titulo || 'N/A';
                     if (termoTitulo) {
                         // A sintaxe '<b>$&</b>' insere o texto encontrado dentro das tags <b>
-                        tituloHtml = tituloHtml.replace(new RegExp(termoTitulo, 'gi'), '<b>$&</b>');
+                        tituloHtml = tituloHtml.replace(new RegExp(termoTitulo, 'gi'), '<strong>$&</strong>');
                     }
         
                     let autorHtml = livro.autor || 'N/A';
@@ -216,17 +210,43 @@
                     if (termoIsbn) {
                         isbnHtml = isbnHtml.replace(new RegExp(termoIsbn, 'gi'), '<b>$&</b>');
                     }
+
+                    // Lógica para renderizar o status de disponibilidade, consistente com as outras páginas
+                    let statusHtml = '';
+                    if (livro.statusDisponibilidade === 'Disponível') {
+                        statusHtml = `
+                            <div class="linha-info status-disponivel">
+                                <i class="fa-solid fa-circle-check" title="Status"></i>
+                                <p>${livro.statusDisponibilidade}</p>
+                            </div>
+                        `;
+                    } else if (livro.statusDisponibilidade) { // Indisponível ou outro status
+                        statusHtml = `
+                            <div class="linha-info status-indisponivel">
+                                <i class="fa-solid fa-circle-xmark" title="Status"></i>
+                                <p>${livro.statusDisponibilidade}</p>
+                            </div>
+                        `;
+                        if (livro.dataPrevistaDevolucao) {
+                            const dataFormatada = new Date(livro.dataPrevistaDevolucao).toLocaleDateString('pt-BR');
+                            statusHtml += `
+                                <div class="linha-info status-info">
+                                    <i class="fa-solid fa-hourglass-half" title="Previsão de Devolução"></i>
+                                    <p>Disponível a partir de: ${dataFormatada}</p>
+                                </div>
+                            `;
+                        }
+                    }
         
-                    // Usamos o mesmo HTML do seu design para os resultados
                     itemResultado.innerHTML = `
                         <div class="info-detalhada">
                             <div class="linha-info">
                                 <i class="fa-solid fa-copyright" title="Autor"></i> 
-                                <p>${autorHtml}</p> 
+                                <p>${autorHtml}</p>
                             </div>
-                            <div class="linha-info">
+                            <div class="linha-info info-titulo">
                                 <i class="fa-solid fa-book" title="Título"></i>
-                                <p><strong>${tituloHtml}</strong></p>
+                                <p>${tituloHtml}</p>
                             </div>
                             <div class="linha-info">
                                 <i class="fa-solid fa-barcode" title="ISBN"></i>
@@ -240,6 +260,7 @@
                                 <i class="fa-solid fa-box-archive" title="Estante"></i>
                                 <p>${livro.estanteNome || (livro.estante ? livro.estante.nome : 'N/A')}</p>
                             </div>
+                            ${statusHtml}
                         </div>
                         <div class="capa-livro">
                             <img src="${capaSrc}" alt="Capa do Livro ${livro.titulo}" onerror="this.onerror=null;this.src='${placeholderCapa}';">

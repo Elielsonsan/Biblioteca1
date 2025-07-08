@@ -32,10 +32,6 @@ public class UsuariosDTO {
         this.city = entity.getCity();
         this.state = entity.getState();
         this.zipCode = entity.getZipCode();
-        if (entity.getCategory() != null) {
-            this.categoriaId = entity.getCategory().getId();
-            this.categoriaNome = entity.getCategory().getNome();
-        }
     }
 
     @NotBlank(message = "Nome do cliente não pode ser vazio.")
@@ -72,9 +68,6 @@ public class UsuariosDTO {
     private String state;
     private String zipCode;
 
-    private Long categoriaId;
-    private String categoriaNome;
-
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -94,8 +87,4 @@ public class UsuariosDTO {
     public void setState(String state) { this.state = state; }
     public String getZipCode() { return zipCode; }
     public void setZipCode(String zipCode) { this.zipCode = zipCode; }
-    public Long getCategoriaId() { return categoriaId; }
-    public void setCategoriaId(Long categoriaId) { this.categoriaId = categoriaId; }
-    public String getCategoriaNome() { return categoriaNome; }
-    public void setCategoriaNome(String categoriaNome) { this.categoriaNome = categoriaNome; }
 }

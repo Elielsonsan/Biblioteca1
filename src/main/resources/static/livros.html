@@ -18,6 +18,7 @@
             <li><a href="/categorias.html">Categoria</a></li>
             <li><a href="/estante.html">Estante</a></li>
             <li><a href="/usuario.html">Usuário</a></li>
+            <li><a href="/emprestimos.html">Empréstimos</a></li>
         </ul>
     </nav>
 
@@ -32,51 +33,25 @@
             </div>
         </section>
 
-        <section class="cartao cartao-busca">
-            <div class="barra-busca-container">
-                <i class="fa-solid fa-magnifying-glass icone-principal"></i>
-                <div class="input-wrapper">
-                    <input type="text" id="termoBusca" placeholder="Comece a sua busca por aqui...">
-                </div>
-                <div class="filtro-select-wrapper">
-                    <select id="filtroBusca" class="filtro-select">
-                        <option value="" disabled selected>Critério de Busca</option>
-                        <option value="titulo">Título</option>
-                        <option value="autor">Autor</option>
-                        <option value="isbn">ISBN</option>
-                        <option value="id">ID</option>
-                        <option value="categoriaNome">Categoria</option>
-                        <option value="estanteNome">Estante</option>
-                    </select>
-                </div>
-            </div>
-            <div id="autocomplete-list" class="autocomplete-list"></div>
-            <div class="botoes-acao-container">
-                <button id="btnBuscar" class="botao-secundario" title="Realizar a busca com os termos e filtros definidos"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
-                <button id="btnLimparBusca" class="botao-secundario" title="Limpar o campo de busca e os resultados"><i class="fa-solid fa-broom"></i><span>Limpar</span></button>
-                <button id="btnAdicionarLivro" class="botao-principal" title="Abrir formulário para adicionar um novo livro"><i class="fa-solid fa-plus"></i><span>Adicionar Livro</span></button>
-            </div>
-        </section>
-
         <section class="cartao cartao-gerenciar">
-            <h2><i class="fa-solid fa-list"></i> Lista de Livros</h2>
+            <div class="gerenciar-header">
+                <h2><i class="fa-solid fa-list"></i> Lista de Livros</h2>
+                <div class="header-botoes-acao">
+                    <button id="btnAbrirBuscaModal" class="botao-secundario" title="Buscar livro">
+                        <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                    </button>
+                    <button id="btnLimparBusca" class="botao-secundario" title="Limpar filtro de busca" style="display: none;">
+                        <i class="fa-solid fa-broom"></i><span>Limpar Busca</span>
+                    </button>
+                    <button id="btnAdicionarLivro" class="botao-principal"
+                        title="Abrir formulário para adicionar um novo livro"><i
+                            class="fa-solid fa-plus"></i><span>Adicionar Livro</span></button>
+                </div>
+            </div>
             <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum livro
                 encontrado.</div>
-            <div class="table-wrapper">
-                <table id="livrosTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>Autor & ISBN</th>
-                            <th>Categoria & Estante</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-            </div>
+            <!-- O container da tabela foi substituído por um container de lista, que será populado via JS -->
+            <div id="listaLivros"></div>
             <!-- Container para os botões de paginação -->
             <div class="paginacao-container" id="paginacao-container">
                 <!-- Botões serão gerados pelo JavaScript -->
@@ -150,27 +125,50 @@
         </div>
     </div>
 
+    <!-- Modal de Busca Unificado -->
+    <div id="searchModal" class="modal-overlay">
+        <div class="modal-content cartao">
+            <div class="modal-header">
+                <h2 id="searchModalTitulo">Buscar Livros</h2>
+                <button id="btnFecharBuscaModal" class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Incluindo o fragmento do formulário de busca avançada -->
+                <!-- O Thymeleaf não processa arquivos em /static, mas deixamos a estrutura para consistência -->
+                <div th:replace="/fragments/busca-avancada-form :: form"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ===================================================================================
+        // SCRIPT DA PÁGINA DE GERENCIAMENTO DE LIVROS
+        // -----------------------------------------------------------------------------------
+        // Este script gerencia todas as operações CRUD (Criar, Ler, Atualizar, Deletar)
+        // para os livros, além de funcionalidades de busca e paginação.
+        // 1. Carrega e exibe a lista de livros de forma paginada.
+        // 2. Permite a busca avançada através de um modal.
+        // 3. Gerencia um modal para adicionar e editar livros.
+        // 4. Lida com a submissão de formulários, incluindo validação de erros.
+        // 5. Permite a exclusão de livros e o registro de devoluções.
+        // ===================================================================================
+
         // URLs da API
         const livrosApiUrl = '/api/livros';
         const categoriasApiUrl = '/api/categorias';
-        const sugestoesApiUrl = '/api/livros/sugestoes';
         const estantesApiUrl = '/api/estantes';
 
         // Elementos do DOM
-        const termoBuscaInput = document.getElementById('termoBusca');
-        const filtroBuscaSelect = document.getElementById('filtroBusca');
-        const livrosTableBody = document.getElementById('livrosTable').getElementsByTagName('tbody')[0];
-        const btnBuscar = document.getElementById('btnBuscar');
+        const listaLivros = document.getElementById('listaLivros');
         const btnLimparBusca = document.getElementById('btnLimparBusca');
-        const autocompleteList = document.getElementById('autocomplete-list');
-        const buscaContainer = document.querySelector('.barra-busca-container');
-        let isSelectingSuggestion = false;
         const listaVaziaMsg = document.getElementById('listaVaziaMsg');
 
-        // Variáveis de Paginação
+        // --- Variáveis de Estado ---
+        // Controla a página atual da lista de livros
         let currentPage = 0;
         const paginacaoContainer = document.getElementById('paginacao-container');
+        // Armazena os parâmetros da última busca realizada para uso na paginação
+        let currentSearchParams = new URLSearchParams();
 
         // Elementos do Modal e Formulário
         const modal = document.getElementById('formModal');
@@ -190,136 +188,198 @@
         const edicaoInput = document.getElementById('edicaoLivro');
         const capaUrlInput = document.getElementById('capaUrlLivro');
 
-        // Objeto de configuração para melhorar a heurística da busca
-        const filtroConfigs = {
-            termo: { placeholder: 'Busque por título, autor, ISBN...', icon: 'fa-magnifying-glass' },
-            titulo: { placeholder: 'Digite o título do livro...', icon: 'fa-book-open' },
-            autor: { placeholder: 'Digite o nome do autor...', icon: 'fa-user' },
-            isbn: { placeholder: 'Digite o ISBN do livro...', icon: 'fa-barcode' },
-            id: { placeholder: 'Digite o ID exato do livro...', icon: 'fa-hashtag' },
-            categoriaNome: { placeholder: 'Digite o nome da categoria...', icon: 'fa-tags' },
-            estanteNome: { placeholder: 'Digite o nome da estante...', icon: 'fa-box-archive' }
-        };
+        // Elementos do Modal de Busca
+        const searchModal = document.getElementById('searchModal');
+        const btnAbrirBuscaModal = document.getElementById('btnAbrirBuscaModal');
+        const btnFecharBuscaModal = document.getElementById('btnFecharBuscaModal');
+        const searchForm = document.getElementById('buscaAvancadaForm'); // ID padronizado do fragmento
+        const btnLimparBuscaModal = document.getElementById('btnLimparBuscaAvancada'); // ID padronizado do fragmento
 
-        // --- LÓGICA PRINCIPAL ---
+        // ===================================================================================
+        // PONTO DE ENTRADA PRINCIPAL
+        // ===================================================================================
+        /**
+         * Adiciona todos os event listeners necessários após o carregamento completo do DOM.
+         * Garante que todos os elementos HTML estejam disponíveis para manipulação.
+         */
         document.addEventListener('DOMContentLoaded', () => {
-            loadCategoriasParaSelect();
-            loadEstantesParaSelect();
-            btnBuscar.addEventListener('click', buscarLivros);
+            // Popula os selects de Categoria e Estante em ambos os modais (Adicionar/Editar e Busca)
+            loadSelectOptions(categoriasApiUrl, document.querySelectorAll('.form-input[name="categoriaId"]'));
+            loadSelectOptions(estantesApiUrl, document.querySelectorAll('.form-input[name="estanteId"]'));
+            
+            // Listener para o botão de limpar a busca principal
             btnLimparBusca.addEventListener('click', limparBusca);
+            // Carrega a lista inicial de livros ao entrar na página
             loadLivros();
 
-            // Listeners para autocomplete e UI da busca
-            termoBuscaInput.addEventListener('input', handleInput);
-            termoBuscaInput.addEventListener('focus', handleFocus);
-            termoBuscaInput.addEventListener('blur', handleBlur);
-            filtroBuscaSelect.addEventListener('change', atualizarInterfaceDeBusca);
+            // Listeners do Modal de Busca
+            btnAbrirBuscaModal.addEventListener('click', () => searchModal.style.display = 'flex');
+            btnFecharBuscaModal.addEventListener('click', () => searchModal.style.display = 'none');
+            searchModal.addEventListener('click', (event) => {
+                if (event.target === searchModal) searchModal.style.display = 'none';
+            });
+            searchForm.addEventListener('submit', (e) => { e.preventDefault(); handleSearchSubmit(); });
+            btnLimparBuscaModal.addEventListener('click', () => searchForm.reset());
 
+            // Listeners do Modal de Adicionar/Editar
+            btnAdicionarLivro.addEventListener('click', openModalForAdd);
+            btnFecharModal.addEventListener('click', closeModal);
+            btnLimparForm.addEventListener('click', resetForm);
+            modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+            livroForm.addEventListener('submit', handleFormSubmit);
         });
 
-        // --- FUNÇÕES DE UI DA BUSCA ---
-        function atualizarInterfaceDeBusca() {
-            const filtroSelecionado = filtroBuscaSelect.value || 'termo';
-            const config = filtroConfigs[filtroSelecionado];
-            const iconePrincipal = buscaContainer.querySelector('.icone-principal');
-            termoBuscaInput.placeholder = config.placeholder;
-            iconePrincipal.className = `fa-solid ${config.icon} icone-principal`;
-        }
+        // ===================================================================================
+        // FUNÇÕES DE BUSCA E PAGINAÇÃO
+        // ===================================================================================
 
-        // --- FUNÇÕES DE BUSCA ---
-        function buscarLivros() {
-            autocompleteList.classList.remove('active'); // Esconde sugestões
-            buscaContainer.classList.remove('focused'); // Contrai a barra
+        /**
+         * Lida com o envio do formulário de busca, captura os dados,
+         * atualiza o estado da busca e chama a função para carregar os livros.
+         */
+        function handleSearchSubmit() {
             currentPage = 0; // Reseta para a primeira página ao fazer uma nova busca
-            const termo = termoBuscaInput.value.trim();
-            const filtro = filtroBuscaSelect.value || 'termo'; // Busca livre (termo) como padrão
-            loadLivros(termo, filtro, currentPage);
+            
+            const formData = new FormData(searchForm);
+            currentSearchParams = new URLSearchParams();
+            // Adiciona aos parâmetros de busca apenas os campos preenchidos
+            for (const [key, value] of formData.entries()) {
+                if (value) {
+                    currentSearchParams.append(key, value);
+                }
+            }
+
+            loadLivros(currentPage);
+            searchModal.style.display = 'none'; // Fecha o modal
+
+            // Mostra ou esconde o botão de limpar filtro principal
+            btnLimparBusca.style.display = currentSearchParams.toString() ? 'flex' : 'none';
         }
 
+        /**
+         * Limpa os filtros de busca e recarrega a lista completa de livros.
+         */
         function limparBusca() {
-            autocompleteList.classList.remove('active');
-            buscaContainer.classList.remove('focused');
-            termoBuscaInput.value = '';
-            termoBuscaInput.placeholder = 'Comece a sua busca por aqui...';
-            filtroBuscaSelect.value = ''; // Reseta para o placeholder "Critério de Busca"
-            // Reseta o ícone para o padrão
-            const iconePrincipal = buscaContainer.querySelector('.icone-principal');
-            iconePrincipal.className = `fa-solid ${filtroConfigs['termo'].icon} icone-principal`;
+            searchForm.reset();
+            currentSearchParams = new URLSearchParams();
             currentPage = 0; // Reseta para a primeira página
-            loadLivros('', 'termo', currentPage);
+            loadLivros();
+            btnLimparBusca.style.display = 'none';
         }
 
-        async function loadLivros(termo = '', filtro = 'termo', page = 0) {
+        /**
+         * Função central que busca os livros na API.
+         * Utiliza os parâmetros de busca armazenados em `currentSearchParams`.
+         * @param {number} page - O número da página a ser buscada.
+         * @param {boolean} append - Se `true`, adiciona os resultados à lista existente (paginação "carregar mais").
+         */
+        async function loadLivros(page = 0, append = false) {
             let url = livrosApiUrl;
-            const params = new URLSearchParams();
+            const params = new URLSearchParams(currentSearchParams); // Clona os parâmetros de busca atuais
             params.append('page', page);
             params.append('size', 10); // Fixo em 10 livros por página
 
-            if (termo) {
-                // Todos os filtros, incluindo 'id', agora são tratados como parâmetros de consulta
-                params.append(filtro, termo);
-            }
             url += `?${params.toString()}`;
 
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     if (response.status === 404) {
-                        renderizarPagina({ content: [], totalPages: 0 }); // Limpa a tabela
+                        renderizarPagina({ content: [], last: true }, append); // Limpa a tabela e esconde a paginação
                         return;
                     }
                     throw new Error(`Erro na requisição: ${response.status}`);
                 }
                 const pageData = await response.json();
-                renderizarPagina(pageData);
+                renderizarPagina(pageData, append);
             } catch (error) {
                 console.error('Erro ao carregar livros:', error);
                 alert('Não foi possível buscar os livros. Verifique o console para mais detalhes.');
             }
         }
 
+        /**
+         * Renderiza a lista de livros e os controles de paginação na tela.
+         * @param {object} pageData - O objeto de página retornado pela API Spring.
+         * @param {boolean} append - Se `true`, adiciona os resultados em vez de substituir.
+         */
         function renderizarPagina(pageData, append = false) {
             const livros = pageData.content;
-            if (!append) {
-                livrosTableBody.innerHTML = '';
+            if (!append) { // Se for uma nova busca, limpa a lista
+                listaLivros.innerHTML = '';
             }
-
+        
             if (!livros || livros.length === 0) {
                 if (!append) { // Só mostra a mensagem de vazio se for uma nova busca, não ao carregar mais
                     listaVaziaMsg.style.display = 'block';
-                    document.querySelector('.table-wrapper').style.display = 'none';
+                    listaLivros.style.display = 'none';
                 }
             } else {
                 listaVaziaMsg.style.display = 'none';
-                document.querySelector('.table-wrapper').style.display = 'block';
+                listaLivros.style.display = 'block';
+
+                const placeholderCapa = '/images/capa-placeholder.png';
+
                 livros.forEach(livro => {
-                    const row = livrosTableBody.insertRow();
-                    row.insertCell().textContent = livro.id;                    
-                    row.insertCell().innerHTML = `<i class="fa-solid fa-book"></i><span>${livro.titulo}</span>`;
+                    const capaSrc = livro.capaUrl && livro.capaUrl.trim() !== '' ? livro.capaUrl : placeholderCapa;
+        
+                    // Lógica para renderizar o status de disponibilidade
+                    let statusHtml = '';
+                    let acoesHtml = ''; // Ações dinâmicas (Emprestar/Devolver/Editar/Excluir)
 
-                    const autorIsbnCell = row.insertCell();
-                    autorIsbnCell.innerHTML = `
-                        <div class="info-cell"><i class="fa-solid fa-user" title="Autor"></i><span>${livro.autor || 'N/A'}</span></div>
-                        <div class="info-cell"><i class="fa-solid fa-barcode" title="ISBN"></i><span>${livro.isbn || 'N/A'}</span></div>
+                    if (livro.statusDisponibilidade === 'Disponível') {
+                        statusHtml = `<div class="linha-info status-disponivel"><i class="fa-solid fa-circle-check" title="Status"></i><p>${livro.statusDisponibilidade}</p></div>`;
+                        // Se disponível, mostra botão de Emprestar
+                        acoesHtml = `
+                            <a href="/emprestimos.html?livroId=${livro.id}&livroTitulo=${encodeURIComponent(livro.titulo)}" class="botao-acao emprestar" title="Emprestar Livro">
+                                <i class="fa-solid fa-handshake-angle"></i>
+                            </a>
+                        `;
+                    } else { // Indisponível
+                        statusHtml = `<div class="linha-info status-indisponivel"><i class="fa-solid fa-circle-xmark" title="Status"></i><p>${livro.statusDisponibilidade}</p></div>`;
+                        if (livro.dataPrevistaDevolucao) {
+                            const dataFormatada = new Date(livro.dataPrevistaDevolucao).toLocaleDateString('pt-BR');
+                            statusHtml += `<div class="linha-info status-info"><i class="fa-solid fa-hourglass-half" title="Previsão de Devolução"></i><p>Disponível a partir de: ${dataFormatada}</p></div>`;
+                        }
+                        // Se indisponível, mostra botão de Devolver
+                        acoesHtml = `
+                            <button class="botao-acao devolver" title="Registrar Devolução" onclick="registrarDevolucaoPorLivro(${livro.id})">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </button>
+                        `;
+                    }
+        
+                    const itemResultado = document.createElement('div');
+                    itemResultado.className = 'item-resultado';
+                    itemResultado.innerHTML = `
+                        <div class="info-detalhada">
+                            <div class="linha-info info-titulo"><i class="fa-solid fa-book" title="Título"></i><p><strong>${livro.titulo || 'N/A'}</strong></p></div>
+                            <div class="linha-info"><i class="fa-solid fa-copyright" title="Autor"></i><p>${livro.autor || 'N/A'}</p></div>
+                            <div class="linha-info"><i class="fa-solid fa-barcode" title="ISBN"></i><p>${livro.isbn || 'N/A'}</p></div>
+                            <div class="linha-info"><i class="fa-solid fa-tags" title="Categoria"></i><p>${livro.categoriaNome || 'N/A'}</p></div>
+                            <div class="linha-info"><i class="fa-solid fa-box-archive" title="Estante"></i><p>${livro.estanteNome || 'N/A'}</p></div>
+                            ${statusHtml}
+                            <div class="linha-info acoes-livro">
+                                <i class="fa-solid fa-gear" title="Ações"></i>
+                                <div class="botoes-acao-container-item">
+                                    ${acoesHtml}
+                                    <button class="botao-acao editar" title="Editar" onclick='openModalForEdit(${JSON.stringify(livro)})'><i class="fa-solid fa-pencil"></i></button>
+                                    <button class="botao-acao excluir" title="Excluir" onclick="deleteLivro(${livro.id})"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="capa-livro"><img src="${capaSrc}" alt="Capa do Livro ${livro.titulo}" onerror="this.onerror=null;this.src='${placeholderCapa}';"></div>
                     `;
-
-                    const categoriaEstanteCell = row.insertCell();
-                    categoriaEstanteCell.innerHTML = `
-                        <div class="info-cell"><i class="fa-solid fa-tags" title="Categoria"></i><span>${livro.categoriaNome || 'N/A'}</span></div>
-                        <div class="info-cell"><i class="fa-solid fa-box-archive" title="Estante"></i><span>${livro.estanteNome || 'N/A'}</span></div>
-                    `;
-
-                    const actionsCell = row.insertCell();
-                    // Usar JSON.stringify é uma forma prática de passar o objeto completo para a função de edição.
-                    actionsCell.innerHTML = `
-                        <button class="botao-acao editar" title="Editar" onclick='openModalForEdit(${JSON.stringify(livro)})'><i class="fa-solid fa-pencil"></i></button>
-                        <button class="botao-acao excluir" title="Excluir" onclick="deleteLivro(${livro.id})"><i class="fa-solid fa-trash"></i></button>
-                    `;
+                    listaLivros.appendChild(itemResultado);
                 });
             }
             renderizarPaginacao(pageData);
         }
-
+        
+        /**
+         * Renderiza o botão "Mostrar mais" se não estivermos na última página.
+         * @param {object} pageData - O objeto de página retornado pela API.
+         */
         function renderizarPaginacao(pageData) {
             paginacaoContainer.innerHTML = '';
 
@@ -329,9 +389,8 @@
                 mostrarMaisBtn.className = 'paginacao-btn';
                 mostrarMaisBtn.onclick = () => {
                     currentPage = pageData.number + 1; // Pede a próxima página
-                    const termo = termoBuscaInput.value.trim();
-                    const filtro = filtroBuscaSelect.value || 'termo';
-                    loadLivros(termo, filtro, currentPage, true); // O 'true' indica para adicionar, não substituir
+                    // Usa as variáveis de estado para a paginação
+                    loadLivros(currentPage, true);
                 };
                 paginacaoContainer.appendChild(mostrarMaisBtn);
                 paginacaoContainer.style.display = 'flex';
@@ -340,108 +399,22 @@
             }
         }
 
-        // --- FUNÇÕES DE AUTOCOMPLETE E UI (ADAPTADAS DA HOME) ---
-
-        async function handleInput() {
-            if (isSelectingSuggestion) {
-                isSelectingSuggestion = false;
-                return;
-            }
-            const termo = termoBuscaInput.value.trim();
-            const filtro = filtroBuscaSelect.value || 'termo'; // Usa 'termo' como padrão
-
-            if (termo.length > 0) {
-                buscaContainer.classList.add('focused');
-            } else {
-                buscaContainer.classList.remove('focused');
-            }
-
-            if (termo.length < 2) { // Só busca sugestões com 2+ caracteres
-                autocompleteList.classList.remove('active');
-                return;
-            }
-
-            try {
-                const url = `${sugestoesApiUrl}?termo=${encodeURIComponent(termo)}&filtro=${filtro}`;
-                const response = await fetch(url);
-                if (!response.ok) return;
-                const sugestoes = await response.json();
-                renderizarSugestoes(sugestoes);
-            } catch (error) {
-                console.error('Erro ao buscar sugestões:', error);
-                autocompleteList.classList.remove('active');
-            }
-        }
-
-        function handleFocus() {
-            atualizarInterfaceDeBusca(); // Ao focar, atualiza o placeholder para o do filtro ativo
-            if (termoBuscaInput.value.trim().length > 0) {
-                buscaContainer.classList.add('focused');
-            }
-        }
-
-        function handleBlur() {
-            // Usa um pequeno delay para permitir que cliques em itens da lista ou filtros sejam processados
-            setTimeout(() => {
-                if (!buscaContainer.contains(document.activeElement)) {
-                    buscaContainer.classList.remove('focused');
-                    autocompleteList.classList.remove('active');
-                }
-                // Se o campo de busca estiver vazio ao perder o foco, retorna ao placeholder inicial
-                if (termoBuscaInput.value.trim() === '') {
-                    termoBuscaInput.placeholder = 'Comece a sua busca por aqui...';
-                    if (!filtroBuscaSelect.value) { // Se nenhum filtro estiver ativo, reseta o ícone
-                        atualizarInterfaceDeBusca();
-                    }
-                }
-            }, 150);
-        }
-
-        function renderizarSugestoes(sugestoes) {
-            autocompleteList.innerHTML = '';
-            if (sugestoes.length === 0) {
-                autocompleteList.classList.remove('active');
-                return;
-            }
-
-            sugestoes.forEach(sugestao => {
-                const item = document.createElement('div');
-                item.className = 'autocomplete-item';
-
-                const icon = document.createElement('i');
-                let iconClass = 'fa-book-open'; // Ícone padrão para título
-                switch (sugestao.tipo) {
-                    case 'autor': iconClass = 'fa-user'; break;
-                    case 'isbn': iconClass = 'fa-barcode'; break;
-                    case 'categoria': iconClass = 'fa-tags'; break;
-                    case 'estante': iconClass = 'fa-box-archive'; break;
-                }
-                icon.className = `fa-solid ${iconClass}`;
-
-
-                const text = document.createElement('span');
-                text.textContent = sugestao.valor;
-
-                item.appendChild(icon);
-                item.appendChild(text);
-
-                item.addEventListener('click', () => {
-                    isSelectingSuggestion = true;
-                    termoBuscaInput.value = sugestao.valor;
-                    buscarLivros(); // Realiza a busca imediatamente
-                });
-                autocompleteList.appendChild(item);
-            });
-            autocompleteList.classList.add('active');
-        }
-
-        // --- FUNÇÕES DO MODAL E FORMULÁRIO ---
+        // ===================================================================================
+        // FUNÇÕES DO MODAL E FORMULÁRIO (ADICIONAR/EDITAR)
+        // ===================================================================================
+        /**
+         * Abre o modal para adicionar um novo livro, limpando o formulário.
+         */
         function openModalForAdd() {
             resetForm();
             modalTitulo.textContent = 'Adicionar Novo Livro';
             modal.style.display = 'flex';
         }
 
+        /**
+         * Abre o modal para editar um livro existente, preenchendo o formulário com seus dados.
+         * @param {object} livro - O objeto do livro a ser editado.
+         */
         function openModalForEdit(livro) {
             resetForm();
             modalTitulo.textContent = `Editar Livro: ${livro.titulo}`;
@@ -455,32 +428,34 @@
             // Usa os IDs do DTO
             categoriaSelect.value = livro.categoriaId || '';
             estanteSelect.value = livro.estanteId || '';
-            // Limpa o campo de busca se estiver visível (em caso de erro anterior)
-            termoBuscaInput.value = '';
             modal.style.display = 'flex';
         }
 
+        /**
+         * Fecha o modal de adicionar/editar.
+         */
         function closeModal() {
             modal.style.display = 'none';
         }
 
+        /**
+         * Reseta o formulário de livro para seu estado inicial.
+         */
         function resetForm() {
             livroForm.reset();
             livroIdInput.value = '';
             clearFormErrors();
         }
 
-        // Event Listeners dos botões do modal
-        btnAdicionarLivro.addEventListener('click', openModalForAdd);
-        btnFecharModal.addEventListener('click', closeModal);
-        btnLimparForm.addEventListener('click', resetForm);
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
+        /**
+         * Recarrega a lista de livros, mantendo o filtro de busca atual.
+         * Usado após salvar ou deletar um item.
+         */
+        function recarregarLista() {
+            loadLivros(0, false);
+        }
 
-        livroForm.addEventListener('submit', async function(event) {
+        async function handleFormSubmit(event) {
             event.preventDefault();
             clearFormErrors();
             const id = livroIdInput.value;
@@ -519,16 +494,19 @@
                 }
         
                 closeModal();
-                loadLivros();
+                recarregarLista(); // Recarrega a lista mantendo o contexto da busca
                 alert(`Livro ${id ? 'atualizado' : 'salvo'} com sucesso!`);
 
             } catch (error) {
                 console.error('Erro ao salvar livro:', error);
-                // Este alert agora exibirá a mensagem de erro específica do backend!
                 alert(`Erro ao salvar o livro:\n${error.message}`);
             }
-        });
-        
+        }
+
+        /**
+         * Exibe as mensagens de erro de validação retornadas pela API nos campos correspondentes do formulário.
+         * @param {Array<object>} errors - Uma lista de objetos de erro.
+         */
         function displayFormErrors(errors) {
             errors.forEach(error => {
                 // Encontra o campo do formulário pelo atributo 'name', que corresponde ao DTO
@@ -543,11 +521,46 @@
             });
         }
 
+        /**
+         * Limpa todas as mensagens de erro do formulário.
+         */
         function clearFormErrors() {
             document.querySelectorAll('.error-message').forEach(div => div.textContent = '');
         }
 
-        // --- FUNÇÕES DE DELEÇÃO E CARREGAMENTO DE SELECTS ---
+        // ===================================================================================
+        // FUNÇÕES DE AÇÃO (DEVOLVER, DELETAR) E UTILITÁRIAS
+        // ===================================================================================
+
+        /**
+         * Registra a devolução de um livro a partir do seu ID.
+         * @param {number} livroId - O ID do livro a ser devolvido.
+         */
+        async function registrarDevolucaoPorLivro(livroId) {
+            const emprestimosApiUrl = '/api/emprestimos'; // URL da API de empréstimos
+            if (!confirm(`Tem certeza que deseja registrar a devolução para o livro ID ${livroId}?`)) return;
+            try {
+                // Novo endpoint para devolução por ID do livro
+                const response = await fetch(`${emprestimosApiUrl}/livro/${livroId}/devolucao`, { method: 'PATCH' });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    const errorMessage = errorData?.message || `Erro ${response.status}: Não foi possível registrar a devolução.`;
+                    throw new Error(errorMessage);
+                }
+
+                recarregarLista();
+                alert('Devolução registrada com sucesso!');
+            } catch (error) {
+                console.error('Erro ao registrar devolução:', error);
+                alert(`Erro ao registrar devolução:\n${error.message}`);
+            }
+        }
+
+        /**
+         * Deleta um livro a partir do seu ID.
+         * @param {number} id - O ID do livro a ser deletado.
+         */
         async function deleteLivro(id) {
             if (!confirm(`Tem certeza que deseja excluir o livro ID ${id}?`)) return;
             try {
@@ -560,7 +573,7 @@
                     throw new Error(errorMessage);
                 }
 
-                loadLivros();
+                recarregarLista(); // Recarrega a lista mantendo o contexto da busca
                 alert('Livro excluído com sucesso!');
             } catch (error) {
                 console.error('Erro ao excluir livro:', error);
@@ -568,29 +581,24 @@
             }
         }
 
-        async function loadCategoriasParaSelect() {
+        /**
+         * Função genérica para popular um ou mais elementos <select> com dados de uma API.
+         * @param {string} apiUrl - A URL da API que retorna a lista de itens.
+         * @param {NodeListOf<HTMLSelectElement>} selectElements - Uma lista de elementos <select> a serem populados.
+         */
+        async function loadSelectOptions(apiUrl, selectElements) {
             try {
-                const response = await fetch(categoriasApiUrl);
-                const categorias = await response.json();
-                categorias.forEach(cat => {
-                    const option = new Option(cat.nome, cat.id);
-                    categoriaSelect.add(option);
+                const response = await fetch(apiUrl);
+                const items = await response.json();
+                // Itera sobre cada elemento <select> fornecido
+                selectElements.forEach(select => {
+                    items.forEach(item => {
+                        const option = new Option(item.nome, item.id);
+                        select.add(option.cloneNode(true)); // Clona o nó para evitar problemas
+                    });
                 });
             } catch (error) {
-                console.error('Erro ao carregar categorias:', error);
-            }
-        }
-
-        async function loadEstantesParaSelect() {
-            try {
-                const response = await fetch(estantesApiUrl);
-                const estantes = await response.json();
-                estantes.forEach(est => {
-                    const option = new Option(est.nome, est.id);
-                    estanteSelect.add(option);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar estantes:', error);
+                console.error(`Erro ao carregar opções de ${apiUrl}:`, error);
             }
         }
     </script>

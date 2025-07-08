@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!--
+      ===================================================================================
+      FRAGMENTO DO FORMULÁRIO DE BUSCA AVANÇADA
+      -----------------------------------------------------------------------------------
+      Este arquivo define um pedaço de HTML reutilizável (um "fragmento" Thymeleaf)
+      que pode ser inserido em qualquer outra página (como 'home.html' ou 'livros.html').
+      
+      - Como funciona: A tag <form> abaixo tem o atributo `th:fragment="form"`. Isso
+        significa que qualquer outra página pode usar `th:replace="~{fragments/busca-avancada-form :: form}"`
+        para substituir uma tag por este formulário completo.
+      
+      - Dependências: Este fragmento espera que a página que o inclui:
+        1. Carregue o arquivo 'style.css' para a estilização.
+        2. Tenha um script JavaScript para popular os <select> de Categoria e Estante.
+        3. Tenha um script para capturar o evento 'submit' do formulário e o clique
+           no botão 'Limpar'.
+      ===================================================================================
+    -->
+    <!--
+      A tag `th:fragment="form"` nomeia este pedaço de código como "form".
+      O `id="buscaAvancadaForm"` é o seletor principal para o JavaScript.
+      A classe `gerenciar-form` aplica estilos gerais de formulário definidos no style.css.
+    -->
+    <form id="buscaAvancadaForm" th:fragment="form" class="gerenciar-form">
+        <!-- A classe `form-grid-columns-2` cria um layout de duas colunas para os campos, otimizando o espaço. -->
+        <div class="form-grid-columns-2">
+            <div class="form-group">
+                <label for="titulo">Título:</label>
+                <input type="text" id="titulo" name="titulo" placeholder="Título do livro" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="autor">Autor:</label>
+                <input type="text" id="autor" name="autor" placeholder="Nome do autor" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="isbn">ISBN:</label>
+                <input type="text" id="isbn" name="isbn" placeholder="ISBN do livro" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="anoPublicacao">Ano de Publicação (a partir de):</label>
+                <input type="number" id="anoPublicacao" name="anoPublicacao" min="1400" max="2099" placeholder="Ex: 2000" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" name="categoriaId" class="form-input">
+                    <option value="">Todas as Categorias</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="estante">Estante:</label>
+                <select id="estante" name="estanteId" class="form-input">
+                    <option value="">Todas as Estantes</option>
+                </select>
+            </div>
+        </div>
+        <!-- Container para os botões de ação, estilizado pela classe `botoes-acao-container`. -->
+        <div class="botoes-acao-container form-buttons">
+            <button type="submit" class="botao-principal"><i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span></button>
+            <button type="button" id="btnLimparBuscaAvancada" class="botao-secundario"><i class="fa-solid fa-broom"></i><span>Limpar</span></button>
+        </div>
+    </form>
+
+</body>
+</html>
