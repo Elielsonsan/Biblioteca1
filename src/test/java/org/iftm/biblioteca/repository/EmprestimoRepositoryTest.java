@@ -40,7 +40,7 @@ class EmprestimoRepositoryTest {
         Categoria catLivro = new Categoria(null, "Ficção Científica");
         entityManager.persist(catLivro);
 
-        Estante estante = new Estante("E001", "Corredor Principal");
+        Estante estante = new Estante(1L, "Corredor Principal");
         entityManager.persist(estante);
 
         // 2. Criar entidades principais
@@ -207,5 +207,32 @@ class EmprestimoRepositoryTest {
 
         // Assert
         assertThat(temAtraso).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deve retornar true se livro tem empréstimo ativo")
+    void existsByLivroAndDataDevolucaoIsNull_QuandoLivroEmprestado_DeveRetornarTrue() {
+        // Arrange: O livro e o emprestimoAtivo (sem data de devolução) já existem do setUp
+
+        // Act
+        boolean existe = emprestimoRepository.existsByLivroAndDataDevolucaoIsNull(livro);
+
+        // Assert
+        assertThat(existe).isTrue();
+    }
+
+    @Test
+    @DisplayName("Deve retornar false se livro não tem empréstimo ativo")
+    void existsByLivroAndDataDevolucaoIsNull_QuandoLivroDevolvido_DeveRetornarFalse() {
+        // Arrange
+        // Pega o empréstimo existente e registra uma devolução
+        emprestimoAtivo.setDataDevolucao(Instant.now());
+        entityManager.persistAndFlush(emprestimoAtivo);
+
+        // Act
+        boolean existe = emprestimoRepository.existsByLivroAndDataDevolucaoIsNull(livro);
+
+        // Assert
+        assertThat(existe).isFalse();
     }
 }

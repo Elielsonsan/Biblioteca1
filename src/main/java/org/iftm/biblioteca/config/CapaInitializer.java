@@ -45,6 +45,10 @@ public class CapaInitializer implements CommandLineRunner {
      * (leitura e salvamento de múltiplos livros) ocorram dentro de uma única transação.
      * Se ocorrer um erro no meio do processo, todas as alterações anteriores são desfeitas (rollback),
      * mantendo a consistência dos dados.
+     * <p>
+     * O método pode declarar {@code throws Exception} porque a interface {@link CommandLineRunner}
+     * o permite. Se uma exceção não tratada for lançada, o Spring Boot registrará o erro
+     * e a inicialização da aplicação falhará, o que é o comportamento desejado neste caso.
      */
     @Override
     @Transactional
@@ -57,9 +61,14 @@ public class CapaInitializer implements CommandLineRunner {
             // Processa apenas os livros que têm uma URL de capa e que é uma URL externa.
             if (urlAtual != null && urlAtual.startsWith("http")) {
                 logger.info("Baixando capa para o livro '{}' (ISBN: {})", livro.getTitulo(), livro.getIsbn());
-                String novaUrl = capaService.baixarSalvarCapa(urlAtual, livro.getIsbn());
-                livro.setCapaUrl(novaUrl);
-                livroRepository.save(livro); // Salva a entidade atualizada de volta no banco.
+                try {
+                    String novaUrl = capaService.baixarSalvarCapa(urlAtual, livro.getIsbn());
+                    livro.setCapaUrl(novaUrl);
+                    livroRepository.save(livro); // Salva a entidade atualizada de volta no banco.
+                } catch (Exception e) {
+                    logger.error("Falha ao processar a capa para o livro com ISBN {}. A transação será revertida.", livro.getIsbn(), e);
+                    throw e; // Relança a exceção para garantir o rollback da transação.
+                }
             }
         }
         logger.info("Verificação de capas concluída.");

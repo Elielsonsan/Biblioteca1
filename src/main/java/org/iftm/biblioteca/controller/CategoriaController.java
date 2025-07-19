@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.List;
 
 import org.iftm.biblioteca.dto.CategoriaDTO;
-import org.iftm.biblioteca.entities.Categoria;
 import org.iftm.biblioteca.service.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity; // Importa todas as anotações de mapeamento
@@ -30,14 +29,14 @@ public class CategoriaController {
 
     // Endpoint para buscar todas as categorias (GET /api/categorias)
     @GetMapping
-    public ResponseEntity<List<CategoriaDTO>> findAll(@RequestParam(value = "nome", defaultValue = "") String nome) {
+    public ResponseEntity<List<CategoriaDTO>> findAll(@RequestParam(value = "termo", defaultValue = "") String termo) {
         List<CategoriaDTO> list;
-        // Se o parâmetro 'nome' estiver vazio, busca todas.
-        if (nome.trim().isEmpty()) {
+        // Se o parâmetro 'termo' estiver vazio, busca todas.
+        if (termo.trim().isEmpty()) {
             list = categoriaService.findAll();
         } else {
             // Se houver um nome, chama o novo método de busca.
-            list = categoriaService.findByNomeContaining(nome);
+            list = categoriaService.findByNomeContaining(termo);
         }
         return ResponseEntity.ok().body(list);
     }
@@ -52,11 +51,10 @@ public class CategoriaController {
     // Endpoint para criar uma nova categoria (POST /api/categorias)
     @PostMapping
     public ResponseEntity<CategoriaDTO> create(@Valid @RequestBody CategoriaDTO dto) {
-        // Exceções são tratadas pelo @ControllerAdvice
-        Categoria createdCategoria = categoriaService.create(dto);
+        dto = categoriaService.create(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(createdCategoria.getId()).toUri();
-        return ResponseEntity.created(uri).body(new CategoriaDTO(createdCategoria));
+                .buildAndExpand(dto.id()).toUri();
+        return ResponseEntity.created(uri).body(dto);
     }
 
     // Endpoint para atualizar uma categoria existente (PUT /api/categorias/{id})
@@ -68,8 +66,9 @@ public class CategoriaController {
 
     // Endpoint para apagar uma categoria (DELETE /api/categorias/{id})
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {        
         categoriaService.delete(id);
-        return ResponseEntity.noContent().build();
+        // Adiciona header "reason" para feedback
+        return ResponseEntity.noContent().header("reason", "Categoria excluída com sucesso").build();
     }
 }

@@ -22,4 +22,7 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, Long> {
 
     // Conta quantos empréstimos ativos (sem data de devolução) um usuário possui.
     long countByUsuarioAndDataDevolucaoIsNull(Usuarios usuario);
+
+    // Verifica se existe um empréstimo ativo para um livro (usado para impedir a exclusão do livro).
+    boolean existsByLivroAndDataDevolucaoIsNull(Livro livro);
 }

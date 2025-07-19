@@ -12,7 +12,7 @@ public interface EstanteService {
 
     EstanteDTO insert(EstanteDTO dto);
 
-    EstanteDTO update(String id, EstanteDTO dto);
+    EstanteDTO update(Long id, EstanteDTO dto);
 
-    void delete(String id);
+    void delete(Long id);
 }

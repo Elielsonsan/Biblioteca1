@@ -12,7 +12,7 @@ public interface LivroService {
 
     // --- Métodos de Busca ---
     Page<LivroDTO> findPaginated(String termo, String titulo, String autor, String isbn, Integer anoPublicacao,
-            Long categoriaId, String estanteId, Pageable pageable);
+            Long categoriaId, Long estanteId, Pageable pageable);
 
     Page<LivroDTOResumido> findAvailableBooks(String termo, Pageable pageable);
 

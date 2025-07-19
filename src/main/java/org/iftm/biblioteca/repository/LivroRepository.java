@@ -33,14 +33,6 @@ public interface LivroRepository extends JpaRepository<Livro, Long>, JpaSpecific
     @Query("SELECT DISTINCT l.isbn FROM Livro l WHERE LOWER(l.isbn) LIKE LOWER(concat('%', :termo, '%')) ORDER BY l.isbn")
     List<String> findIsbnsParaSugestao(@Param("termo") String termo, Pageable pageable);
 
-    // Adicionado para buscar nomes de categorias para o autocomplete
-    @Query("SELECT DISTINCT c.nome FROM Livro l JOIN l.categoria c WHERE LOWER(c.nome) LIKE LOWER(concat('%', :termo, '%')) ORDER BY c.nome")
-    List<String> findNomesDeCategoriaParaSugestao(@Param("termo") String termo, Pageable pageable);
-
-    // Adicionado para buscar nomes de estantes para o autocomplete
-    @Query("SELECT DISTINCT e.nome FROM Livro l JOIN l.estante e WHERE LOWER(e.nome) LIKE LOWER(concat('%', :termo, '%')) ORDER BY e.nome")
-    List<String> findNomesDeEstanteParaSugestao(@Param("termo") String termo, Pageable pageable);
-
     // --- Método para encontrar livros disponíveis para empréstimo ---
     @Query("SELECT l FROM Livro l WHERE " +
            "l.id NOT IN (SELECT e.livro.id FROM Emprestimo e WHERE e.dataDevolucao IS NULL) AND " +

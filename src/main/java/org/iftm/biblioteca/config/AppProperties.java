@@ -18,7 +18,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
 
-    // Inicializa os objetos de configuração aninhados.
+    // Inicializa os objetos de configuração aninhados como 'final' para garantir
+    // que sejam instanciados apenas uma vez.
     private final Upload upload = new Upload();
     private final Emprestimo emprestimo = new Emprestimo();
 
@@ -26,6 +27,7 @@ public class AppProperties {
 
     /**
      * Agrupa as configurações relacionadas ao upload de arquivos, como as capas dos livros.
+     * O uso de uma classe estática aninhada é uma boa prática para organizar propriedades relacionadas.
      */
     public static class Upload {
         /**
@@ -40,6 +42,7 @@ public class AppProperties {
 
         /**
          * Permite que o Spring injete o valor de {@code app.upload.path} do arquivo de propriedades.
+         * O método setter é essencial para que o mecanismo de binding do Spring funcione.
          */
         public void setPath(String path) { this.path = path; }
     }

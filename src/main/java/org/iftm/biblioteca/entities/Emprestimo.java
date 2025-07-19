@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,6 +30,7 @@ public class Emprestimo implements Serializable {
     @JoinColumn(name = "livro_id", nullable = false)
     private Livro livro;
 
+    @Column(updatable = false)
     private Instant dataEmprestimo;
     private Instant dataDevolucao; // Data real da devolução
 

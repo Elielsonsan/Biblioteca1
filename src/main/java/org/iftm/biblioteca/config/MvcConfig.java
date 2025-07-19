@@ -35,13 +35,17 @@ public class MvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        // 1. Obtém o caminho configurado para o upload de capas a partir das propriedades da aplicação.
+        // 1. Obtém o caminho físico do diretório de uploads a partir da classe de configurações.
+        //    Isso mantém o código desacoplado de caminhos fixos ("hardcoded").
         Path uploadDir = Paths.get(appProperties.getUpload().getPath());
-        // 2. Converte o caminho para um formato de URI, que é o formato esperado pelo Spring.
-        //    Exemplo: "file:///home/ele/biblioteca_files/capas/"
+        // 2. Converte o caminho do sistema de arquivos para um formato de URI de recurso,
+        //    que é o formato esperado pelo método `addResourceLocations`.
+        //    É crucial adicionar "file:" no início e uma "/" no final para que o Spring
+        //    o interprete corretamente como um diretório.
+        //    Exemplo: "file:/home/ele/biblioteca_files/capas/"
         String uploadPath = uploadDir.toUri().toString();
 
-        // 3. Mapeia o padrão de URL (o que o navegador vai pedir) para o local físico dos arquivos.
+        // 3. Mapeia o padrão de URL público (o que o navegador vai requisitar) para o local físico dos arquivos.
         registry.addResourceHandler("/images/capas/**")
                 .addResourceLocations(uploadPath);
     }

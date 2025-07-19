@@ -1,34 +1,42 @@
 package org.iftm.biblioteca.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_estante")
 public class Estante implements Serializable {
-    private static final long serialVersionUID = 1L;
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String nome;
+
+    @OneToMany(mappedBy = "estante")
+    private List<Livro> livros = new ArrayList<>();
 
     public Estante() {
     }
 
-    public Estante(String id, String nome) {
+    public Estante(Long id, String nome) {
         this.id = id;
         this.nome = nome;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -40,6 +48,10 @@ public class Estante implements Serializable {
         this.nome = nome;
     }
 
+    public List<Livro> getLivros() {
+        return livros;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
@@ -49,7 +61,7 @@ public class Estante implements Serializable {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Estante estante = (Estante) obj;
-        return Objects.equals(id, estante.id);
+        Estante other = (Estante) obj;
+        return Objects.equals(id, other.id);
     }
 }

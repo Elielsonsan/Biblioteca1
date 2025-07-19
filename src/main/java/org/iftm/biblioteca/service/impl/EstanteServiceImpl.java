@@ -40,62 +40,47 @@ public class EstanteServiceImpl implements EstanteService { // Implementa a inte
 
     @Transactional
     public EstanteDTO insert(EstanteDTO dto) {
-        verificarNomeDuplicado(dto.getNome(), null);
+        verificarNomeDuplicado(dto.nome(), null);
+        
         Estante entity = new Estante();
-        entity.setId(gerarProximoId()); // Lógica para gerar o novo ID
-        entity.setNome(dto.getNome());
+        entity.setNome(dto.nome());
+        // O ID agora é gerado automaticamente pelo banco de dados ao salvar.
         entity = estanteRepository.save(entity);
+        
         return new EstanteDTO(entity);
     }
 
     @Transactional
-    public EstanteDTO update(String id, EstanteDTO dto) {
+    public EstanteDTO update(Long id, EstanteDTO dto) {
         Estante entity = estanteRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Estante não encontrada com ID: " + id));
-        verificarNomeDuplicado(dto.getNome(), id);
-        entity.setNome(dto.getNome());
+        
+        verificarNomeDuplicado(dto.nome(), id);
+        entity.setNome(dto.nome());
         entity = estanteRepository.save(entity);
+        
         return new EstanteDTO(entity);
     }
 
     @Transactional
-    public void delete(String id) {
+    public void delete(Long id) {
         // Busca a estante para garantir que ela existe antes de verificar os livros
         Estante estante = estanteRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Estante não encontrada com ID: " + id));
 
         // Utiliza o livroRepository para verificar se existem livros associados a esta estante
         if (livroRepository.countByEstante(estante) > 0) {
-            throw new EstanteComLivrosException("Não é possível excluir a estante '" + estante.getNome()
-                    + "' pois ela possui livros associados.");
+            throw new EstanteComLivrosException(
+                    "Não é possível excluir a estante '" + estante.getNome() + "' pois ela possui livros associados.");
         }
 
         estanteRepository.deleteById(id); // Exclui apenas se não houver livros
     }
 
-    private void verificarNomeDuplicado(String nome, String idAtual) {
+    private void verificarNomeDuplicado(String nome, Long idAtual) {
         Optional<Estante> estanteExistente = estanteRepository.findByNomeIgnoreCase(nome);
         if (estanteExistente.isPresent() && !estanteExistente.get().getId().equals(idAtual)) {
             throw new NomeDuplicadoException("Já existe uma estante com o nome: " + nome);
-        }
-    }
-
-    /**
-     * Gera o próximo ID para uma estante no formato "E001", "E002", etc.
-     * Este método é sincronizado para evitar condições de corrida em ambientes concorrentes.
-     * @return O próximo ID formatado como String.
-     */
-    private synchronized String gerarProximoId() {
-        Optional<Estante> ultimaEstante = estanteRepository.findTopByOrderByIdDesc();
-        if (ultimaEstante.isPresent()) {
-            String ultimoId = ultimaEstante.get().getId();
-            // Remove o prefixo "E" e converte o restante para número
-            int proximoNumero = Integer.parseInt(ultimoId.substring(1)) + 1;
-            // Formata de volta para "E" com 3 dígitos, preenchendo com zeros à esquerda
-            return String.format("E%03d", proximoNumero);
-        } else {
-            // Se não houver nenhuma estante no banco, começa com "E001"
-            return "E001";
         }
     }
 }

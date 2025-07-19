@@ -6,101 +6,47 @@ import org.iftm.biblioteca.entities.Emprestimo;
 
 import jakarta.validation.constraints.NotNull;
 
-public class EmprestimoDTO {
-
-    private Long id;
-
-    @NotNull(message = "ID do usuário é obrigatório.")
-    private Long usuarioId;
-    private String usuarioNome;
-
-    @NotNull(message = "ID do livro é obrigatório.")
-    private Long livroId;
-    private String livroTitulo;
-
-    private Instant dataEmprestimo;
-    private Instant dataDevolucao;
-    private boolean atrasado;
-
-    public EmprestimoDTO() {
-    }
-
+/**
+ * DTO (Data Transfer Object) para a entidade Emprestimo.
+ * <p>
+ * Usado para criar novos empréstimos (recebendo `usuarioId` e `livroId`) e para
+ * retornar dados detalhados de empréstimos existentes.
+ *
+ * @param id             O ID único do empréstimo.
+ * @param usuarioId      O ID do usuário que realizou o empréstimo. Obrigatório na criação.
+ * @param usuarioNome    O nome do usuário (preenchido em respostas da API).
+ * @param livroId        O ID do livro que foi emprestado. Obrigatório na criação.
+ * @param livroTitulo    O título do livro (preenchido em respostas da API).
+ * @param dataEmprestimo A data e hora em que o empréstimo foi realizado.
+ * @param dataDevolucao  A data e hora em que o livro foi devolvido (nulo se ainda estiver ativo).
+ * @param atrasado       Um booleano que indica se o empréstimo está atrasado. Este campo é
+ *                       calculado e preenchido pela camada de serviço.
+ */
+public record EmprestimoDTO(
+        Long id,
+        @NotNull(message = "ID do usuário é obrigatório.")
+        Long usuarioId,
+        String usuarioNome,
+        @NotNull(message = "ID do livro é obrigatório.")
+        Long livroId,
+        String livroTitulo,
+        Instant dataEmprestimo,
+        Instant dataDevolucao,
+        boolean atrasado
+) {
+    /**
+     * Construtor que converte uma entidade Emprestimo para um DTO.
+     * Note que este construtor não calcula o status 'atrasado'. A camada de serviço
+     * é responsável por essa lógica e por construir o DTO final.
+     */
     public EmprestimoDTO(Emprestimo entity) {
-        this.id = entity.getId();
-        if (entity.getUsuario() != null) {
-            this.usuarioId = entity.getUsuario().getId();
-            this.usuarioNome = entity.getUsuario().getName();
-        }
-        if (entity.getLivro() != null) {
-            this.livroId = entity.getLivro().getId();
-            this.livroTitulo = entity.getLivro().getTitulo();
-        }
-        this.dataEmprestimo = entity.getDataEmprestimo();
-        this.dataDevolucao = entity.getDataDevolucao();
-    }
-
-    // Getters e Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUsuarioId() {
-        return usuarioId;
-    }
-
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
-    public String getUsuarioNome() {
-        return usuarioNome;
-    }
-
-    public void setUsuarioNome(String usuarioNome) {
-        this.usuarioNome = usuarioNome;
-    }
-
-    public Long getLivroId() {
-        return livroId;
-    }
-
-    public void setLivroId(Long livroId) {
-        this.livroId = livroId;
-    }
-
-    public String getLivroTitulo() {
-        return livroTitulo;
-    }
-
-    public void setLivroTitulo(String livroTitulo) {
-        this.livroTitulo = livroTitulo;
-    }
-
-    public Instant getDataEmprestimo() {
-        return dataEmprestimo;
-    }
-
-    public void setDataEmprestimo(Instant dataEmprestimo) {
-        this.dataEmprestimo = dataEmprestimo;
-    }
-
-    public Instant getDataDevolucao() {
-        return dataDevolucao;
-    }
-
-    public void setDataDevolucao(Instant dataDevolucao) {
-        this.dataDevolucao = dataDevolucao;
-    }
-
-    public boolean isAtrasado() {
-        return atrasado;
-    }
-
-    public void setAtrasado(boolean atrasado) {
-        this.atrasado = atrasado;
+        this(entity.getId(),
+             entity.getUsuario() != null ? entity.getUsuario().getId() : null,
+             entity.getUsuario() != null ? entity.getUsuario().getName() : null,
+             entity.getLivro() != null ? entity.getLivro().getId() : null,
+             entity.getLivro() != null ? entity.getLivro().getTitulo() : null,
+             entity.getDataEmprestimo(),
+             entity.getDataDevolucao(),
+             false); // O status de atraso é calculado no serviço.
     }
 }

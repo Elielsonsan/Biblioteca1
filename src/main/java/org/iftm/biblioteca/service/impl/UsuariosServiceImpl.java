@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.iftm.biblioteca.dto.SugestaoDTO;
 import org.iftm.biblioteca.dto.UsuariosDTO;
 import org.iftm.biblioteca.entities.Usuarios;
+import org.iftm.biblioteca.repository.EmprestimoRepository;
 import org.iftm.biblioteca.repository.UsuariosRepository;
 import org.iftm.biblioteca.service.UsuariosService;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
@@ -26,6 +27,9 @@ public class UsuariosServiceImpl implements UsuariosService {
 
     @Autowired
     private UsuariosRepository usuarioRepository;
+
+    @Autowired
+    private EmprestimoRepository emprestimoRepository; // Para validar a exclusão
 
     @Override
     @Transactional(readOnly = true)
@@ -46,7 +50,7 @@ public class UsuariosServiceImpl implements UsuariosService {
     @Transactional
     public UsuariosDTO create(UsuariosDTO dto) {
         // Validações básicas (@NotBlank, @Email, @Size) são feitas pelo @Valid no DTO.
-        validarUsuarioEmailUnico(dto.getEmail(), null);
+        validarUsuarioEmailUnico(dto.email(), null);
         Usuarios entity = new Usuarios();
         mapDtoToEntity(dto, entity);
         return new UsuariosDTO(usuarioRepository.save(entity));
@@ -58,19 +62,26 @@ public class UsuariosServiceImpl implements UsuariosService {
         // findById já lança exceção se o cliente não for encontrado
         Usuarios entity = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
-        validarUsuarioEmailUnico(dto.getEmail(), id);
+        validarUsuarioEmailUnico(dto.email(), id);
         mapDtoToEntity(dto, entity);
         return new UsuariosDTO(usuarioRepository.save(entity));
     }
 
     @Override
     @Transactional
-    public void delete(Long id) {
-        // Verifica se o cliente existe antes de tentar deletar
-        if (!usuarioRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id + " para exclusão.");
+    public void delete(Long id) { 
+        // 1. Busca o usuário para garantir que ele existe.
+        Usuarios usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id + " para exclusão."));
+
+        // 2. Regra de negócio CRÍTICA: Verifica se o usuário tem empréstimos ativos.
+        //    É necessário um método `countByUsuarioAndDataDevolucaoIsNull` no EmprestimoRepository.
+        if (emprestimoRepository.countByUsuarioAndDataDevolucaoIsNull(usuario) > 0) {
+            throw new RegraDeNegocioException("Não é possível excluir o usuário '" + usuario.getName() + "' pois ele possui empréstimos pendentes.");
         }
-        usuarioRepository.deleteById(id);
+
+        // 3. Exclui o usuário apenas se a validação passar.
+        usuarioRepository.delete(usuario);
     }
 
     @Override
@@ -133,15 +144,15 @@ public class UsuariosServiceImpl implements UsuariosService {
     }
 
     private void mapDtoToEntity(UsuariosDTO dto, Usuarios entity) {
-        entity.setName(dto.getName());
-        entity.setEmail(dto.getEmail());
-        entity.setCpf(dto.getCpf());
-        entity.setIncome(dto.getIncome());
-        entity.setBirthDate(dto.getBirthDate());
-        entity.setChildrenCount(dto.getChildrenCount());
-        entity.setStreet(dto.getStreet());
-        entity.setCity(dto.getCity());
-        entity.setState(dto.getState());
-        entity.setZipCode(dto.getZipCode());
+        entity.setName(dto.name());
+        entity.setEmail(dto.email());
+        entity.setCpf(dto.cpf());
+        entity.setIncome(dto.income());
+        entity.setBirthDate(dto.birthDate());
+        entity.setChildrenCount(dto.childrenCount());
+        entity.setStreet(dto.street());
+        entity.setCity(dto.city());
+        entity.setState(dto.state());
+        entity.setZipCode(dto.zipCode());
     }
 }

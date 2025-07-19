@@ -16,45 +16,97 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/**
+ * Representa a entidade Usuario no sistema, mapeada para a tabela tb_usuario no banco de dados.
+ */
 @Entity
 @Table(name = "tb_usuario") // Padronizado com as outras tabelas do sistema
 public class Usuarios implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Identificador único do usuário, gerado automaticamente pelo banco de dados.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Nome completo do usuário. Não pode ser nulo.
+     */
     @Column(nullable = false)
     private String name;
 
+    /**
+     * Email do usuário. Não pode ser nulo e deve ser único no sistema.
+     */
     @Column(nullable = false, unique = true) // Email geralmente é obrigatório e único
     private String email;
 
+    /**
+     * CPF do usuário. Deve ser único no sistema.
+     */
     @Column(unique = true)
     private String cpf;
 
+    /**
+     * Renda do usuário. Armazenada com precisão de 10 dígitos, sendo 2 deles decimais.
+     */
     @Column(precision = 10, scale = 2) // Para valores monetários
     private BigDecimal income;
 
+    /**
+     * Data de nascimento do usuário.
+     */
     private LocalDate birthDate;
 
+    /**
+     * Número de filhos do usuário.
+     */
     private Integer childrenCount;
 
     // Campos de endereço
+
+    /**
+     * Rua do endereço do usuário.
+     */
     private String street;
+
+    /**
+     * Cidade do endereço do usuário.
+     */
     private String city;
+
+    /**
+     * Estado do endereço do usuário.
+     */
     private String state;
+
+    /**
+     * Código postal (CEP) do endereço do usuário.
+     */
     private String zipCode;
 
+    /**
+     * Lista de empréstimos associados a este usuário.
+     * Representa um relacionamento um-para-muitos com a entidade Emprestimo.
+     * O atributo mappedBy indica o campo na entidade Emprestimo que mapeia este relacionamento.
+     */
     @OneToMany(mappedBy = "usuario")
     private Set<Emprestimo> emprestimos = new HashSet<>();
 
-
+    /**
+     * Construtor padrão (vazio) da entidade Usuario.
+     * Necessário para o funcionamento do JPA.
+     */
     public Usuarios() {
     }
 
+    /**
+     * Construtor com todos os atributos da entidade Usuario.
+     * Útil para criar instâncias da entidade com valores iniciais.
+     */
     // Construtor atualizado com os novos campos
     public Usuarios(Long id, String name, String email, String cpf, BigDecimal income, LocalDate birthDate, Integer childrenCount, String street, String city, String state, String zipCode) {
         this.id = id;
@@ -69,6 +121,8 @@ public class Usuarios implements Serializable {
         this.state = state;
         this.zipCode = zipCode;
     }
+
+    // Métodos Getters e Setters para todos os atributos
 
     public Long getId() {
         return id;
@@ -162,6 +216,10 @@ public class Usuarios implements Serializable {
         return emprestimos;
     }
 
+    /**
+     * Implementação do método equals baseado no atributo id.
+     * Define que dois objetos Usuario são iguais se possuírem o mesmo id.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -172,6 +230,10 @@ public class Usuarios implements Serializable {
         return Objects.equals(id, usuario.id);
     }
 
+    /**
+     * Implementação do método hashCode baseado no atributo id.
+     * Garante que objetos Usuario com o mesmo id tenham o mesmo código hash.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id);

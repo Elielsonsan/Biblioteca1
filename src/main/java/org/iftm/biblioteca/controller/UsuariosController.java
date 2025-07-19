@@ -38,7 +38,7 @@ public class UsuariosController {
         dto = usuariosService.create(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(dto.getId())
+                .buildAndExpand(dto.id())
                 .toUri();
         return ResponseEntity.created(location).body(dto);
     }

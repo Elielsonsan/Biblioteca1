@@ -1,9 +1,9 @@
 package org.iftm.biblioteca.config;
 
 // --- Imports Necessários ---
-import java.math.BigDecimal;
-import java.time.LocalDate; // Adicionar para BigDecimal
-import java.util.Arrays; // Adicionar para LocalDate
+import java.math.BigDecimal; 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -19,16 +19,34 @@ import org.iftm.biblioteca.repository.EmprestimoRepository;
 import org.iftm.biblioteca.repository.EstanteRepository;
 import org.iftm.biblioteca.repository.LivroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-//@Component // Desativado para usar o data.sql para popular o banco de dados.
+/**
+ * Componente para carregar dados iniciais no banco de dados na inicialização da aplicação.
+ * <p>
+ * Implementa {@link CommandLineRunner}, o que faz com que o método {@code run()} seja
+ * executado automaticamente pelo Spring Boot após a aplicação iniciar.
+ * <p>
+ * Esta classe é útil para ambientes de desenvolvimento e teste, garantindo que o banco
+ * de dados sempre comece com um conjunto de dados consistente.
+ * <p>
+ * <strong>Atenção:</strong> A anotação {@code @Component} está comentada. Para ativar
+ * este carregador de dados, descomente a linha `//@Component`. Atualmente, a
+ * carga de dados pode estar sendo feita pelo arquivo `data.sql`.
+ */
+//@Component // Descomente esta linha para ativar o carregamento de dados via Java.
 public class DataLoader implements CommandLineRunner {
 
-        // --- Declara os repositórios como membros da classe ---
+        private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
+
+        // --- Injeção de Dependências dos Repositórios ---
+        // O Spring injeta automaticamente as instâncias dos repositórios necessários.
         @Autowired
         private CategoriaRepository categoriaRepository;
         @Autowired
@@ -40,37 +58,50 @@ public class DataLoader implements CommandLineRunner {
         @Autowired
         private EmprestimoRepository emprestimoRepository;
 
+        // O EntityManager é injetado para operações de baixo nível, como o flush.
         @PersistenceContext
         private EntityManager entityManager;
 
-        // --- Implementação do método run ---
+        /**
+         * Método executado na inicialização da aplicação.
+         * A anotação {@code @Transactional} garante que todas as operações de banco de dados
+         * dentro deste método ocorram em uma única transação. Se um erro ocorrer,
+         * todas as alterações são desfeitas (rollback), mantendo a consistência.
+         */
         @Override
-        @Transactional // Garante que tudo execute em uma única transação (opcional, mas recomendado)
+        @Transactional
         public void run(String... args) throws Exception {
 
-                // Limpa o banco antes de inserir para garantir um estado consistente
+                // --- Limpeza do Banco de Dados ---
+                // Garante que o banco de dados esteja em um estado limpo antes de inserir novos dados.
+                // A ordem é importante para respeitar as chaves estrangeiras:
+                // 1. Empréstimos (depende de Livros e Usuários)
+                // 2. Livros (depende de Categorias e Estantes)
+                // 3. Usuários
+                // 4. Categorias e Estantes (não dependem de outras entidades)
                 emprestimoRepository.deleteAll();
                 livroRepository.deleteAll();
-                usuarioRepository.deleteAll(); // Deletar Usuários antes de Categorias
+                usuarioRepository.deleteAll();
                 categoriaRepository.deleteAll();
                 estanteRepository.deleteAll();
                 entityManager.flush(); // Força a execução dos deletes no banco de dados
 
-                System.out.println(">>> Carregando dados iniciais...");
+                logger.info(">>> Carregando dados iniciais via DataLoader...");
 
-                // 1. Criar e Salvar Categorias PRIMEIRO
-                // Use os objetos retornados pelo saveAll, pois podem conter IDs gerados.
+                // --- 1. Criação e Persistência de Categorias ---
+                // É crucial salvar as entidades que não têm dependências primeiro.
                 Categoria catFiccao = new Categoria(null, "Ficção");
                 Categoria catNaoFiccao = new Categoria(null, "Não Ficção");
                 Categoria catFantasia = new Categoria(null, "Fantasia");
                 Categoria catRomance = new Categoria(null, "Romance");
                 Categoria catAventura = new Categoria(null, "Aventura");
 
-                // Salva todos de uma vez e guarda a lista de entidades salvas
+                // Salva todas as categorias em uma única operação de lote para melhor performance.
                 List<Categoria> categoriasSalvas = categoriaRepository.saveAll(Arrays.asList(
                                 catFiccao, catNaoFiccao, catFantasia, catRomance, catAventura));
 
-                // Coleta as categorias salvas em um Map para fácil acesso pelo nome
+                // Cria um Map para facilitar a busca das categorias salvas pelo nome.
+                // Isso evita múltiplas consultas ao banco de dados para obter as referências.
                 Map<String, Categoria> mapCategoriasSalvas = categoriasSalvas.stream()
                                 .collect(Collectors.toMap(Categoria::getNome, Function.identity()));
 
@@ -102,7 +133,7 @@ public class DataLoader implements CommandLineRunner {
                 // nulas
                 if (fantasiaSalva != null && romanceSalvo != null && ficcaoSalva != null &&
                                 estante1Salva != null && estante2Salva != null && estante3Salva != null
-                                && estante4Salva != null) {
+                                && estante4Salva != null) { // estante4Salva não estava sendo usada, mas a verificação é boa
 
                         Livro l1 = new Livro(null, "O Senhor dos Anéis", "J.R.R. Tolkien", "1234567890", 1954, 5,
                                         "/images/capa-placeholder.png", fantasiaSalva, estante1Salva);
@@ -120,20 +151,15 @@ public class DataLoader implements CommandLineRunner {
                                         "/images/capa-placeholder.png", ficcaoSalva, estante1Salva); // Use ficcaoSalva
                         Livro l8 = new Livro(null, "1984", "George Orwell", "6677889900", 1949, 3,
                                         "/images/capa-placeholder.png", ficcaoSalva, estante2Salva);
-                        // Exemplo de livro usando a nova estante e uma categoria existente
-                        // Supondo que categoria "Romance" (ID 4 pelo DataLoader) e "Seção Especial -
-                        // TI" (ID 4 pelo DataLoader)
-                        // Livro l9 = new Livro(null, "Código Limpo", "Robert C. Martin",
-                        // "9788576082675", 2008, 1, mapCategoriasSalvas.get("Romance"), estante4Salva);
 
                         livroRepository.saveAll(Arrays.asList(l1, l2, l3, l4, l5, l6, l7, l8));
-                        System.out.println(">>> Livros carregados com sucesso!");
+                        logger.info(">>> Livros carregados com sucesso!");
                 } else {
-                        System.out.println(">>> Erro ao carregar categorias ou estantes salvas.");
+                        logger.error(">>> Erro: Não foi possível encontrar todas as categorias ou estantes necessárias para criar os livros.");
                 }
 
                 // 4. Criar e Salvar Usuários
-                System.out.println(">>> Carregando usuários...");
+                logger.info(">>> Carregando usuários...");
                 Usuarios usuario1 = new Usuarios(null, "Carlos Alberto", "carlos.alberto@example.com",
                                 "123.456.789-00",
                                 new BigDecimal("3500.00"), LocalDate.of(1985, 5, 20), 2,
@@ -160,6 +186,6 @@ public class DataLoader implements CommandLineRunner {
                                 "Avenida Afonso Pena, 2000", "Belo Horizonte", "MG", "30130-005");
 
                 usuarioRepository.saveAll(Arrays.asList(usuario1, usuario2, usuario3, usuario4, usuario5));
-                System.out.println(">>> Usuários carregados com sucesso!");
+                logger.info(">>> Usuários carregados com sucesso!");
         }
 }

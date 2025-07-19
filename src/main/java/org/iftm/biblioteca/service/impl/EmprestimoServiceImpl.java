@@ -44,6 +44,12 @@ public class EmprestimoServiceImpl implements EmprestimoService {
         return page.map(this::toDTO);
     }
 
+    /**
+     * Busca um empréstimo pelo seu ID.
+     * @param id O ID do empréstimo.
+     * @return O DTO do empréstimo encontrado.
+     * @throws RecursoNaoEncontradoException se o empréstimo não for encontrado.
+     */
     @Override
     @Transactional(readOnly = true)
     public EmprestimoDTO findById(Long id) {
@@ -52,14 +58,22 @@ public class EmprestimoServiceImpl implements EmprestimoService {
         return toDTO(entity);
     }
 
+    /**
+     * Cria um novo empréstimo, aplicando todas as regras de negócio.
+     * @param dto O DTO com os dados do novo empréstimo (ID do usuário e do livro).
+     * @return O DTO do empréstimo criado.
+     * @throws RecursoNaoEncontradoException se o usuário ou o livro não forem encontrados.
+     * @throws RegraDeNegocioException se o livro não estiver disponível ou se o usuário tiver
+     * pendências (empréstimos atrasados ou limite de empréstimos atingido).
+     */
     @Override
     @Transactional
     public EmprestimoDTO create(EmprestimoDTO dto) {
-        Usuarios usuario = usuarioRepository.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + dto.getUsuarioId()));
+        Usuarios usuario = usuarioRepository.findById(dto.usuarioId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + dto.usuarioId()));
 
-        Livro livro = livroRepository.findById(dto.getLivroId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com ID: " + dto.getLivroId()));
+        Livro livro = livroRepository.findById(dto.livroId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com ID: " + dto.livroId()));
 
         validarDisponibilidadeLivro(livro);
         validarSituacaoUsuario(usuario);
@@ -70,9 +84,16 @@ public class EmprestimoServiceImpl implements EmprestimoService {
         entity.setDataEmprestimo(Instant.now());
 
         entity = emprestimoRepository.save(entity);
-        return new EmprestimoDTO(entity); // Um novo empréstimo nunca está atrasado.
+        return toDTO(entity); // Usa o método helper para consistência
     }
 
+    /**
+     * Registra a devolução de um livro a partir do ID do empréstimo.
+     * @param id O ID do empréstimo a ser finalizado.
+     * @return O DTO do empréstimo atualizado com a data de devolução.
+     * @throws RecursoNaoEncontradoException se o empréstimo não for encontrado.
+     * @throws RegraDeNegocioException se o livro já tiver sido devolvido.
+     */
     @Override
     @Transactional
     public EmprestimoDTO registrarDevolucao(Long id) {
@@ -88,6 +109,13 @@ public class EmprestimoServiceImpl implements EmprestimoService {
         return toDTO(entity);
     }
 
+    /**
+     * Registra a devolução de um livro a partir do ID do próprio livro.
+     * @param livroId O ID do livro a ser devolvido.
+     * @return O DTO do empréstimo atualizado com a data de devolução.
+     * @throws RecursoNaoEncontradoException se o livro não for encontrado.
+     * @throws RegraDeNegocioException se não houver um empréstimo ativo para o livro informado.
+     */
     @Override
     @Transactional
     public EmprestimoDTO registrarDevolucaoPorLivro(Long livroId) {
@@ -102,6 +130,9 @@ public class EmprestimoServiceImpl implements EmprestimoService {
         return toDTO(emprestimoAtivo);
     }
 
+    /**
+     * Valida se um livro está disponível para empréstimo (ou seja, não tem empréstimos ativos).
+     */
     private void validarDisponibilidadeLivro(Livro livro) {
         emprestimoRepository.findFirstByLivroAndDataDevolucaoIsNull(livro).ifPresent(e -> {
             throw new RegraDeNegocioException(
@@ -109,6 +140,9 @@ public class EmprestimoServiceImpl implements EmprestimoService {
         });
     }
 
+    /**
+     * Valida se um usuário está apto a realizar um novo empréstimo.
+     */
     private void validarSituacaoUsuario(Usuarios usuario) {
         // REGRA 1: Verificar se o usuário tem empréstimos atrasados
         int prazoDias = appProperties.getEmprestimo().getPrazoDias();
@@ -124,8 +158,8 @@ public class EmprestimoServiceImpl implements EmprestimoService {
 
         if (emprestimosAtivos >= limiteAtivos) {
             throw new RegraDeNegocioException(
-                    "O usuário '" + usuario.getName() + "' já atingiu o limite de " + limiteAtivos
-                            + " empréstimos ativos.");
+                    "O usuário '" + usuario.getName() + "' já atingiu o limite de " + limiteAtivos + " empréstimos ativos (atualmente com " +
+                            emprestimosAtivos + ").");
         }
     }
 
@@ -137,15 +171,20 @@ public class EmprestimoServiceImpl implements EmprestimoService {
      * @return O DTO com as informações de status.
      */
     private EmprestimoDTO toDTO(Emprestimo emprestimo) {
-        EmprestimoDTO dto = new EmprestimoDTO(emprestimo);
+        boolean isAtrasado = false;
         // Um empréstimo só pode estar atrasado se ainda não foi devolvido.
         if (emprestimo.getDataDevolucao() == null) {
             int prazoDias = appProperties.getEmprestimo().getPrazoDias();
             Instant dataLimite = Instant.now().minus(prazoDias, ChronoUnit.DAYS);
             if (emprestimo.getDataEmprestimo().isBefore(dataLimite)) {
-                dto.setAtrasado(true);
+                isAtrasado = true;
             }
         }
-        return dto;
+        // Constrói um novo DTO com todos os dados, incluindo o status de atraso calculado.
+        return new EmprestimoDTO(emprestimo.getId(),
+                emprestimo.getUsuario().getId(), emprestimo.getUsuario().getName(),
+                emprestimo.getLivro().getId(), emprestimo.getLivro().getTitulo(),
+                emprestimo.getDataEmprestimo(), emprestimo.getDataDevolucao(),
+                isAtrasado);
     }
 }

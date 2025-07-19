@@ -41,7 +41,7 @@ public class LivroController {
             @RequestParam(value = "isbn", required = false) String isbn,
             @RequestParam(value = "anoPublicacao", required = false) Integer anoPublicacao,
             @RequestParam(value = "categoriaId", required = false) Long categoriaId,
-            @RequestParam(value = "estanteId", required = false) String estanteId,
+            @RequestParam(value = "estanteId", required = false) Long estanteId,
             Pageable pageable) {
         
         Page<LivroDTO> page = livroService.findPaginated(termo, titulo, autor, isbn, anoPublicacao, categoriaId, estanteId, pageable);

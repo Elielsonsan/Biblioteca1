@@ -7,6 +7,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/**
+ * DTO (Data Transfer Object) para a entidade Livro.
+ * <p>
+ * Usado para transferir dados completos de um livro, tanto para entrada (criação/atualização)
+ * quanto para saída (respostas da API), incluindo status de disponibilidade calculado.
+ */
 public class LivroDTO {
 
     private Long id;
@@ -18,6 +24,8 @@ public class LivroDTO {
     @NotBlank(message = "Autor não pode ser vazio.")
     private String autor;
 
+    // A validação de formato específico (ex: ISBN-10 vs ISBN-13) pode ser adicionada com @Pattern.
+    // O serviço normaliza este campo removendo hifens e espaços antes de salvar.
     @NotBlank(message = "ISBN não pode ser vazio.")
     private String isbn;
 
@@ -25,18 +33,29 @@ public class LivroDTO {
     private Integer anoPublicacao;
 
     private Integer edicao;
+
+    // Para entrada, pode ser uma URL externa (http://...).
+    // Para saída, será um caminho local (ex: /images/capas/isbn.jpg) se o download for bem-sucedido.
     private String capaUrl;
 
     @NotNull(message = "Categoria é obrigatória.")
     private Long categoriaId;
     private String categoriaNome;
 
+    // O ID da estante é um Long, refletindo a refatoração da entidade Estante.
     @NotNull(message = "Estante é obrigatória.")
-    private String estanteId;
+    private Long estanteId;
     private String estanteNome;
 
-    // Novos campos para status de disponibilidade
+    /**
+     * Status de disponibilidade do livro ("Disponível" ou "Indisponível").
+     * Este campo é calculado e preenchido pela camada de serviço.
+     */
     private String statusDisponibilidade;
+    /**
+     * Se o livro estiver emprestado, esta é a data prevista para sua devolução.
+     * Este campo é calculado e preenchido pela camada de serviço.
+     */
     private Instant dataPrevistaDevolucao;
 
     public LivroDTO() {
@@ -56,7 +75,7 @@ public class LivroDTO {
             this.categoriaNome = entity.getCategoria().getNome();
         }
         if (entity.getEstante() != null) {
-            this.estanteId = entity.getEstante().getId();
+            this.estanteId = entity.getEstante().getId(); // Corrigido para Long
             this.estanteNome = entity.getEstante().getNome();
         }
     }
@@ -78,10 +97,10 @@ public class LivroDTO {
     public void setCapaUrl(String capaUrl) { this.capaUrl = capaUrl; }
     public Long getCategoriaId() { return categoriaId; }
     public void setCategoriaId(Long categoriaId) { this.categoriaId = categoriaId; }
-    public String getCategoriaNome() { return categoriaNome; }
+    public String getCategoriaNome() { return categoriaNome; } 
     public void setCategoriaNome(String categoriaNome) { this.categoriaNome = categoriaNome; }
-    public String getEstanteId() { return estanteId; }
-    public void setEstanteId(String estanteId) { this.estanteId = estanteId; }
+    public Long getEstanteId() { return estanteId; }
+    public void setEstanteId(Long estanteId) { this.estanteId = estanteId; }
     public String getEstanteNome() { return estanteNome; }
     public void setEstanteNome(String estanteNome) { this.estanteNome = estanteNome; }
 

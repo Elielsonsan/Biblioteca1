@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.iftm.biblioteca.config.AppProperties;
+
 import org.iftm.biblioteca.dto.LivroDTO;
 import org.iftm.biblioteca.dto.LivroDTOResumido;
 import org.iftm.biblioteca.dto.SugestaoDTO;
@@ -23,89 +23,33 @@ import org.iftm.biblioteca.repository.LivroRepository;
 import org.iftm.biblioteca.service.LivroService;
 import org.iftm.biblioteca.service.exceptions.IsbnDuplicadoException;
 import org.iftm.biblioteca.service.exceptions.RecursoNaoEncontradoException;
+import org.iftm.biblioteca.specification.LivroSpecification;
 import org.iftm.biblioteca.service.exceptions.RegraDeNegocioException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
+import org.springframework.transaction.annotation.Transactional;;
 
 @Service
-public class LivroServiceImpl implements LivroService {
+public class LivroServiceImpl implements LivroService  {
 
     private final LivroRepository livroRepository;
     private final CategoriaRepository categoriaRepository;
     private final EstanteRepository estanteRepository;
     private final EmprestimoRepository emprestimoRepository;
-    private final AppProperties appProperties;
     private final CapaService capaService; // Nova dependência
 
     // Injeção de dependência via construtor (melhor prática)
     public LivroServiceImpl(LivroRepository livroRepository, CategoriaRepository categoriaRepository,
-            EstanteRepository estanteRepository, AppProperties appProperties,
-            EmprestimoRepository emprestimoRepository, CapaService capaService) { // Adiciona CapaService
+            EstanteRepository estanteRepository, EmprestimoRepository emprestimoRepository, CapaService capaService) {
         this.livroRepository = livroRepository;
         this.categoriaRepository = categoriaRepository;
         this.estanteRepository = estanteRepository;
         this.emprestimoRepository = emprestimoRepository;
-        this.appProperties = appProperties;
         this.capaService = capaService; // Inicializa a nova dependência
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<LivroDTO> findPaginated(String termo, String titulo, String autor, String isbn, Integer anoPublicacao,
-            Long categoriaId, String estanteId, Pageable pageable) {
-
-        Specification<Livro> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            // Esta condição evita que o fetch seja aplicado à query de contagem, o que pode causar erros.
-            // A verificação de nulidade de 'query' é crucial, pois a query de contagem pode passá-la como nula.
-            if (query != null && query.getResultType() != Long.class && query.getResultType() != long.class) {
-                root.fetch("categoria", JoinType.LEFT);
-                root.fetch("estante", JoinType.LEFT);
-            }
-
-            // Filtro de busca rápida (termo geral)
-            if (StringUtils.hasText(termo)) {
-                Predicate p1 = cb.like(cb.lower(root.get("titulo")), "%" + termo.toLowerCase() + "%");
-                Predicate p2 = cb.like(cb.lower(root.get("autor")), "%" + termo.toLowerCase() + "%");
-                Predicate p3 = cb.like(cb.lower(root.get("isbn")), "%" + termo.toLowerCase() + "%");
-                predicates.add(cb.or(p1, p2, p3));
-            }
-
-            // Filtros avançados
-            if (StringUtils.hasText(titulo)) {
-                predicates.add(cb.like(cb.lower(root.get("titulo")), "%" + titulo.toLowerCase() + "%"));
-            }
-            if (StringUtils.hasText(autor)) {
-                predicates.add(cb.like(cb.lower(root.get("autor")), "%" + autor.toLowerCase() + "%"));
-            }
-            if (StringUtils.hasText(isbn)) {
-                predicates.add(cb.like(cb.lower(root.get("isbn")), "%" + isbn.toLowerCase() + "%"));
-            }
-            if (anoPublicacao != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("anoPublicacao"), anoPublicacao));
-            }
-            if (categoriaId != null) {
-                predicates.add(cb.equal(root.get("categoria").get("id"), categoriaId));
-            }
-            if (StringUtils.hasText(estanteId)) {
-                predicates.add(cb.equal(root.get("estante").get("id"), estanteId));
-            }
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-
-        return livroRepository.findAll(spec, pageable).map(this::toDTO);
-    }
-
     @Override
     @Transactional(readOnly = true)
     public Page<LivroDTOResumido> findAvailableBooks(String termo, Pageable pageable) {
@@ -146,12 +90,20 @@ public class LivroServiceImpl implements LivroService {
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!livroRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Livro não encontrado com ID: " + id);
+        // 1. Busca o livro para garantir que ele existe e para obter seus dados.
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com ID: " + id));
+
+        // 2. Regra de negócio CRÍTICA: Verifica se o livro possui empréstimos ativos.
+        //    É necessário um método `existsByLivroAndDataDevolucaoIsNull` no EmprestimoRepository.
+        if (emprestimoRepository.existsByLivroAndDataDevolucaoIsNull(livro)) {
+            throw new RegraDeNegocioException("Não é possível excluir o livro '" + livro.getTitulo() + "' pois ele está atualmente emprestado.");
         }
-        livroRepository.deleteById(id);
+
+        // 3. Exclui o livro do banco de dados.
+        livroRepository.delete(livro);
     }
-    @Override
+
     @Transactional(readOnly = true)
     public List<SugestaoDTO> buscarSugestoes(String termo, String filtro) {
         if (termo == null || termo.trim().length() < 2) {
@@ -159,6 +111,8 @@ public class LivroServiceImpl implements LivroService {
         }
         Pageable limit = PageRequest.of(0, 10); // Limita a 10 sugestões para performance
         return switch (filtro) {
+            // Para cada filtro específico, busca no repositório e mapeia para um SugestaoDTO,
+            // indicando o tipo da sugestão (ex: "autor", "titulo").
             case "autor" -> livroRepository.findAutoresParaSugestao(termo, limit).stream()
                     .map(s -> new SugestaoDTO(s, "autor"))
                     .collect(Collectors.toList());
@@ -168,10 +122,10 @@ public class LivroServiceImpl implements LivroService {
             case "isbn" -> livroRepository.findIsbnsParaSugestao(termo, limit).stream()
                     .map(s -> new SugestaoDTO(s, "isbn"))
                     .collect(Collectors.toList());
-            case "categoriaNome" -> livroRepository.findNomesDeCategoriaParaSugestao(termo, limit).stream()
+            case "categoriaNome" -> categoriaRepository.findNomesParaSugestao(termo, limit).stream()
                     .map(s -> new SugestaoDTO(s, "categoria"))
                     .collect(Collectors.toList());
-            case "estanteNome" -> livroRepository.findNomesDeEstanteParaSugestao(termo, limit).stream()
+            case "estanteNome" -> estanteRepository.findNomesParaSugestao(termo, limit).stream()
                     .map(s -> new SugestaoDTO(s, "estante"))
                     .collect(Collectors.toList());
             default -> {
@@ -184,7 +138,8 @@ public class LivroServiceImpl implements LivroService {
                         .map(s -> new SugestaoDTO(s, "isbn"));
 
                 // Remove duplicatas e limita o resultado final para não sobrecarregar o front-end.
-                yield Stream.concat(autores, Stream.concat(titulos, isbns))
+                // 'yield' é usado em switch expressions para retornar um valor do bloco do case.
+                yield Stream.of(autores, titulos, isbns).flatMap(s -> s)
                         .distinct()
                         .limit(10) // Garante que o total não exceda 10
                         .collect(Collectors.toList());
@@ -218,7 +173,7 @@ public class LivroServiceImpl implements LivroService {
         Categoria categoria = categoriaRepository.findById(livroDTO.getCategoriaId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Categoria não encontrada com ID: " + livroDTO.getCategoriaId()));
-        Estante estante = estanteRepository.findById(livroDTO.getEstanteId())
+        Estante estante = estanteRepository.findById(livroDTO.getEstanteId()) // Assumindo que o ID da estante agora é Long
                 .orElseThrow(() -> new RecursoNaoEncontradoException(
                         "Estante não encontrada com ID: " + livroDTO.getEstanteId()));
 
@@ -239,7 +194,12 @@ public class LivroServiceImpl implements LivroService {
         livro.setCategoria(categoria);
         livro.setEstante(estante);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LivroDTO> findPaginated(String termo, String titulo, String autor, String isbn, Integer anoPublicacao, Long categoriaId, Long estanteId, Pageable pageable) {
+        Specification<Livro> spec = new LivroSpecification(termo, titulo, autor, isbn, anoPublicacao, categoriaId, estanteId);
+        return livroRepository.findAll(spec, pageable).map(this::toDTO);
+    }
     /**
      * Converte uma entidade Livro para LivroDTO, adicionando a lógica de
      * status de disponibilidade.
@@ -253,7 +213,7 @@ public class LivroServiceImpl implements LivroService {
 
         if (emprestimoAtivoOpt.isPresent()) {
             dto.setStatusDisponibilidade("Indisponível");
-            int prazoDias = appProperties.getEmprestimo().getPrazoDias();
+            int prazoDias = 10; // appProperties.getEmprestimo().getPrazoDias();  Substitui pela propriedade da classe
             Instant dataPrevista = emprestimoAtivoOpt.get().getDataEmprestimo().plus(prazoDias, ChronoUnit.DAYS);
             dto.setDataPrevistaDevolucao(dataPrevista);
         } else {

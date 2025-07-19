@@ -1,33 +1,30 @@
 package org.iftm.biblioteca.dto;
 
-import java.io.Serializable;
-
 import org.iftm.biblioteca.entities.Estante;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-public class EstanteDTO implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private String id;
-    private String nome;
-
-    public EstanteDTO() {
-    }
-
-    public EstanteDTO(String id, String nome) {
-        this.id = id;
-        this.nome = nome;
-    }
-
+/**
+ * DTO (Data Transfer Object) para a entidade Estante.
+ * <p>
+ * Usado para transferir dados entre o controller e o service. A conversão para um
+ * 'record' Java moderniza o código, tornando-o imutável e mais conciso.
+ * <p>
+ * As anotações de validação garantem a integridade dos dados na entrada.
+ *
+ * @param id   O identificador único da estante (Long), consistente com a entidade.
+ * @param nome O nome da estante, que deve ser preenchido e ter um tamanho razoável.
+ */
+public record EstanteDTO(
+        Long id,
+        @NotBlank(message = "Nome da estante não pode ser vazio.")
+        @Size(min = 3, max = 100, message = "Nome da estante deve ter entre 3 e 100 caracteres.")
+        String nome
+) {
+    /**
+     * Construtor adicional para converter uma entidade Estante em um EstanteDTO.
+     */
     public EstanteDTO(Estante entity) {
-        this.id = entity.getId();
-        this.nome = entity.getNome();
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getNome() {
-        return nome;
+        this(entity.getId(), entity.getNome());
     }
 }

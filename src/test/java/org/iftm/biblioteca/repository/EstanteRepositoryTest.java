@@ -26,9 +26,9 @@ class EstanteRepositoryTest {
 
     @BeforeEach // Roda antes de cada @Test
     protected void setUp() {
-        // Cria e persiste algumas estantes com IDs de String para os testes
-        estante1 = new Estante("E001", "Corredor A - Prateleira 1");
-        estante2 = new Estante("E002", "Corredor B - Prateleira 2");
+        // Cria e persiste algumas estantes para os testes. O ID será gerado pelo banco.
+        estante1 = new Estante(null, "Corredor A - Prateleira 1");
+        estante2 = new Estante(null, "Corredor B - Prateleira 2");
 
         entityManager.persist(estante1);
         entityManager.persist(estante2);
@@ -40,18 +40,18 @@ class EstanteRepositoryTest {
     @DisplayName("Deve salvar (incluir) uma nova estante com sucesso")
     void save_QuandoEstanteValida_DeveRetornarEstanteComId() {
         // Arrange
-        Estante novaEstante = new Estante("E003", "Corredor C - Prateleira 3");
+        Estante novaEstante = new Estante(null, "Corredor C - Prateleira 3");
 
         // Act
         Estante estanteSalva = estanteRepository.save(novaEstante);
 
         // Assert
         assertThat(estanteSalva).isNotNull();
-        assertThat(estanteSalva.getId()).isEqualTo("E003");
+        assertThat(estanteSalva.getId()).isNotNull();
         assertThat(estanteSalva.getNome()).isEqualTo("Corredor C - Prateleira 3");
 
         // Verifica no banco
-        Estante estanteDoBanco = entityManager.find(Estante.class, "E003");
+        Estante estanteDoBanco = entityManager.find(Estante.class, estanteSalva.getId());
         assertThat(estanteDoBanco).isNotNull();
         assertThat(estanteDoBanco.getNome()).isEqualTo("Corredor C - Prateleira 3");
     }
@@ -76,11 +76,11 @@ class EstanteRepositoryTest {
     @DisplayName("Deve encontrar estante por ID existente (findById)")
     void findById_QuandoIdExiste_DeveRetornarOptionalComEstante() {
         // Arrange
-        String idExistente = estante1.getId(); // Pega ID do setUp (agora é String)
+        Long idExistente = estante1.getId(); // Pega ID do setUp (agora é Long)
         assertThat(idExistente).isNotNull();
 
         // Act
-        Optional<Estante> optionalEstante = estanteRepository.findById(idExistente); // findById agora espera String
+        Optional<Estante> optionalEstante = estanteRepository.findById(idExistente); // findById agora espera Long
 
         // Assert
         assertThat(optionalEstante).isPresent();
@@ -92,10 +92,10 @@ class EstanteRepositoryTest {
     @DisplayName("Não deve encontrar estante por ID inexistente (findById)")
     void findById_QuandoIdNaoExiste_DeveRetornarOptionalVazio() {
         // Arrange
-        String idInexistente = "E999";
+        Long idInexistente = 999L;
 
         // Act
-        Optional<Estante> optionalEstante = estanteRepository.findById(idInexistente); // findById agora espera String
+        Optional<Estante> optionalEstante = estanteRepository.findById(idInexistente); // findById agora espera Long
 
         // Assert
         assertThat(optionalEstante).isNotPresent();
@@ -138,7 +138,7 @@ class EstanteRepositoryTest {
     @DisplayName("Deve excluir estante por ID existente (deleteById)")
     void deleteById_QuandoIdExiste_DeveRemoverEstante() {
         // Arrange
-        String idParaDeletar = estante2.getId(); // ID agora é String
+        Long idParaDeletar = estante2.getId(); // ID agora é Long
         assertThat(idParaDeletar).isNotNull();
         assertThat(estanteRepository.existsById(idParaDeletar)).isTrue();
         long contagemAntes = estanteRepository.count();
@@ -157,10 +157,10 @@ class EstanteRepositoryTest {
     @DisplayName("Deve atualizar o nome de uma estante existente")
     void save_QuandoAtualizaEstanteExistente_DevePersistirAlteracao() {
         // Arrange
-        String idParaAtualizar = estante1.getId(); // ID agora é String
+        Long idParaAtualizar = estante1.getId(); // ID agora é Long
         assertThat(idParaAtualizar).isNotNull();
 
-        Optional<Estante> optionalEstante = estanteRepository.findById(idParaAtualizar); // findById agora espera String
+        Optional<Estante> optionalEstante = estanteRepository.findById(idParaAtualizar); // findById agora espera Long
         assertThat(optionalEstante).isPresent();
         Estante estanteParaAtualizar = optionalEstante.get();
         String nomeNovo = "Corredor A - Prateleira 1 (Reformada)";

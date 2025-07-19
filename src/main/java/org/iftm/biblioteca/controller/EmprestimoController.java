@@ -41,7 +41,7 @@ public class EmprestimoController {
     @PostMapping
     public ResponseEntity<EmprestimoDTO> create(@Valid @RequestBody EmprestimoDTO dto) {
         dto = emprestimoService.create(dto);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.id()).toUri();
         return ResponseEntity.created(uri).body(dto);
     }
 
