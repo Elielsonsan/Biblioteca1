@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.iftm.biblioteca.dto.CategoriaDTO;
+import org.iftm.biblioteca.dto.SugestaoDTO;
 import org.iftm.biblioteca.service.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity; // Importa todas as anotações de mapeamento
@@ -29,16 +30,16 @@ public class CategoriaController {
 
     // Endpoint para buscar todas as categorias (GET /api/categorias)
     @GetMapping
-    public ResponseEntity<List<CategoriaDTO>> findAll(@RequestParam(value = "termo", defaultValue = "") String termo) {
-        List<CategoriaDTO> list;
-        // Se o parâmetro 'termo' estiver vazio, busca todas.
-        if (termo.trim().isEmpty()) {
-            list = categoriaService.findAll();
-        } else {
-            // Se houver um nome, chama o novo método de busca.
-            list = categoriaService.findByNomeContaining(termo);
-        }
+    public ResponseEntity<List<CategoriaDTO>> findAll(@RequestParam(value = "nome", defaultValue = "") String nome) {
+        List<CategoriaDTO> list = categoriaService.findAll(nome);
         return ResponseEntity.ok().body(list);
+    }
+
+    // Endpoint para buscar sugestões de autocomplete (GET /api/categorias/sugestoes)
+    @GetMapping("/sugestoes")
+    public ResponseEntity<List<SugestaoDTO>> getSugestoes(@RequestParam("termo") String termo) {
+        List<SugestaoDTO> sugestoes = categoriaService.findSugestoes(termo);
+        return ResponseEntity.ok(sugestoes);
     }
 
     // Endpoint para buscar uma categoria por ID (GET /api/categorias/{id})

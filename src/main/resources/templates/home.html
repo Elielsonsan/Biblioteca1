@@ -295,8 +295,10 @@
             });
 
             // Popula os selects de Categoria e Estante no modal de busca avançada
-            loadSelectOptions(categoriasApiUrl, buscaAvancadaForm.querySelector('[name="categoriaId"]'));
-            loadSelectOptions(estantesApiUrl, buscaAvancadaForm.querySelector('[name="estanteId"]'));
+            // Corrigido para usar o seletor de ID que corresponde ao HTML do fragmento
+            // e é consistente com a página busca-avancada.html.
+            loadSelectOptions(categoriasApiUrl, document.getElementById('categoria'));
+            loadSelectOptions(estantesApiUrl, document.getElementById('estante'));
         });
 
         // ===================================================================================
@@ -305,12 +307,21 @@
 
         /**
          * Carrega dinamicamente as opções para um elemento <select> a partir de uma API.
+         * Função foi tornada mais robusta para evitar erros que quebram o script.
          * @param {string} apiUrl - A URL da API que retorna a lista de itens.
          * @param {HTMLElement} selectElement - O elemento <select> a ser populado.
          */
         async function loadSelectOptions(apiUrl, selectElement) {
+            // Adiciona uma verificação para garantir que o elemento <select> foi encontrado no DOM.
+            // Isso evita um erro 'TypeError' se o seletor não retornar um elemento,
+            // o que poderia impedir o restante do script da página de ser executado.
+            if (!selectElement) {
+                console.warn(`Elemento <select> não encontrado para a API: ${apiUrl}. A busca avançada pode não funcionar como esperado.`);
+                return;
+            }
             try {
                 const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`Falha ao carregar dados da API: ${response.status}`);
                 const items = await response.json();
                 items.forEach(item => {
                     const option = new Option(item.nome, item.id);
@@ -361,8 +372,10 @@
                     isSelectingSuggestion = true; // Ativa a flag para ignorar o próximo evento de 'input'
                     termoBuscaInput.value = sugestao.valor; // Preenche o input com a sugestão clicada
                     autocompleteList.classList.remove('active'); // Esconde a lista
-                    // Chama a função de busca diretamente, garantindo que o filtro ativo seja usado.
-                    realizarBusca(sugestao.valor, activeFilter);
+                    // CORREÇÃO: Chama a função de busca usando o 'tipo' da própria sugestão,
+                    // garantindo que a busca seja feita no campo correto (autor, título, etc.),
+                    // independentemente do filtro que estava ativo na interface.
+                    realizarBusca(sugestao.valor, sugestao.tipo);
                 });
                 autocompleteList.appendChild(item);
             });

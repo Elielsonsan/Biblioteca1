@@ -1,6 +1,14 @@
 /* ==================================================================== */
 /* --- 1. CONFIGURAÇÕES GLOBAIS E VARIÁVEIS ---                         */
 /* ==================================================================== */
+
+/* Define um modelo de caixa mais intuitivo para todos os elementos */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 :root {
     --cor-fundo: #f1f5f9;
     --cor-texto-primario: #0F172A;

@@ -9,6 +9,77 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Ajustes específicos para o layout da busca com autocomplete */
+
+        /* 1. Garante que o wrapper seja a referência para o posicionamento absoluto dos filhos */
+        .autocomplete-wrapper {
+            position: relative;
+        }
+
+        /* 2. Posiciona o ícone da lupa dentro do campo de input */
+        .autocomplete-wrapper > .fa-magnifying-glass {
+            position: absolute;
+            left: 12px; /* Espaçamento da borda esquerda */
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--cor-texto-secundario);
+            pointer-events: none; /* Permite que o clique atravesse o ícone e foque no input */
+        }
+
+        /* 3. Adiciona um padding à esquerda no input para não sobrepor o ícone */
+        /* Usando o ID para aumentar a especificidade e evitar o uso de !important */
+        .autocomplete-wrapper #termoBusca.form-input {
+            padding-left: 35px;
+        }
+
+        /* 4. Garante que a lista de resultados apareça ABAIXO e FLUTUANDO */
+        .autocomplete-wrapper .autocomplete-list {
+            position: absolute; /* Tira a lista do fluxo normal, fazendo-a flutuar */
+            width: 100%;
+            left: 0;
+            top: 100%;
+            z-index: 1001; /* Garante que a lista apareça sobre o overlay do modal */
+            
+            /* Estilos visuais para a lista flutuante */
+            background-color: var(--cor-fundo);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px var(--cor-sombra-escura);
+            
+            /* Sobrescreve/reseta estilos de 'style.css' que não se aplicam aqui */
+            margin-top: 4px; /* Substitui o margin-top negativo */
+            padding: 0.5rem;
+
+            /* Estado inicial: escondido e com transição */
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.2s ease-in-out;
+        }
+
+        .autocomplete-wrapper .autocomplete-list.active {
+            max-height: 300px;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .autocomplete-wrapper .autocomplete-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 10px 12px;
+            cursor: pointer;
+            color: var(--cor-texto-primario);
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .autocomplete-wrapper .autocomplete-item:hover {
+            background-color: var(--cor-sombra-escura);
+        }
+    </style>
 </head>
 <body>
     <nav class="navegacao-principal">
@@ -33,6 +104,7 @@
             </div>
         </section>
 
+        <!-- Seção de Gerenciamento de Livros -->
         <section class="cartao cartao-gerenciar">
             <div class="gerenciar-header">
                 <h2><i class="fa-solid fa-list"></i> Lista de Livros</h2>
@@ -43,18 +115,17 @@
                     <button id="btnLimparBusca" class="botao-secundario" title="Limpar filtro de busca" style="display: none;">
                         <i class="fa-solid fa-broom"></i><span>Limpar Busca</span>
                     </button>
-                    <button id="btnAdicionarLivro" class="botao-principal"
-                        title="Abrir formulário para adicionar um novo livro"><i
-                            class="fa-solid fa-plus"></i><span>Adicionar Livro</span></button>
+                    <button id="btnAdicionarLivro" class="botao-principal" title="Abrir formulário para adicionar um novo livro">
+                        <i class="fa-solid fa-plus"></i><span>Adicionar Livro</span>
+                    </button>
                 </div>
             </div>
-            <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum livro
-                encontrado.</div>
-            <!-- O container da tabela foi substituído por um container de lista, que será populado via JS -->
-            <div id="listaLivros"></div>
-            <!-- Container para os botões de paginação -->
+            <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum livro encontrado.</div>
+            <div id="listaLivros">
+                <!-- Resultados da busca serão inseridos aqui -->
+            </div>
             <div class="paginacao-container" id="paginacao-container">
-                <!-- Botões serão gerados pelo JavaScript -->
+                <!-- Paginação será inserida aqui -->
             </div>
         </section>
     </main>
@@ -125,17 +196,29 @@
         </div>
     </div>
 
-    <!-- Modal de Busca Unificado -->
+    <!-- Modal de Busca com Autocomplete -->
     <div id="searchModal" class="modal-overlay">
         <div class="modal-content cartao">
             <div class="modal-header">
-                <h2 id="searchModalTitulo">Buscar Livros</h2>
+                <h2 id="searchModalTitulo">Buscar Livro</h2>
                 <button id="btnFecharBuscaModal" class="close-button">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Incluindo o fragmento do formulário de busca avançada -->
-                <!-- O Thymeleaf não processa arquivos em /static, mas deixamos a estrutura para consistência -->
-                <div th:replace="/fragments/busca-avancada-form :: form"></div>
+                <form id="searchForm" class="gerenciar-form">
+                    <div class="form-group">
+                        <label for="termoBusca">Buscar por Título, Autor ou ISBN:</label>
+                        <div class="autocomplete-wrapper">
+                            <i class="fa-solid fa-magnifying-glass"></i> <!-- Este ícone agora será posicionado pelo CSS -->
+                            <input type="text" id="termoBusca" class="form-input" placeholder="Digite para buscar...">
+                            <div id="autocomplete-list" class="autocomplete-list"></div>
+                        </div>
+                    </div>
+                    <div class="botoes-acao-container form-buttons">
+                        <button type="submit" class="botao-principal">
+                            <i class="fa-solid fa-search"></i><span>Buscar</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -157,6 +240,7 @@
         const livrosApiUrl = '/api/livros';
         const categoriasApiUrl = '/api/categorias';
         const estantesApiUrl = '/api/estantes';
+        const sugestoesApiUrl = '/api/livros/sugestoes';
 
         // Elementos do DOM
         const listaLivros = document.getElementById('listaLivros');
@@ -164,8 +248,6 @@
         const listaVaziaMsg = document.getElementById('listaVaziaMsg');
 
         // --- Variáveis de Estado ---
-        // Controla a página atual da lista de livros
-        let currentPage = 0;
         const paginacaoContainer = document.getElementById('paginacao-container');
         // Armazena os parâmetros da última busca realizada para uso na paginação
         let currentSearchParams = new URLSearchParams();
@@ -192,8 +274,9 @@
         const searchModal = document.getElementById('searchModal');
         const btnAbrirBuscaModal = document.getElementById('btnAbrirBuscaModal');
         const btnFecharBuscaModal = document.getElementById('btnFecharBuscaModal');
-        const searchForm = document.getElementById('buscaAvancadaForm'); // ID padronizado do fragmento
-        const btnLimparBuscaModal = document.getElementById('btnLimparBuscaAvancada'); // ID padronizado do fragmento
+        const searchForm = document.getElementById('searchForm');
+        const termoBuscaInput = document.getElementById('termoBusca');
+        const autocompleteList = document.getElementById('autocomplete-list');
 
         // ===================================================================================
         // PONTO DE ENTRADA PRINCIPAL
@@ -203,23 +286,31 @@
          * Garante que todos os elementos HTML estejam disponíveis para manipulação.
          */
         document.addEventListener('DOMContentLoaded', () => {
-            // Popula os selects de Categoria e Estante em ambos os modais (Adicionar/Editar e Busca)
+            // Popula os selects de Categoria e Estante no formulário de busca e no modal de edição
             loadSelectOptions(categoriasApiUrl, document.querySelectorAll('.form-input[name="categoriaId"]'));
             loadSelectOptions(estantesApiUrl, document.querySelectorAll('.form-input[name="estanteId"]'));
             
             // Listener para o botão de limpar a busca principal
             btnLimparBusca.addEventListener('click', limparBusca);
             // Carrega a lista inicial de livros ao entrar na página
-            loadLivros();
+            loadLivros(0);
 
             // Listeners do Modal de Busca
             btnAbrirBuscaModal.addEventListener('click', () => searchModal.style.display = 'flex');
             btnFecharBuscaModal.addEventListener('click', () => searchModal.style.display = 'none');
-            searchModal.addEventListener('click', (event) => {
-                if (event.target === searchModal) searchModal.style.display = 'none';
-            });
+            searchModal.addEventListener('click', (event) => { if (event.target === searchModal) searchModal.style.display = 'none'; });
+
+            // Listeners da Busca (dentro do modal)
             searchForm.addEventListener('submit', (e) => { e.preventDefault(); handleSearchSubmit(); });
-            btnLimparBuscaModal.addEventListener('click', () => searchForm.reset());
+            termoBuscaInput.addEventListener('input', handleAutocompleteInput);
+
+            // Listener global para fechar a lista de autocomplete ao clicar fora dela
+            document.addEventListener('click', (event) => {
+                const wrapper = searchModal.querySelector('.autocomplete-wrapper');
+                if (wrapper && !wrapper.contains(event.target)) {
+                    autocompleteList.classList.remove('active');
+                }
+            });
 
             // Listeners do Modal de Adicionar/Editar
             btnAdicionarLivro.addEventListener('click', openModalForAdd);
@@ -238,32 +329,22 @@
          * atualiza o estado da busca e chama a função para carregar os livros.
          */
         function handleSearchSubmit() {
-            currentPage = 0; // Reseta para a primeira página ao fazer uma nova busca
-            
-            const formData = new FormData(searchForm);
+            const termo = termoBuscaInput.value.trim();
             currentSearchParams = new URLSearchParams();
-            // Adiciona aos parâmetros de busca apenas os campos preenchidos
-            for (const [key, value] of formData.entries()) {
-                if (value) {
-                    currentSearchParams.append(key, value);
-                }
+            if (termo) {
+                currentSearchParams.append('termo', termo);
             }
-
-            loadLivros(currentPage);
-            searchModal.style.display = 'none'; // Fecha o modal
-
-            // Mostra ou esconde o botão de limpar filtro principal
-            btnLimparBusca.style.display = currentSearchParams.toString() ? 'flex' : 'none';
+            loadLivros(0);
+            searchModal.style.display = 'none'; // Fecha o modal após a busca
         }
 
         /**
          * Limpa os filtros de busca e recarrega a lista completa de livros.
          */
         function limparBusca() {
-            searchForm.reset();
+            termoBuscaInput.value = '';
             currentSearchParams = new URLSearchParams();
-            currentPage = 0; // Reseta para a primeira página
-            loadLivros();
+            loadLivros(0);
             btnLimparBusca.style.display = 'none';
         }
 
@@ -277,7 +358,10 @@
             let url = livrosApiUrl;
             const params = new URLSearchParams(currentSearchParams); // Clona os parâmetros de busca atuais
             params.append('page', page);
-            params.append('size', 10); // Fixo em 10 livros por página
+            params.append('size', 6); // Alterado para 6 para melhor visualização em 3 colunas
+
+            // Mostra ou esconde o botão de limpar busca
+            btnLimparBusca.style.display = currentSearchParams.has('termo') ? 'flex' : 'none';
 
             url += `?${params.toString()}`;
 
@@ -305,18 +389,19 @@
          */
         function renderizarPagina(pageData, append = false) {
             const livros = pageData.content;
-            if (!append) { // Se for uma nova busca, limpa a lista
+            // CORREÇÃO: Limpa a lista apenas se for uma nova busca (append = false)
+            if (!append) {
                 listaLivros.innerHTML = '';
             }
         
             if (!livros || livros.length === 0) {
                 if (!append) { // Só mostra a mensagem de vazio se for uma nova busca, não ao carregar mais
-                    listaVaziaMsg.style.display = 'block';
+                    listaVaziaMsg.style.display = 'flex';
                     listaLivros.style.display = 'none';
                 }
             } else {
                 listaVaziaMsg.style.display = 'none';
-                listaLivros.style.display = 'block';
+                listaLivros.style.display = 'grid'; // Usar grid para layout responsivo
 
                 const placeholderCapa = '/images/capa-placeholder.png';
 
@@ -385,18 +470,77 @@
 
             if (!pageData.last) { // Se não for a última página
                 const mostrarMaisBtn = document.createElement('button');
-                mostrarMaisBtn.innerHTML = '<i class="fa-solid fa-angles-down"></i><span>Mostrar mais 10 títulos</span>';
+                mostrarMaisBtn.innerHTML = '<i class="fa-solid fa-angles-down"></i><span>Mostrar mais títulos</span>';
                 mostrarMaisBtn.className = 'paginacao-btn';
-                mostrarMaisBtn.onclick = () => {
-                    currentPage = pageData.number + 1; // Pede a próxima página
-                    // Usa as variáveis de estado para a paginação
-                    loadLivros(currentPage, true);
-                };
+                // Captura o número da próxima página no momento da criação do botão.
+                const nextPage = pageData.number + 1;
+                mostrarMaisBtn.onclick = () => loadLivros(nextPage, true);
                 paginacaoContainer.appendChild(mostrarMaisBtn);
                 paginacaoContainer.style.display = 'flex';
             } else {
                 paginacaoContainer.style.display = 'none';
             }
+        }
+
+        // ===================================================================================
+        // FUNÇÕES DE AUTOCOMPLETE
+        // ===================================================================================
+
+        /**
+         * Lida com a digitação no campo de busca para acionar o autocomplete.
+         */
+        async function handleAutocompleteInput() {
+            const termo = termoBuscaInput.value.trim();
+            if (termo.length < 2) {
+                autocompleteList.classList.remove('active');
+                autocompleteList.innerHTML = '';
+                return;
+            }
+
+            try {
+                const url = `${sugestoesApiUrl}?termo=${encodeURIComponent(termo)}`;
+                const response = await fetch(url);
+                if (!response.ok) return;
+                const sugestoes = await response.json();
+                renderizarSugestoes(sugestoes);
+            } catch (error) {
+                console.error('Erro ao buscar sugestões:', error);
+                autocompleteList.classList.remove('active');
+            }
+        }
+
+        /**
+         * Renderiza a lista de sugestões abaixo da barra de busca.
+         * @param {Array<object>} sugestoes - A lista de sugestões da API.
+         */
+        function renderizarSugestoes(sugestoes) {
+            autocompleteList.innerHTML = '';
+            if (sugestoes.length === 0) {
+                autocompleteList.classList.remove('active');
+                return;
+            }
+
+            sugestoes.forEach(sugestao => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+
+                const iconClasses = {
+                    titulo: 'fa-solid fa-book-open',
+                    autor: 'fa-solid fa-user',
+                    isbn: 'fa-solid fa-barcode'
+                };
+                const icon = iconClasses[sugestao.tipo] || 'fa-solid fa-search';
+
+                item.innerHTML = `<i class="${icon}"></i><span>${sugestao.valor}</span>`;
+                item.addEventListener('mousedown', () => { // mousedown para executar antes do blur
+                    termoBuscaInput.value = sugestao.valor;
+                    autocompleteList.classList.remove('active');
+                    handleSearchSubmit();
+                });
+                autocompleteList.appendChild(item);
+            });
+
+            autocompleteList.classList.add('active');
         }
 
         // ===================================================================================

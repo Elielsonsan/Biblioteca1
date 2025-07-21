@@ -14,6 +14,67 @@
     <!-- Usar caminho relativo para o CSS -->
     <link rel="stylesheet" href="/css/style.css">
 
+    <style>
+        /* Ajustes específicos para o layout da busca com autocomplete */
+        .autocomplete-wrapper {
+            position: relative;
+        }
+        .autocomplete-wrapper > .fa-magnifying-glass {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--cor-texto-secundario);
+            pointer-events: none;
+        }
+        /* Usando o ID para aumentar a especificidade e evitar o uso de !important */
+        .autocomplete-wrapper #termoBuscaModal.form-input {
+            padding-left: 35px;
+        }
+        .autocomplete-wrapper .autocomplete-list {
+            position: absolute; /* Tira a lista do fluxo normal, fazendo-a flutuar */
+            width: 100%;
+            left: 0;
+            top: 100%;
+            z-index: 1001; /* Garante que a lista apareça sobre o overlay do modal */
+            
+            /* Estilos visuais para a lista flutuante */
+            background-color: var(--cor-fundo);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px var(--cor-sombra-escura);
+            margin-top: 4px;
+            padding: 0.5rem;
+
+            /* Estado inicial: escondido e com transição */
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.2s ease-in-out;
+        }
+
+        .autocomplete-wrapper .autocomplete-list.active {
+            max-height: 300px;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .autocomplete-wrapper .autocomplete-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 10px 12px;
+            cursor: pointer;
+            color: var(--cor-texto-primario);
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .autocomplete-wrapper .autocomplete-item:hover {
+            background-color: var(--cor-sombra-escura);
+        }
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -49,6 +110,9 @@
                 <div class="header-botoes-acao">
                     <button id="btnAbrirBuscaModal" class="botao-secundario" title="Buscar estante">
                         <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
+                    </button>
+                    <button id="btnLimparBusca" class="botao-secundario" title="Limpar filtro de busca" style="display: none;">
+                        <i class="fa-solid fa-broom"></i><span>Limpar Busca</span>
                     </button>
                     <button id="btnAdicionarEstante" class="botao-principal"
                         title="Abrir formulário para adicionar uma nova estante"><i
@@ -110,17 +174,18 @@
                 <button id="btnFecharBuscaModal" class="close-button">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="searchForm" class="gerenciar-form" onsubmit="event.preventDefault(); buscarEstantes();">
+                <form id="searchForm" class="gerenciar-form">
                     <div class="form-group">
                         <label for="termoBuscaModal">Nome da Estante:</label>
-                        <input type="text" id="termoBuscaModal" class="form-input" placeholder="Digite o nome para buscar...">
+                        <div class="autocomplete-wrapper">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="termoBuscaModal" class="form-input" placeholder="Digite para buscar...">
+                            <div id="autocomplete-list" class="autocomplete-list"></div>
+                        </div>
                     </div>
                     <div class="botoes-acao-container form-buttons">
-                        <button type="submit" class="botao-secundario">
-                            <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
-                        </button>
-                        <button type="button" class="botao-secundario" id="btnLimparBuscaModal">
-                            <i class="fa-solid fa-broom"></i><span>Limpar</span>
+                        <button type="submit" class="botao-principal">
+                            <i class="fa-solid fa-search"></i><span>Buscar</span>
                         </button>
                     </div>
                 </form>
@@ -131,6 +196,7 @@
     <script>
         // URLs da API (usando caminho relativo para portabilidade)
         const estantesApiUrl = '/api/estantes';
+        const sugestoesApiUrl = '/api/estantes/sugestoes';
 
         // Elementos do DOM
         const estantesTableBody = document.getElementById('estantesTable').getElementsByTagName('tbody')[0];
@@ -151,8 +217,10 @@
         const searchModal = document.getElementById('searchModal');
         const btnAbrirBuscaModal = document.getElementById('btnAbrirBuscaModal');
         const btnFecharBuscaModal = document.getElementById('btnFecharBuscaModal');
+        const searchForm = document.getElementById('searchForm');
         const termoBuscaModalInput = document.getElementById('termoBuscaModal');
-        const btnLimparBuscaModal = document.getElementById('btnLimparBuscaModal');
+        const autocompleteList = document.getElementById('autocomplete-list');
+        const btnLimparBusca = document.getElementById('btnLimparBusca');
 
         // --- LÓGICA PRINCIPAL ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -173,7 +241,19 @@
             searchModal.addEventListener('click', (event) => {
                 if (event.target === searchModal) searchModal.style.display = 'none';
             });
-            btnLimparBuscaModal.addEventListener('click', limparBusca);
+            
+            // Listeners da Busca
+            searchForm.addEventListener('submit', (e) => { e.preventDefault(); buscarEstantes(); });
+            termoBuscaModalInput.addEventListener('input', handleAutocompleteInput);
+            btnLimparBusca.addEventListener('click', limparBusca);
+
+            // Listener global para fechar a lista de autocomplete ao clicar fora dela
+            document.addEventListener('click', (event) => {
+                const wrapper = searchModal.querySelector('.autocomplete-wrapper');
+                if (wrapper && !wrapper.contains(event.target)) {
+                    autocompleteList.classList.remove('active');
+                }
+            });
         });
 
         // --- FUNÇÕES DE BUSCA E RENDERIZAÇÃO ---
@@ -186,6 +266,7 @@
         function limparBusca() {
             termoBuscaModalInput.value = '';
             loadEstantes();
+            btnLimparBusca.style.display = 'none';
         }
 
         async function loadEstantes(nome = '') {
@@ -193,6 +274,8 @@
             if (nome) {
                 url += `?nome=${encodeURIComponent(nome)}`;
             }
+
+            btnLimparBusca.style.display = nome ? 'flex' : 'none';
 
             try {
                 const response = await fetch(url);
@@ -231,6 +314,49 @@
             }
         }
 
+        // --- FUNÇÕES DE AUTOCOMPLETE ---
+        async function handleAutocompleteInput() {
+            const termo = termoBuscaModalInput.value.trim();
+            if (termo.length < 2) {
+                autocompleteList.classList.remove('active');
+                autocompleteList.innerHTML = '';
+                return;
+            }
+            try {
+                const url = `${sugestoesApiUrl}?termo=${encodeURIComponent(termo)}`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    console.error(`Erro ao buscar sugestões: API retornou status ${response.status}`);
+                    return;
+                }
+                const sugestoes = await response.json();
+                renderizarSugestoes(sugestoes);
+            } catch (error) {
+                console.error('Erro ao buscar sugestões:', error);
+                autocompleteList.classList.remove('active');
+            }
+        }
+
+        function renderizarSugestoes(sugestoes) {
+            autocompleteList.innerHTML = '';
+            if (sugestoes.length === 0) {
+                autocompleteList.classList.remove('active');
+                return;
+            }
+            sugestoes.forEach(sugestao => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = `<i class="fa-solid fa-box-archive"></i><span>${sugestao.valor}</span>`;
+                item.addEventListener('mousedown', () => {
+                    termoBuscaModalInput.value = sugestao.valor;
+                    autocompleteList.classList.remove('active');
+                    buscarEstantes();
+                });
+                autocompleteList.appendChild(item);
+            });
+            autocompleteList.classList.add('active');
+        }
+
         // --- FUNÇÕES DO MODAL E FORMULÁRIO ---
         function openModalForAdd() {
             resetForm();
@@ -253,11 +379,23 @@
         function resetForm() {
             estanteForm.reset();
             estanteIdInput.value = '';
-            document.querySelector('.error-message').textContent = '';
+            const errorMessageDiv = document.querySelector('#estanteForm .error-message');
+            if (errorMessageDiv) {
+                errorMessageDiv.textContent = '';
+            }
+        }
+
+        function recarregarLista() {
+            // Recarrega a lista mantendo o filtro de busca atual.
+            loadEstantes(termoBuscaModalInput.value.trim());
         }
 
         async function handleFormSubmit(event) {
             event.preventDefault();
+            // Limpa erros anteriores
+            const errorMessageDiv = document.querySelector('#estanteForm .error-message');
+            if (errorMessageDiv) errorMessageDiv.textContent = '';
+
             const id = estanteIdInput.value;
             const estanteData = { nome: nomeInput.value };
 
@@ -273,19 +411,29 @@
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => null);
-                    if (errorData && errorData.message) {
-                        throw new Error(errorData.message);
+                    // Se for um erro de validação do backend (@Valid)
+                    if (response.status === 400 && Array.isArray(errorData)) {
+                        const firstError = errorData[0];
+                        if (errorMessageDiv) {
+                            errorMessageDiv.textContent = firstError.message;
+                        }
+                        throw new Error("Erro de validação. Verifique o campo.");
                     }
-                    throw new Error(`Erro ${response.status}: Não foi possível salvar.`);
+                    // Outros erros com mensagem
+                    const errorMessage = errorData?.message || `Erro ${response.status}: Não foi possível salvar a estante.`;
+                    throw new Error(errorMessage);
                 }
 
                 closeModal();
-                loadEstantes();
+                recarregarLista();
                 alert(`Estante ${id ? 'atualizada' : 'salva'} com sucesso!`);
 
             } catch (error) {
                 console.error('Erro ao salvar estante:', error);
-                alert(`Erro ao salvar a estante:\n${error.message}`);
+                // A mensagem de erro de validação já foi exibida no formulário, então não mostramos o alert genérico
+                if (error.message !== "Erro de validação. Verifique o campo.") {
+                    alert(`Erro ao salvar a estante:\n${error.message}`);
+                }
             }
         }
 
@@ -302,7 +450,7 @@
                     throw new Error(errorMessage);
                 }
 
-                loadEstantes();
+                recarregarLista();
                 alert('Estante excluída com sucesso!');
             } catch (error) {
                 console.error('Erro ao excluir estante:', error);
