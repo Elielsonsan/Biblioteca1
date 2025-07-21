@@ -16,6 +16,7 @@
 </head>
 
 <body>
+    <!-- Navegação Principal do Site -->
     <nav class="navegacao-principal">
         <ul>
             <li><a href="/">Home</a></li>
@@ -27,7 +28,9 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal da Página -->
     <main>
+        <!-- Seção de Apresentação com Título e Logo -->
         <section class="cartao cartao-apresentacao">
             <div class="coluna-texto">
                 <h1>Gerenciar Empréstimos</h1>
@@ -38,7 +41,9 @@
             </div>
         </section>
 
+        <!-- Seção de Gerenciamento de Empréstimos -->
         <section class="cartao cartao-gerenciar">
+            <!-- Cabeçalho da seção com título e botão de ação -->
             <div class="gerenciar-header">
                 <h2><i class="fa-solid fa-book-bookmark"></i> Histórico de Empréstimos</h2>
                 <div class="header-botoes-acao">
@@ -48,8 +53,10 @@
                     </button>
                 </div>
             </div>
+            <!-- Mensagem exibida quando a lista de empréstimos está vazia -->
             <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum
                 empréstimo registrado.</div>
+            <!-- Tabela para exibir a lista de empréstimos -->
             <div class="table-wrapper">
                 <table id="emprestimosTable">
                     <thead>
@@ -65,10 +72,12 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Contêiner para a paginação (botão "Carregar mais") -->
             <div class="paginacao-container" id="paginacao-container"></div>
         </section>
     </main>
 
+    <!-- Modal para Registrar Novo Empréstimo -->
     <div id="formModal" class="modal-overlay">
         <div class="modal-content cartao">
             <div class="modal-header">
@@ -76,9 +85,10 @@
                 <button id="btnFecharModal" class="close-button">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Formulário de registro de empréstimo com buscas dinâmicas -->
                 <form id="emprestimoForm" class="gerenciar-form">
                     <div class="form-grid">
-                        <!-- Campo de busca de usuário -->
+                        <!-- Componente de busca de usuário com autocomplete -->
                         <div class="form-group grid-span-2">
                             <label for="usuarioSearchInput">Buscar Usuário (Nome, CPF ou ID):</label>
                             <div id="usuarioSearchWrapper" class="autocomplete-wrapper">
@@ -93,7 +103,7 @@
                             <!-- Input oculto para armazenar o ID do usuário selecionado -->
                             <input type="hidden" id="usuarioId" name="usuarioId" required>
                         </div>
-                        <!-- Campo de busca de livro -->
+                        <!-- Componente de busca de livro disponível com autocomplete -->
                         <div class="form-group grid-span-2">
                             <label for="livroSearchInput">Buscar Livro Disponível (Título, Autor ou ISBN):</label>
                             <div id="livroSearchWrapper" class="autocomplete-wrapper">
@@ -109,6 +119,7 @@
                             <input type="hidden" id="livroId" name="livroId" required>
                         </div>
                     </div>
+                    <!-- Botões de ação do formulário -->
                     <div class="botoes-acao-container form-buttons">
                         <button type="submit" class="botao-principal"><i
                                 class="fa-solid fa-floppy-disk"></i><span>Salvar</span></button>

@@ -81,6 +81,7 @@
 </head>
 
 <body>
+    <!-- Navegação Principal do Site -->
     <nav class="navegacao-principal">
         <ul>
             <!-- Links sem Thymeleaf para funcionar como arquivos estáticos -->
@@ -93,7 +94,9 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal da Página -->
     <main>
+        <!-- Seção de Apresentação com Título e Logo -->
         <section class="cartao cartao-apresentacao">
             <div class="coluna-texto">
                 <h1>Gerenciar Categorias</h1>
@@ -104,7 +107,9 @@
             </div>
         </section>
 
+        <!-- Seção de Gerenciamento de Categorias -->
         <section class="cartao cartao-gerenciar">
+            <!-- Cabeçalho da seção com título e botões de ação -->
             <div class="gerenciar-header">
                 <h2><i class="fa-solid fa-list"></i> Lista de Categorias</h2>
                 <div class="header-botoes-acao">
@@ -119,8 +124,10 @@
                             class="fa-solid fa-plus"></i><span>Adicionar Categoria</span></button>
                 </div>
             </div>
+            <!-- Mensagem exibida quando a lista de categorias está vazia -->
             <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhuma categoria
                 encontrada.</div>
+            <!-- Tabela para exibir a lista de categorias -->
             <div class="table-wrapper">
                 <table id="categoriasTable">
                     <thead>
@@ -139,6 +146,7 @@
     </main>
 
     <!-- Modal para Adicionar/Editar Categoria -->
+    <!-- O overlay do modal, que cobre a tela inteira, inicialmente oculto -->
     <div id="formModal" class="modal-overlay">
         <div class="modal-content cartao">
             <div class="modal-header">
@@ -146,6 +154,7 @@
                 <button id="btnFecharModal" class="close-button">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Formulário para criar ou editar uma categoria -->
                 <form id="categoriaForm" class="gerenciar-form">
                     <input type="hidden" id="categoriaId">
                     <div class="form-group">
@@ -166,7 +175,8 @@
         </div>
     </div>
 
-    <!-- Modal de Busca -->
+    <!-- Modal de Busca de Categorias -->
+    <!-- O overlay do modal, que cobre a tela inteira, inicialmente oculto -->
     <div id="searchModal" class="modal-overlay">
         <div class="modal-content cartao">
             <div class="modal-header">
@@ -174,6 +184,7 @@
                 <button id="btnFecharBuscaModal" class="close-button">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Formulário de busca com autocomplete -->
                 <form id="searchForm" class="gerenciar-form">
                     <div class="form-group">
                         <label for="termoBusca">Nome da Categoria:</label>

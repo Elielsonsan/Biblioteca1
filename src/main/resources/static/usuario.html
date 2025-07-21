@@ -16,6 +16,7 @@
 </head>
 
 <body>
+    <!-- Navegação Principal do Site -->
     <nav class="navegacao-principal">
         <ul>
             <li><a href="/">Home</a></li>
@@ -27,7 +28,9 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal da Página -->
     <main>
+        <!-- Seção de Apresentação com Título e Logo -->
         <section class="cartao cartao-apresentacao">
             <div class="coluna-texto">
                 <h1>Gerenciar Usuários</h1>
@@ -38,7 +41,9 @@
             </div>
         </section>
 
+        <!-- Seção de Gerenciamento de Usuários -->
         <section class="cartao cartao-gerenciar">
+            <!-- Cabeçalho da seção com título e botões de ação -->
             <div class="gerenciar-header">
                 <h2><i class="fa-solid fa-users"></i> Lista de Usuários</h2>
                 <div class="header-botoes-acao">
@@ -53,8 +58,10 @@
                             class="fa-solid fa-plus"></i><span>Adicionar Usuário</span></button>
                 </div>
             </div>
+            <!-- Mensagem exibida quando a lista de usuários está vazia -->
             <div id="listaVaziaMsg" style="display: none; text-align: center; width: 100%; padding: 2rem;">Nenhum
                 usuário encontrado.</div>
+            <!-- Tabela para exibir a lista de usuários -->
             <div class="table-wrapper">
                 <table id="usuariosTable">
                     <thead>
@@ -68,10 +75,12 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Contêiner para a paginação (botão "Carregar mais") -->
             <div class="paginacao-container" id="paginacao-container"></div>
         </section>
     </main>
 
+    <!-- Modal para Adicionar/Editar Usuário -->
     <div id="formModal" class="modal-overlay">
         <div class="modal-content cartao">
             <div class="modal-header">
@@ -79,8 +88,10 @@
                 <button id="btnFecharModal" class="close-button">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Formulário para criar ou editar um usuário -->
                 <form id="usuarioForm" class="gerenciar-form">
                     <input type="hidden" id="usuarioId">
+                    <!-- Grid para organizar os campos do formulário -->
                     <div class="form-grid">
                         <div class="form-group grid-span-2">
                             <label for="nomeUsuario">Nome Completo:</label>
@@ -108,6 +119,7 @@
                             <input type="number" id="filhosUsuario" name="childrenCount" class="form-input" min="0">
                         </div>
                     </div>
+                    <!-- Botões de ação do formulário -->
                     <div class="botoes-acao-container form-buttons">
                         <button type="submit" class="botao-principal"><i
                                 class="fa-solid fa-floppy-disk"></i><span>Salvar</span></button>
@@ -119,7 +131,7 @@
         </div>
     </div>
 
-    <!-- Modal de Busca -->
+    <!-- Modal de Busca de Usuários -->
     <div id="searchModal" class="modal-overlay">
         <div class="modal-content cartao">
             <div class="modal-header">
@@ -127,6 +139,7 @@
                 <button id="btnFecharBuscaModal" class="close-button">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Formulário de busca com autocomplete -->
                 <form id="searchForm" class="gerenciar-form" onsubmit="event.preventDefault(); buscarUsuarios();">
                     <div class="form-group">
                         <label for="termoBuscaModal">Nome do Usuário:</label>

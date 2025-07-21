@@ -15,6 +15,7 @@
 </head>
 <body>
 
+    <!-- Navegação Principal do Site -->
     <nav class="navegacao-principal">
         <ul>
             <li><a href="/">Home</a></li>
@@ -24,7 +25,9 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal da Página -->
     <main>
+        <!-- Seção de Apresentação com Título e Logo -->
         <section class="cartao cartao-apresentacao">
             <div class="coluna-texto">
                 <h1>Busca Avançada de Livros</h1>
@@ -36,13 +39,14 @@
             </div>
         </section>
 
+        <!-- Seção principal que contém o formulário de busca -->
         <section class="cartao">
             <h2>Opções de Busca</h2>
-            <!-- Substituindo o formulário antigo pela inclusão do fragmento reutilizável -->
+            <!-- Inclusão do fragmento reutilizável que contém o formulário de busca avançada -->
             <div th:replace="~{fragments/busca-avancada-form :: form}"></div>
         </section>
 
-        <!-- Seção para exibir resultados da busca avançada, controlada por JS -->
+        <!-- Seção de Resultados da Busca (dinâmica, controlada por JS) -->
         <section id="secaoResultados" class="cartao container-resultados" style="display: none;">
             <h2>Resultados da Busca Avançada</h2>
             <div id="listaResultados">
@@ -50,6 +54,7 @@
             </div>
         </section>
 
+        <!-- Mensagem para Busca Sem Resultados (dinâmica, controlada por JS) -->
         <section id="secaoSemResultados" class="cartao" style="display: none;">
             <p>Nenhum livro encontrado com os critérios da busca.</p>
         </section>

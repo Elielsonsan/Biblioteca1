@@ -16,6 +16,7 @@
 </head>
 <body class="home">
 
+    <!-- Navegação Principal do Site -->
     <nav class="navegacao-principal">
         <ul>
             <li><a href="/">Home</a></li>
@@ -27,7 +28,9 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal da Página -->
     <main>
+        <!-- Seção de Apresentação com Título e Logo -->
         <section class="cartao cartao-apresentacao">
             <div class="coluna-texto">
                 <h1>Biblioteca do IFTM</h1>
@@ -39,9 +42,10 @@
             </div>
         </section>
 
-        <!-- O formulário de busca envia os dados para um endpoint, ex: /livros/buscar -->
+        <!-- Formulário de Busca Simples -->
         <form id="homeSearchForm">
             <section class="cartao cartao-busca">
+                <!-- Barra de busca com ícone, input e botões de filtro -->
                 <div class="barra-busca-container">
                     <i class="fa-solid fa-magnifying-glass icone-principal"></i>                    
                     <div class="input-wrapper">
@@ -54,7 +58,9 @@
                         <button type="button" class="filtro-btn" data-filter="isbn" title="Buscar por ISBN"><i class="fa-solid fa-barcode"></i></button>
                     </div>                    
                 </div>
+                <!-- Lista de autocompletar, populada via JavaScript -->
                 <div id="autocomplete-list" class="autocomplete-list"></div>
+                <!-- Botões de ação principais: Buscar, Limpar e Busca Avançada -->
                 <div class="botoes-acao-container">
                     <button type="submit" class="botao-principal">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -72,7 +78,7 @@
             </section>
         </form>
         
-        <!-- Seção de resultados dinâmica -->
+        <!-- Seção de Resultados da Busca (dinâmica, controlada por JS) -->
         <section id="secaoResultados" class="cartao container-resultados" style="display: none;">
             <h2 id="tituloResultados">Resultados da Busca</h2>
             <div id="listaResultados">
@@ -80,7 +86,7 @@
             </div>
         </section>
 
-        <!-- Mensagem exibida quando a busca não retorna resultados -->
+        <!-- Mensagem para Busca Sem Resultados (dinâmica, controlada por JS) -->
         <section id="secaoSemResultados" class="cartao" style="display: none;">
             <p>Nenhum livro encontrado para o termo buscado.</p>
         </section>
@@ -88,6 +94,7 @@
     </main>
 
     <!-- Modal de Busca Avançada -->
+    <!-- A sobreposição do modal, inicialmente oculta -->
     <div id="searchModal" class="modal-overlay">
         <div class="modal-content cartao">
             <div class="modal-header">
